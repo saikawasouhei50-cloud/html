@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>캐릭터 뽑기 게임</title>
+    <!-- Tailwind CSS를 사용하여 빠르고 멋진 디자인을 적용합니다 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 사용자 정의 애니메이션 및 스타일 */
+        @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
+        body {
+            font-family: 'Jua', sans-serif;
+            background-image: linear-gradient(to top, #30cfd0 0%, #330867 100%);
+        }
+
+        /* 카드가 나타날 때의 애니메이션 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        
+        .card-animation { animation: fadeIn 0.5s ease-out forwards; }
+
+        /* 등급별 카드 배경 그라데이션 */
+        .rarity-N { background-image: linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%); }
+        .rarity-R { background-image: linear-gradient(to top, #a1c4fd 0%, #c2ebf0 100%); }
+        .rarity-SR { background-image: linear-gradient(to right, #f83292, #7122fa); }
+        .rarity-SSR { background-image: linear-gradient(to right, #f78ca0 0%, #f9748f 19%, #fd868c 60%, #fe9a8b 100%); }
+
+        /* 버튼 호버 효과 */
+        .gacha-button { transition: all 0.3s ease; }
+        .gacha-button:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); }
+        
+        /* 탭 버튼 스타일 */
+        .tab-button { transition: all 0.2s ease-in-out; }
+        .tab-button.active { background-color: #f6e05e; color: #330867; }
+        
+        /* 카드 개수 뱃지 스타일 */
+        .count-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #e53e3e;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+        }
+        /* 덱 슬롯 스타일 */
+        .deck-slot {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        /* 홈 화면 캐릭터 이미지 */
+        #home-character-image {
+            max-height: 60vh;
+            object-fit: contain;
+            filter: drop-shadow(0px 5px 15px rgba(0,0,0,0.5));
+            transition: transform 0.3s ease-in-out;
+        }
+        #home-character-image:hover {
+            transform: scale(1.03);
+        }
+        /* 이벤트 배너 애니메이션 */
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 15px rgba(255, 255, 100, 0.4); }
+            50% { box-shadow: 0 0 25px rgba(255, 255, 100, 0.8); }
+        }
+        #event-banner {
+            animation: pulse-glow 2.5s infinite ease-in-out;
+        }
+        /* 뽑기 탭 버튼 스타일 */
+        .gacha-tab-button { transition: all 0.2s ease-in-out; }
+        .gacha-tab-button.active { background-color: rgba(246, 224, 94, 0.8); color: #330867; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-5xl bg-white/10 backdrop-blur-md rounded-2xl shadow-xl text-white p-6 md:p-8">
+        
+        <!-- 제목 부분 -->
+        <header class="text-center mb-4">
+            <h1 class="text-4xl md:text-5xl font-bold tracking-wider text-yellow-300" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">✨ 캐릭터 월드 ✨</h1>
+        </header>
+
+        <!-- 재화 및 탭 메뉴 영역 -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
+            <div class="bg-black/20 rounded-full p-1 flex-shrink-0">
+                <button id="tab-home" class="tab-button active font-bold py-2 px-6 rounded-full">홈</button>
+                <button id="tab-gacha" class="tab-button font-bold py-2 px-6 rounded-full">뽑기</button>
+                <button id="tab-inventory" class="tab-button font-bold py-2 px-6 rounded-full">보관함</button>
+                <button id="tab-deck" class="tab-button font-bold py-2 px-6 rounded-full">덱 관리</button>
+                <button id="tab-combat" class="tab-button font-bold py-2 px-6 rounded-full">전투</button>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-2xl font-bold text-yellow-300 bg-black/20 py-2 px-6 rounded-full inline-block">💎 <span id="currency-display">100</span></div>
+                <button id="reset-game" class="gacha-button bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full text-sm">초기화</button>
+            </div>
+        </div>
+
+        <!-- 메인 컨텐츠 영역 -->
+        <main>
+             <!-- 저장 불가 경고 메시지 -->
+            <div id="storage-warning" class="hidden text-center bg-red-500 p-2 rounded-lg mb-4">
+                <strong>경고:</strong> 게임 진행 상황을 저장할 수 없습니다. 브라우저가 시크릿 모드이거나 저장 기능이 비활성화되었는지 확인해주세요.
+            </div>
+
+            <!-- 홈 화면 -->
+            <div id="home-view">
+                <div class="relative min-h-[50vh] flex flex-col justify-center items-center text-center p-4">
+                    <!-- 이벤트 배너 -->
+                    <div id="event-banner" class="hidden absolute top-4 right-4 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 p-4 rounded-lg shadow-lg cursor-pointer transform hover:scale-105 transition-transform duration-300 z-10">
+                        <h3 class="text-white text-lg font-bold drop-shadow-md">기간 한정 이벤트!</h3>
+                        <p class="text-white text-sm drop-shadow-md">SSR 타락천사 확률 UP!</p>
+                    </div>
+
+                    <div id="home-character-container" class="flex-grow flex items-center justify-center cursor-pointer">
+                        <img id="home-character-image" src="" alt="대표 캐릭터" class="max-w-full">
+                    </div>
+                    <div id="home-dialogue-container" class="w-full max-w-2xl bg-black/30 backdrop-blur-sm p-4 rounded-xl mt-4">
+                        <p id="home-character-name" class="font-bold text-lg text-yellow-300"></p>
+                        <p id="home-character-dialogue" class="text-white"></p>
+                    </div>
+                     <div id="home-default-message" class="text-2xl text-gray-300">
+                        보관함에서 대표 캐릭터를 설정해주세요!
+                    </div>
+                </div>
+            </div>
+
+            <!-- 뽑기 화면 -->
+            <div id="gacha-view" class="hidden">
+                <p class="text-center text-gray-200 mt-2 mb-4">운명을 시험하여 전설의 동료를 만나보세요!</p>
+                
+                <!-- Gacha Type Tabs -->
+                <div class="bg-black/20 rounded-full p-1 flex justify-center items-center mb-4 max-w-sm mx-auto">
+                    <button id="gacha-tab-normal" class="gacha-tab-button active w-1/2 font-bold py-2 px-6 rounded-full">일반 뽑기</button>
+                    <button id="gacha-tab-event" class="gacha-tab-button w-1/2 font-bold py-2 px-6 rounded-full hidden">이벤트 뽑기</button>
+                </div>
+
+                <!-- Normal Gacha View -->
+                <div id="normal-gacha-view">
+                    <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mb-4">
+                        <button id="pull-one" class="gacha-button w-full sm:w-auto bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-8 rounded-full shadow-lg">💎 1회 뽑기 (10)</button>
+                        <button id="pull-ten" class="gacha-button w-full sm:w-auto bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-8 rounded-full shadow-lg">💎💎 10회 뽑기 (100)</button>
+                    </div>
+                </div>
+
+                <!-- Event Gacha View -->
+                <div id="event-gacha-view" class="hidden">
+                    <div class="text-center p-2 mb-2 rounded-lg bg-yellow-500/20">
+                        <p class="font-bold text-yellow-300">[타락천사] 등장 확률 UP!</p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mb-4">
+                        <button id="pull-one-event" class="gacha-button w-full sm:w-auto bg-gradient-to-r from-red-500 to-yellow-500 hover:from-red-600 hover:to-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-8 rounded-full shadow-lg">🔥 1회 뽑기 (10)</button>
+                        <button id="pull-ten-event" class="gacha-button w-full sm:w-auto bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-8 rounded-full shadow-lg">🔥🔥 10회 뽑기 (100)</button>
+                    </div>
+                </div>
+
+                <div id="message-area" class="text-center text-lg h-8 mb-4 transition-opacity duration-300"></div>
+                <div id="results-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 min-h-[200px] bg-black/20 p-4 rounded-xl"></div>
+            </div>
+
+            <!-- 보관함 화면 -->
+            <div id="inventory-view" class="hidden">
+                 <div class="text-center mb-4">
+                    <p class="text-gray-200">지금까지 수집한 동료들입니다.</p>
+                    <div class="mt-2 flex justify-center items-center gap-4">
+                        <p id="inventory-status" class="text-lg font-bold bg-black/20 py-2 px-4 rounded-full"></p>
+                        <button id="expand-inventory" class="gacha-button bg-yellow-500 hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold py-2 px-4 rounded-full shadow-lg text-sm">칸 확장 (💎50)</button>
+                    </div>
+                </div>
+                <div id="inventory-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 min-h-[400px] max-h-[60vh] overflow-y-auto bg-black/20 p-4 rounded-xl"></div>
+            </div>
+
+            <!-- 덱 관리 화면 -->
+            <div id="deck-view" class="hidden">
+                <div class="text-center mb-4">
+                    <p class="text-gray-200">최강의 덱을 구성하여 전투를 준비하세요! (5장 필수)</p>
+                    <div class="mt-2 flex justify-center items-center gap-4">
+                        <div id="deck-status" class="text-lg font-bold text-yellow-300"></div>
+                        <button id="auto-fill-deck" class="gacha-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full shadow-lg text-sm">자동 편성</button>
+                    </div>
+                </div>
+                <div id="deck-slots-container" class="grid grid-cols-5 gap-4 mb-6 bg-black/20 p-4 rounded-xl"></div>
+                <div id="deck-inventory-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 min-h-[250px] max-h-[40vh] overflow-y-auto bg-black/20 p-4 rounded-xl"></div>
+            </div>
+            
+            <!-- 전투 화면 -->
+            <div id="combat-view" class="hidden">
+                <div class="text-center mb-4">
+                    <p class="text-gray-200">편성한 덱으로 던전에 도전하여 보상을 획득하세요!</p>
+                    <p class="text-xl font-bold">현재 덱 전투력: <span id="deck-power-display" class="text-yellow-300">0</span></p>
+                </div>
+                <div id="combat-message-area" class="text-center text-lg h-8 mb-4 transition-opacity duration-300"></div>
+                <div id="dungeon-list-container" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- 게임 설정 ---
+        const characters = [
+            { name: '슬라임', rarity: 'N', power: 1, imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=Slime', dialogues: ['꾸물... 꾸물...', '내가... 대표?', '말랑말랑...'] }, 
+            { name: '고블린', rarity: 'N', power: 2, imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=Goblin', dialogues: ['키킥!', '반짝이는 거, 좋아!', '내 몽둥이, 강하다!'] }, 
+            { name: '들쥐', rarity: 'N', power: 1, imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=Rat', dialogues: ['찍찍!', '치즈... 좋아...', '숨는 건 자신있어.'] }, 
+            { name: '오크 전사', rarity: 'R', power: 5, imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=Orc', dialogues: ['크아아! 전투다!', '내 도끼를 받아라!', '더 강한 자는 없나?'] }, 
+            { name: '엘프 궁수', rarity: 'R', power: 7, imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=Elf', dialogues: ['바람의 속삭임이 들리는군...', '내 화살은 빗나가지 않아.', '숲을 위하여.'] }, 
+            { name: '인간 기사', rarity: 'R', power: 6, imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=Knight', dialogues: ['정의의 이름으로!', '방패 뒤에 서도록.', '이 검에 맹세하지.'] }, 
+            { name: '하이 오크', rarity: 'SR', power: 15, imageUrl: 'https://placehold.co/300x500/b794f4/ffffff?text=High+Orc', dialogues: ['모조리 부숴주마!', '나는... 부족의 자랑이다.', '힘こそ全て(힘이야말로 전부)!'] }, 
+            { name: '마법사', rarity: 'SR', power: 18, imageUrl: 'https://placehold.co/300x500/b794f4/ffffff?text=Mage', dialogues: ['지식의 심연을 들여다본 적 있나?', '마나의 흐름이 느껴진다...', '이게 바로... 마법이다.'] }, 
+            { name: '드래곤', rarity: 'SSR', power: 35, imageUrl: 'https://placehold.co/300x500/f6e05e/000000?text=Dragon', dialogues: ['하찮은 필멸자로군.', '나의 분노를 감당할 수 있겠나?', '이 세상의 지배자는 나다.'] }, 
+            { name: '타락천사', rarity: 'SSR', power: 40, imageUrl: 'https://placehold.co/300x500/f6e05e/000000?text=Fallen+Angel', dialogues: ['날개는 잃었지만, 긍지는 잃지 않았다.', '어둠 속에서... 진실을 보았지.', '후회는 없다.'] },
+        ];
+        const rarityProbabilities = { 'SSR': 3, 'SR': 12, 'R': 35, 'N': 50 };
+        const eventRarityProbabilities = { 'SSR': 6, 'SR': 14, 'R': 30, 'N': 50 };
+        const EVENT_CHARACTER_NAME = '타락천사';
+        const dungeons = [
+            { name: '초보자의 숲', recommendedPower: 20, rewards: { min: 10, max: 20 } },
+            { name: '오크 점령지', recommendedPower: 50, rewards: { min: 25, max: 40 } },
+            { name: '용의 둥지', recommendedPower: 120, rewards: { min: 60, max: 100 } },
+        ];
+        const EVENT_START_DATE = new Date('2025-10-14T00:00:00');
+        const EVENT_END_DATE = new Date('2025-10-24T23:59:59');
+
+        // --- 게임 상태 ---
+        let playerCurrency = 100;
+        let playerInventory = [];
+        let playerDeck = [];
+        let inventoryCapacity = 100;
+        let representativeCharacter = null;
+        const DECK_CAPACITY = 5;
+        const PULL_ONE_COST = 10;
+        const PULL_TEN_COST = 100;
+        const EXPAND_COST = 50;
+        const EXPAND_AMOUNT = 10;
+        const SAVE_DATA_KEY = 'gachaGameSaveData_v2'; // 버전을 명시하여 이전 데이터와 충돌 방지
+
+        // --- HTML 요소 가져오기 ---
+        const currencyDisplay = document.getElementById('currency-display');
+        const messageArea = document.getElementById('message-area');
+        const allTabs = document.querySelectorAll('.tab-button');
+        const allViews = document.querySelectorAll('main > div');
+        const pullOneButton = document.getElementById('pull-one');
+        const pullTenButton = document.getElementById('pull-ten');
+        const pullOneEventButton = document.getElementById('pull-one-event');
+        const pullTenEventButton = document.getElementById('pull-ten-event');
+        const resultsContainer = document.getElementById('results-container');
+        const inventoryContainer = document.getElementById('inventory-container');
+        const inventoryStatus = document.getElementById('inventory-status');
+        const expandInventoryButton = document.getElementById('expand-inventory');
+        const deckStatus = document.getElementById('deck-status');
+        const deckSlotsContainer = document.getElementById('deck-slots-container');
+        const deckInventoryContainer = document.getElementById('deck-inventory-container');
+        const autoFillDeckButton = document.getElementById('auto-fill-deck');
+        const deckPowerDisplay = document.getElementById('deck-power-display');
+        const combatMessageArea = document.getElementById('combat-message-area');
+        const dungeonListContainer = document.getElementById('dungeon-list-container');
+        const homeCharacterContainer = document.getElementById('home-character-container');
+        const homeCharacterImage = document.getElementById('home-character-image');
+        const homeDialogueContainer = document.getElementById('home-dialogue-container');
+        const homeDefaultMessage = document.getElementById('home-default-message');
+        const homeCharacterName = document.getElementById('home-character-name');
+        const homeCharacterDialogue = document.getElementById('home-character-dialogue');
+        const eventBanner = document.getElementById('event-banner');
+        const gachaTabNormal = document.getElementById('gacha-tab-normal');
+        const gachaTabEvent = document.getElementById('gacha-tab-event');
+        const normalGachaView = document.getElementById('normal-gacha-view');
+        const eventGachaView = document.getElementById('event-gacha-view');
+        const resetButton = document.getElementById('reset-game');
+        const storageWarning = document.getElementById('storage-warning');
+        
+        // --- 이벤트 리스너 ---
+        allTabs.forEach(tab => {
+            tab.addEventListener('click', () => switchTab(tab.id.split('-')[1]));
+        });
+        pullOneButton.addEventListener('click', () => handlePull(1, PULL_ONE_COST, 'normal'));
+        pullTenButton.addEventListener('click', () => handlePull(10, PULL_TEN_COST, 'normal'));
+        pullOneEventButton.addEventListener('click', () => handlePull(1, PULL_ONE_COST, 'event'));
+        pullTenEventButton.addEventListener('click', () => handlePull(10, PULL_TEN_COST, 'event'));
+        expandInventoryButton.addEventListener('click', expandInventory);
+        autoFillDeckButton.addEventListener('click', autoFillDeck);
+        gachaTabNormal.addEventListener('click', () => switchGachaTab('normal'));
+        gachaTabEvent.addEventListener('click', () => switchGachaTab('event'));
+        deckSlotsContainer.addEventListener('click', (e) => { if (e.target.dataset.action === 'remove-from-deck') removeFromDeck(e.target.dataset.cardName); });
+        deckInventoryContainer.addEventListener('click', (e) => { if (e.target.dataset.action === 'add-to-deck') addToDeck(e.target.dataset.cardName); });
+        inventoryContainer.addEventListener('click', (e) => { if (e.target.dataset.action === 'set-representative') setRepresentative(e.target.dataset.cardName); });
+        dungeonListContainer.addEventListener('click', (e) => { if (e.target.dataset.action === 'challenge-dungeon') challengeDungeon(parseInt(e.target.dataset.dungeonIndex)); });
+        homeCharacterContainer.addEventListener('click', () => { if (representativeCharacter) displayHomeView(true); });
+        eventBanner.addEventListener('click', () => {
+            showMessage('[타락천사] 확률 UP 이벤트 진행 중!', 'text-blue-300', messageArea);
+            switchTab('gacha');
+        });
+        resetButton.addEventListener('click', resetGame);
+
+        // --- 데이터 저장/불러오기 함수 ---
+        function isStorageAvailable() {
+            try {
+                const key = "__test_localstorage__";
+                localStorage.setItem(key, key);
+                localStorage.removeItem(key);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function saveGame() {
+            if (!isStorageAvailable()) return;
+            const saveData = {
+                currency: playerCurrency,
+                inventory: playerInventory.map(card => card.name), // 이름만 저장
+                deck: playerDeck.map(card => card.name), // 이름만 저장
+                capacity: inventoryCapacity,
+                representative: representativeCharacter ? representativeCharacter.name : null,
+            };
+            localStorage.setItem(SAVE_DATA_KEY, JSON.stringify(saveData));
+        }
+
+        function loadGame() {
+            if (!isStorageAvailable()) {
+                storageWarning.classList.remove('hidden');
+                resetButton.disabled = true;
+                // 저장 기능 없이 새 게임 시작
+                playerInventory.push(characters.find(c => c.name === '슬라임'));
+                playerInventory.push(characters.find(c => c.name === '엘프 궁수'));
+            } else {
+                const savedDataString = localStorage.getItem(SAVE_DATA_KEY);
+                if (savedDataString) {
+                    const savedData = JSON.parse(savedDataString);
+                    playerCurrency = savedData.currency || 100;
+                    // 이름 배열을 기반으로 전체 캐릭터 정보 재구성
+                    playerInventory = (savedData.inventory || []).map(name => characters.find(c => c.name === name)).filter(Boolean);
+                    playerDeck = (savedData.deck || []).map(name => characters.find(c => c.name === name)).filter(Boolean);
+                    inventoryCapacity = savedData.capacity || 100;
+                    if (savedData.representative) {
+                        representativeCharacter = characters.find(c => c.name === savedData.representative) || null;
+                    }
+                } else {
+                    // 새로운 게임 시작
+                    playerInventory.push(characters.find(c => c.name === '슬라임'));
+                    playerInventory.push(characters.find(c => c.name === '엘프 궁수'));
+                    saveGame(); // 최초 시작 시 한 번 저장
+                }
+            }
+            updateUI();
+            checkEventStatus();
+            switchTab('home');
+        }
+
+        function resetGame() {
+            if (!isStorageAvailable()) return;
+            if (resetButton.dataset.confirming === 'true') {
+                localStorage.removeItem(SAVE_DATA_KEY);
+                location.reload();
+            } else {
+                resetButton.textContent = '확인?';
+                resetButton.dataset.confirming = 'true';
+                resetButton.classList.remove('bg-red-600', 'hover:bg-red-700');
+                resetButton.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
+                setTimeout(() => {
+                    resetButton.textContent = '초기화';
+                    resetButton.dataset.confirming = 'false';
+                    resetButton.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
+                    resetButton.classList.add('bg-red-600', 'hover:bg-red-700');
+                }, 3000);
+            }
+        }
+
+
+        // --- 핵심 게임 로직 함수 ---
+        function switchTab(tabName) {
+            allViews.forEach(view => view.classList.add('hidden'));
+            allTabs.forEach(tab => tab.classList.remove('active'));
+
+            document.getElementById(`${tabName}-view`).classList.remove('hidden');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+
+            if (tabName === 'home') displayHomeView();
+            else if (tabName === 'inventory') displayInventory(); 
+            else if (tabName === 'deck') displayDeckManagement();
+            else if (tabName === 'combat') displayCombatView();
+        }
+
+        function switchGachaTab(tabName) {
+            if (tabName === 'normal') {
+                normalGachaView.classList.remove('hidden');
+                eventGachaView.classList.add('hidden');
+                gachaTabNormal.classList.add('active');
+                gachaTabEvent.classList.remove('active');
+            } else {
+                normalGachaView.classList.add('hidden');
+                eventGachaView.classList.remove('hidden');
+                gachaTabNormal.classList.remove('active');
+                gachaTabEvent.classList.add('active');
+            }
+        }
+
+        function checkEventStatus() {
+            const now = new Date();
+            const isEventActive = now >= EVENT_START_DATE && now <= EVENT_END_DATE;
+            
+            if (isEventActive) {
+                eventBanner.classList.remove('hidden');
+                gachaTabEvent.classList.remove('hidden');
+            } else {
+                eventBanner.classList.add('hidden');
+                gachaTabEvent.classList.add('hidden');
+                if(gachaTabEvent.classList.contains('active')) {
+                    switchGachaTab('normal');
+                }
+            }
+        }
+
+        function displayHomeView(cycleDialogue = false) {
+            if (representativeCharacter) {
+                homeCharacterContainer.classList.remove('hidden');
+                homeDialogueContainer.classList.remove('hidden');
+                homeDefaultMessage.classList.add('hidden');
+
+                homeCharacterImage.src = representativeCharacter.imageUrl;
+                homeCharacterName.textContent = representativeCharacter.name;
+                
+                if (cycleDialogue) {
+                    const currentDialogue = homeCharacterDialogue.textContent;
+                    let newDialogue;
+                    do {
+                        newDialogue = representativeCharacter.dialogues[Math.floor(Math.random() * representativeCharacter.dialogues.length)];
+                    } while (representativeCharacter.dialogues.length > 1 && newDialogue === currentDialogue);
+                    homeCharacterDialogue.textContent = newDialogue;
+                } else {
+                     homeCharacterDialogue.textContent = representativeCharacter.dialogues[0];
+                }
+
+            } else {
+                homeCharacterContainer.classList.add('hidden');
+                homeDialogueContainer.classList.add('hidden');
+                homeDefaultMessage.classList.remove('hidden');
+            }
+        }
+
+        function setRepresentative(cardName) {
+            const cardData = characters.find(c => c.name === cardName);
+            if (cardData) {
+                representativeCharacter = cardData;
+                showMessage(`${cardData.name}(을)를 대표로 설정했습니다!`, 'text-blue-300', messageArea);
+                displayInventory(); // Re-render inventory to update button state
+                saveGame();
+            }
+        }
+        
+        function handlePull(count, cost, gachaType = 'normal') {
+            if (playerInventory.length + count > inventoryCapacity) {
+                showMessage('보관함 공간이 부족합니다!', 'text-yellow-400', messageArea); return;
+            }
+            if (playerCurrency >= cost) {
+                playerCurrency -= cost;
+                showMessage(`-💎${cost}`, 'text-red-400', messageArea);
+                performPulls(count, gachaType);
+            } else {
+                showMessage('재화가 부족합니다!', 'text-red-400', messageArea);
+            }
+        }
+        
+        function expandInventory() {
+            if (playerCurrency >= EXPAND_COST) {
+                playerCurrency -= EXPAND_COST; inventoryCapacity += EXPAND_AMOUNT;
+                showMessage(`보관함이 ${inventoryCapacity}칸으로 확장되었습니다!`, 'text-green-300', messageArea);
+                updateUI(); displayInventory(); saveGame();
+            } else {
+                showMessage('보석이 부족하여 확장할 수 없습니다.', 'text-red-400', messageArea);
+            }
+        }
+
+        function updateUI() {
+            currencyDisplay.textContent = playerCurrency;
+            const buttons = [pullOneButton, pullTenButton, pullOneEventButton, pullTenEventButton];
+            buttons.forEach(btn => {
+                if (btn.id.includes('ten')) btn.disabled = playerCurrency < PULL_TEN_COST;
+                else btn.disabled = playerCurrency < PULL_ONE_COST;
+            });
+            expandInventoryButton.disabled = playerCurrency < EXPAND_COST;
+        }
+
+        function showMessage(message, colorClass, element) {
+            element.textContent = message;
+            element.className = `text-center text-lg h-8 mb-4 transition-opacity duration-300 ${colorClass}`;
+            setTimeout(() => { element.textContent = ''; }, 2000);
+        }
+
+        function performPulls(count, gachaType = 'normal') {
+            const results = [];
+            let guaranteedSR = (count === 10);
+            for (let i = 0; i < count; i++) {
+                let pulledChar;
+                if (guaranteedSR && i === count - 1 && !results.some(c => c.rarity === 'SR' || c.rarity === 'SSR')) {
+                    pulledChar = pullCharacter(['SR', 'SSR'], gachaType);
+                } else {
+                    pulledChar = pullCharacter(null, gachaType);
+                }
+                results.push(pulledChar);
+                playerInventory.push(pulledChar); 
+            }
+            displayResults(results); updateUI(); saveGame();
+        }
+
+        function pullCharacter(allowedRarities = null, gachaType = 'normal') {
+            const now = new Date();
+            const isEventActive = now >= EVENT_START_DATE && now <= EVENT_END_DATE;
+            const useEventRates = gachaType === 'event' && isEventActive;
+            const probabilities = useEventRates ? eventRarityProbabilities : rarityProbabilities;
+            
+            let selectedRarity = '';
+            if (allowedRarities) {
+                const highTierProb = { 'SSR': probabilities['SSR'], 'SR': probabilities['SR'] };
+                const totalProb = highTierProb.SSR + highTierProb.SR;
+                selectedRarity = (Math.random() * totalProb < highTierProb.SSR) ? 'SSR' : 'SR';
+            } else {
+                const rand = Math.random() * 100; let cumulativeProb = 0;
+                for (const rarity in probabilities) {
+                    cumulativeProb += probabilities[rarity];
+                    if (rand < cumulativeProb) { selectedRarity = rarity; break; }
+                }
+            }
+
+            if (useEventRates && selectedRarity === 'SSR') {
+                if (Math.random() < 0.5) { // 50% chance for event character
+                    return characters.find(c => c.name === EVENT_CHARACTER_NAME);
+                } else {
+                    const otherSSRs = characters.filter(c => c.rarity === 'SSR' && c.name !== EVENT_CHARACTER_NAME);
+                    if (otherSSRs.length > 0) return otherSSRs[Math.floor(Math.random() * otherSSRs.length)];
+                    return characters.find(c => c.name === EVENT_CHARACTER_NAME); // Fallback
+                }
+            }
+
+            const possibleCharacters = characters.filter(char => char.rarity === selectedRarity);
+            return possibleCharacters[Math.floor(Math.random() * possibleCharacters.length)];
+        }
+
+        function displayResults(pulledCharacters) {
+            resultsContainer.innerHTML = '';
+            pulledCharacters.forEach((character, index) => {
+                resultsContainer.appendChild(createCard(character, { animationIndex: index }));
+            });
+        }
+        
+        function getUniqueInventory() {
+            const cardCounts = playerInventory.reduce((acc, card) => {
+                if (!acc[card.name]) { acc[card.name] = { ...card, count: 0 }; }
+                acc[card.name].count++; return acc;
+            }, {});
+            const rarityOrder = { 'SSR': 4, 'SR': 3, 'R': 2, 'N': 1 };
+            return Object.values(cardCounts).sort((a, b) => (rarityOrder[b.rarity] - rarityOrder[a.rarity]) || a.name.localeCompare(b.name));
+        }
+
+        function displayInventory() {
+            inventoryStatus.textContent = `${playerInventory.length} / ${inventoryCapacity}`;
+            inventoryContainer.innerHTML = '';
+            const uniqueCards = getUniqueInventory();
+            if (uniqueCards.length === 0) {
+                inventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">아직 수집한 동료가 없습니다.</p>`; return;
+            }
+            uniqueCards.forEach((character, index) => {
+                inventoryContainer.appendChild(createCard(character, { animationIndex: index, isInventory: true }));
+            });
+        }
+
+        function displayDeckManagement() {
+            deckStatus.textContent = `현재 덱: ${playerDeck.length} / ${DECK_CAPACITY}`;
+            deckStatus.classList.toggle('text-green-400', playerDeck.length === DECK_CAPACITY);
+            deckSlotsContainer.innerHTML = '';
+            for (let i = 0; i < DECK_CAPACITY; i++) {
+                if (playerDeck[i]) {
+                    deckSlotsContainer.appendChild(createCard(playerDeck[i], { isDeckSlot: true }));
+                } else {
+                    const emptySlot = document.createElement('div');
+                    emptySlot.className = 'deck-slot rounded-lg'; emptySlot.textContent = '비어있음';
+                    deckSlotsContainer.appendChild(emptySlot);
+                }
+            }
+            deckInventoryContainer.innerHTML = '';
+            const uniqueCards = getUniqueInventory();
+             if (uniqueCards.length === 0) {
+                deckInventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">덱에 추가할 카드가 없습니다.</p>`; return;
+            }
+            uniqueCards.forEach((character, index) => {
+                const isCardInDeck = playerDeck.some(deckCard => deckCard.name === character.name);
+                const isDeckFull = playerDeck.length >= DECK_CAPACITY;
+                deckInventoryContainer.appendChild(createCard(character, { animationIndex: index, isDeckBuilder: true, isCardInDeck, isDeckFull }));
+            });
+        }
+        
+        function autoFillDeck() {
+            const uniqueCards = getUniqueInventory();
+            const sortedByPower = uniqueCards.sort((a, b) => b.power - a.power);
+            playerDeck = sortedByPower.slice(0, DECK_CAPACITY);
+            displayDeckManagement();
+            showMessage('가장 강력한 카드로 덱을 자동 편성했습니다!', 'text-blue-300', messageArea);
+            saveGame();
+        }
+
+        function addToDeck(cardName) {
+            if (playerDeck.length >= DECK_CAPACITY || playerDeck.some(card => card.name === cardName)) return;
+            const cardToAdd = playerInventory.find(card => card.name === cardName);
+            if (cardToAdd) { playerDeck.push(cardToAdd); displayDeckManagement(); saveGame(); }
+        }
+        
+        function removeFromDeck(cardName) {
+            playerDeck = playerDeck.filter(card => card.name !== cardName);
+            displayDeckManagement();
+            saveGame();
+        }
+        
+        function calculateDeckPower() {
+            return playerDeck.reduce((total, card) => total + card.power, 0);
+        }
+
+        function displayCombatView() {
+            deckPowerDisplay.textContent = calculateDeckPower();
+            dungeonListContainer.innerHTML = '';
+            dungeons.forEach((dungeon, index) => {
+                const dungeonEl = document.createElement('div');
+                dungeonEl.className = 'bg-black/20 p-4 rounded-lg text-center';
+                dungeonEl.innerHTML = `
+                    <h3 class="text-xl font-bold text-yellow-300">${dungeon.name}</h3>
+                    <p class="text-gray-300">권장 전투력: ${dungeon.recommendedPower}</p>
+                    <p class="text-gray-300">예상 보상: 💎${dungeon.rewards.min} ~ ${dungeon.rewards.max}</p>
+                    <button data-action="challenge-dungeon" data-dungeon-index="${index}" class="gacha-button bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-full mt-4">도전</button>
+                `;
+                dungeonListContainer.appendChild(dungeonEl);
+            });
+        }
+        
+        function challengeDungeon(dungeonIndex) {
+            if (playerDeck.length < DECK_CAPACITY) {
+                showMessage('덱을 5장으로 모두 채워야 합니다!', 'text-yellow-400', combatMessageArea);
+                return;
+            }
+            
+            const dungeon = dungeons[dungeonIndex];
+            const deckPower = calculateDeckPower();
+            
+            if (deckPower < dungeon.recommendedPower) {
+                if (Math.random() < 0.3) {
+                    const earnedReward = dungeon.rewards.min;
+                    playerCurrency += earnedReward;
+                    showMessage(`기적! 약세를 극복하고 승리! 💎${earnedReward} 획득!`, 'text-green-300', combatMessageArea);
+                } else {
+                    const penalty = dungeon.rewards.min;
+                    playerCurrency = Math.max(0, playerCurrency - penalty);
+                    showMessage(`전투 패배... 💎${penalty}를 잃었습니다.`, 'text-red-400', combatMessageArea);
+                }
+            } else {
+                let powerRatio = Math.min(deckPower / dungeon.recommendedPower, 1.5);
+                let rewardRange = dungeon.rewards.max - dungeon.rewards.min;
+                let earnedReward = dungeon.rewards.min + Math.floor(rewardRange * powerRatio * Math.random());
+                earnedReward = Math.min(earnedReward, dungeon.rewards.max * 2);
+
+                playerCurrency += earnedReward;
+                showMessage(`탐험 성공! 💎${earnedReward} 획득!`, 'text-green-300', combatMessageArea);
+            }
+            updateUI();
+            saveGame();
+        }
+
+        function createCard(character, options = {}) {
+            const { animationIndex, isDeckSlot, isDeckBuilder, isInventory, isCardInDeck, isDeckFull } = options;
+            const card = document.createElement('div');
+            const cardImageUrl = character.imageUrl.replace('300x500', '150x180'); // Use smaller images for cards
+            card.className = `rarity-${character.rarity} relative text-center rounded-lg shadow-md p-2 transform transition-transform duration-300 hover:scale-105`;
+            const rarityColor = { 'N': 'text-gray-600', 'R': 'text-blue-800', 'SR': 'text-white', 'SSR': 'text-black' }[character.rarity];
+            
+            let badgeHTML = character.count > 1 ? `<div class="count-badge">x${character.count}</div>` : '';
+            if(isDeckSlot) badgeHTML = '';
+
+            let actionButtonsHTML = '';
+            if (isDeckBuilder) {
+                const disabled = isDeckFull || isCardInDeck;
+                const buttonText = isCardInDeck ? '추가됨' : '추가';
+                const buttonColor = disabled ? 'bg-gray-500' : 'bg-green-500 hover:bg-green-600';
+                actionButtonsHTML = `<button data-action="add-to-deck" data-card-name="${character.name}" class="w-full mt-2 py-1 rounded-md text-white font-bold text-sm ${buttonColor}" ${disabled ? 'disabled' : ''}>${buttonText}</button>`;
+            } else if (isInventory) {
+                 const isRepresentative = representativeCharacter && representativeCharacter.name === character.name;
+                 const repButtonText = isRepresentative ? '대표' : '대표 설정';
+                 const repButtonColor = isRepresentative ? 'bg-yellow-500' : 'bg-gray-600 hover:bg-gray-700';
+                 actionButtonsHTML = `<button data-action="set-representative" data-card-name="${character.name}" class="w-full mt-2 py-1 rounded-md text-white font-bold text-sm ${repButtonColor}" ${isRepresentative ? 'disabled' : ''}>${repButtonText}</button>`;
+            }
+            
+            let deckSlotButton = '';
+            if(isDeckSlot) {
+                 deckSlotButton = `<button data-action="remove-from-deck" data-card-name="${character.name}" class="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 text-sm font-bold flex items-center justify-center z-10">X</button>`;
+            }
+
+
+            card.innerHTML = `
+                ${badgeHTML} ${deckSlotButton}
+                <div class="relative pointer-events-none">
+                    <img src="${cardImageUrl}" alt="${character.name}" class="w-full h-auto rounded-md mb-2 border-2 border-white/50">
+                    <p class="font-bold text-sm ${rarityColor} truncate">${character.name}</p>
+                    <p class="font-black text-lg ${rarityColor}" style="text-shadow: 1px 1px 2px rgba(255,255,255,0.5);">${character.rarity}</p>
+                </div>
+                 ${actionButtonsHTML}
+            `;
+            if (typeof animationIndex === 'number') {
+                card.style.opacity = '0';
+                card.style.animationDelay = `${animationIndex * 0.05}s`;
+                card.classList.add('card-animation');
+            }
+            if(isDeckBuilder && isCardInDeck) {
+                card.classList.add('opacity-50');
+            }
+            return card;
+        }
+
+        // --- 게임 시작 ---
+        loadGame();
+    </script>
+</body>
+</html>
+
