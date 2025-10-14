@@ -83,6 +83,17 @@
         /* 뽑기 탭 버튼 스타일 */
         .gacha-tab-button { transition: all 0.2s ease-in-out; }
         .gacha-tab-button.active { background-color: rgba(246, 224, 94, 0.8); color: #330867; }
+        
+        /* 전투 화면 스타일 */
+        #combat-log { scroll-behavior: smooth; }
+        .hp-bar-background { background-color: #4a5568; }
+        .hp-bar-foreground { background-color: #48bb78; transition: width 0.5s ease-in-out; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        .shake-animation { animation: shake 0.3s 1; }
+        .speed-button.active {
+            background-color: #4299e1; /* blue-500 */
+            box-shadow: 0 0 10px rgba(66, 153, 225, 0.7);
+        }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
@@ -122,7 +133,7 @@
                     <!-- 이벤트 배너 -->
                     <div id="event-banner" class="hidden absolute top-4 right-4 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 p-4 rounded-lg shadow-lg cursor-pointer transform hover:scale-105 transition-transform duration-300 z-10">
                         <h3 class="text-white text-lg font-bold drop-shadow-md">기간 한정 이벤트!</h3>
-                        <p class="text-white text-sm drop-shadow-md">SSR 타락천사 확률 UP!</p>
+                        <p class="text-white text-sm drop-shadow-md">[핏빛 욕조] 서도진 확률 UP!</p>
                     </div>
 
                     <div id="home-character-container" class="flex-grow flex items-center justify-center cursor-pointer">
@@ -141,32 +152,25 @@
             <!-- 뽑기 화면 -->
             <div id="gacha-view" class="hidden">
                 <p class="text-center text-gray-200 mt-2 mb-4">운명을 시험하여 전설의 동료를 만나보세요!</p>
-                
-                <!-- Gacha Type Tabs -->
                 <div class="bg-black/20 rounded-full p-1 flex justify-center items-center mb-4 max-w-sm mx-auto">
                     <button id="gacha-tab-normal" class="gacha-tab-button active w-1/2 font-bold py-2 px-6 rounded-full">일반 뽑기</button>
                     <button id="gacha-tab-event" class="gacha-tab-button w-1/2 font-bold py-2 px-6 rounded-full hidden">이벤트 뽑기</button>
                 </div>
-
-                <!-- Normal Gacha View -->
                 <div id="normal-gacha-view">
                     <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mb-4">
                         <button id="pull-one" class="gacha-button w-full sm:w-auto bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-8 rounded-full shadow-lg">💎 1회 뽑기 (10)</button>
                         <button id="pull-ten" class="gacha-button w-full sm:w-auto bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-8 rounded-full shadow-lg">💎💎 10회 뽑기 (100)</button>
                     </div>
                 </div>
-
-                <!-- Event Gacha View -->
                 <div id="event-gacha-view" class="hidden">
                     <div class="text-center p-2 mb-2 rounded-lg bg-yellow-500/20">
-                        <p class="font-bold text-yellow-300">[타락천사] 등장 확률 UP!</p>
+                        <p class="font-bold text-yellow-300">[핏빛 욕조] 서도진 등장 확률 UP!</p>
                     </div>
                     <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mb-4">
                         <button id="pull-one-event" class="gacha-button w-full sm:w-auto bg-gradient-to-r from-red-500 to-yellow-500 hover:from-red-600 hover:to-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-8 rounded-full shadow-lg">🔥 1회 뽑기 (10)</button>
                         <button id="pull-ten-event" class="gacha-button w-full sm:w-auto bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-8 rounded-full shadow-lg">🔥🔥 10회 뽑기 (100)</button>
                     </div>
                 </div>
-
                 <div id="message-area" class="text-center text-lg h-8 mb-4 transition-opacity duration-300"></div>
                 <div id="results-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 min-h-[200px] bg-black/20 p-4 rounded-xl"></div>
             </div>
@@ -196,545 +200,864 @@
                 <div id="deck-inventory-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 min-h-[250px] max-h-[40vh] overflow-y-auto bg-black/20 p-4 rounded-xl"></div>
             </div>
             
-            <!-- 전투 화면 -->
+            <!-- 전투 화면 (던전 선택) -->
             <div id="combat-view" class="hidden">
                 <div class="text-center mb-4">
                     <p class="text-gray-200">편성한 덱으로 던전에 도전하여 보상을 획득하세요!</p>
                     <p class="text-xl font-bold">현재 덱 전투력: <span id="deck-power-display" class="text-yellow-300">0</span></p>
                 </div>
-                <div id="combat-message-area" class="text-center text-lg h-8 mb-4 transition-opacity duration-300"></div>
                 <div id="dungeon-list-container" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
             </div>
+
+            <!-- 전투 진행 화면 -->
+            <div id="combat-in-progress-view" class="hidden">
+                <div class="grid grid-cols-3 gap-4 items-center">
+                    <!-- Player Deck -->
+                    <div id="combat-player-deck" class="col-span-1 space-y-2"></div>
+                    <!-- Monster -->
+                    <div id="combat-monster-area" class="col-span-2 flex flex-col items-center"></div>
+                </div>
+
+                <div class="flex justify-end items-center gap-2 mt-4">
+                    <button id="speed-1x" class="speed-button active bg-gray-600 text-white font-bold py-1 px-3 rounded-full text-sm">1x</button>
+                    <button id="speed-2x" class="speed-button bg-gray-600 text-white font-bold py-1 px-3 rounded-full text-sm">2x</button>
+                    <button id="speed-4x" class="speed-button bg-gray-600 text-white font-bold py-1 px-3 rounded-full text-sm">4x</button>
+                </div>
+                <div id="combat-log-container" class="mt-2 bg-black/30 p-4 rounded-lg h-40 overflow-y-auto">
+                    <div id="combat-log"></div>
+                </div>
+                 <div id="combat-result-modal" class="hidden absolute inset-0 bg-black/70 flex justify-center items-center z-20">
+                    <div class="bg-gray-800 p-8 rounded-lg text-center">
+                        <h2 id="combat-result-title" class="text-4xl font-bold mb-4"></h2>
+                        <p id="combat-result-message" class="text-lg mb-6"></p>
+                        <button id="close-combat-result" class="gacha-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-full">확인</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 카드 상세 정보 모달 -->
+            <div id="card-detail-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-30">
+                <div class="bg-gray-800 p-6 rounded-lg max-w-lg w-full relative mx-4">
+                    <button id="close-card-detail" class="absolute top-3 right-4 text-white text-3xl font-bold hover:text-gray-400">&times;</button>
+                    <div class="flex flex-col md:flex-row gap-6">
+                        <div class="md:w-1/3">
+                            <img id="detail-card-image" src="" alt="Card Image" class="w-full rounded-lg shadow-lg">
+                        </div>
+                        <div class="md:w-2/3">
+                            <h2 id="detail-card-name" class="text-3xl font-bold"></h2>
+                            <div class="flex items-center gap-4 mb-4">
+                                <p id="detail-card-rarity" class="font-bold text-2xl"></p>
+                                <p id="detail-card-faction" class="font-bold text-lg px-3 py-1 rounded-full"></p>
+                            </div>
+                            <div class="bg-black/20 p-3 rounded-lg mb-4">
+                                <h3 class="font-bold text-lg mb-2 text-yellow-300">능력치</h3>
+                                <div class="grid grid-cols-3 gap-2 text-center">
+                                    <div><p class="text-sm text-gray-400">HP</p><p id="detail-stat-hp" class="font-bold text-lg"></p></div>
+                                    <div><p class="text-sm text-gray-400">ATK</p><p id="detail-stat-atk" class="font-bold text-lg"></p></div>
+                                    <div><p class="text-sm text-gray-400">DEF</p><p id="detail-stat-def" class="font-bold text-lg"></p></div>
+                                </div>
+                            </div>
+                             <div class="bg-black/20 p-3 rounded-lg">
+                                <h3 class="font-bold text-lg mb-2 text-yellow-300">스킬</h3>
+                                <div id="detail-skills-container" class="space-y-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
     <script>
-        // --- 게임 설정 ---
-        const characters = [
-            { name: '슬라임', rarity: 'N', power: 1, imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=Slime', cardImageUrl: 'https://placehold.co/150x180/a0aec0/ffffff?text=Slime', dialogues: ['꾸물... 꾸물...', '내가... 대표?', '말랑말랑...'] }, 
-            { name: '고블린', rarity: 'N', power: 2, imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=Goblin', cardImageUrl: 'https://placehold.co/150x180/a0aec0/ffffff?text=Goblin', dialogues: ['키킥!', '반짝이는 거, 좋아!', '내 몽둥이, 강하다!'] }, 
-            { name: '들쥐', rarity: 'N', power: 1, imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=Rat', cardImageUrl: 'https://placehold.co/150x180/a0aec0/ffffff?text=Rat', dialogues: ['찍찍!', '치즈... 좋아...', '숨는 건 자신있어.'] }, 
-            { name: '오크 전사', rarity: 'R', power: 5, imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=Orc', cardImageUrl: 'https://placehold.co/150x180/63b3ed/ffffff?text=Orc', dialogues: ['크아아! 전투다!', '내 도끼를 받아라!', '더 강한 자는 없나?'] }, 
-            { name: '엘프 궁수', rarity: 'R', power: 7, imageUrl: 'https://i.postimg.cc/MKyM7Bqx/900px-Electron-shell-001-Hydrogen-no-label-svg.png', cardImageUrl: 'https://i.postimg.cc/k4tLVq8v/900px-Electron-shell-001-Hydrogen-no-label-svg.png', dialogues: ['바람의 속삭임이 들리는군...', '내 화살은 빗나가지 않아.', '숲을 위하여.'] }, 
-            { name: '인간 기사', rarity: 'R', power: 6, imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=Knight', cardImageUrl: 'https://placehold.co/150x180/63b3ed/ffffff?text=Knight', dialogues: ['정의의 이름으로!', '방패 뒤에 서도록.', '이 검에 맹세하지.'] }, 
-            { name: '하이 오크', rarity: 'SR', power: 15, imageUrl: 'https://placehold.co/300x500/b794f4/ffffff?text=High+Orc', cardImageUrl: 'https://placehold.co/150x180/b794f4/ffffff?text=High+Orc', dialogues: ['모조리 부숴주마!', '나는... 부족의 자랑이다.', '힘こそ全て(힘이야말로 전부)!'] }, 
-            { name: '마법사', rarity: 'SR', power: 18, imageUrl: 'https://placehold.co/300x500/b794f4/ffffff?text=Mage', cardImageUrl: 'https://placehold.co/150x180/b794f4/ffffff?text=Mage', dialogues: ['지식의 심연을 들여다본 적 있나?', '마나의 흐름이 느껴진다...', '이게 바로... 마법이다.'] }, 
-            { name: '드래곤', rarity: 'SSR', power: 35, imageUrl: 'https://placehold.co/300x500/f6e05e/000000?text=Dragon', cardImageUrl: 'https://placehold.co/150x180/f6e05e/000000?text=Dragon', dialogues: ['하찮은 필멸자로군.', '나의 분노를 감당할 수 있겠나?', '이 세상의 지배자는 나다.'] }, 
-            { name: '타락천사', rarity: 'SSR', power: 40, imageUrl: 'https://placehold.co/300x500/f6e05e/000000?text=Fallen+Angel', cardImageUrl: 'https://placehold.co/150x180/f6e05e/000000?text=Fallen+Angel', dialogues: ['날개는 잃었지만, 긍지는 잃지 않았다.', '어둠 속에서... 진실을 보았지.', '후회는 없다.'] },
-        ];
-        const rarityProbabilities = { 'SSR': 3, 'SR': 12, 'R': 35, 'N': 50 };
-        const eventRarityProbabilities = { 'SSR': 6, 'SR': 14, 'R': 30, 'N': 50 };
-        const EVENT_CHARACTER_NAME = '타락천사';
-        const dungeons = [
-            { name: '초보자의 숲', recommendedPower: 20, rewards: { min: 10, max: 20 } },
-            { name: '오크 점령지', recommendedPower: 50, rewards: { min: 25, max: 40 } },
-            { name: '용의 둥지', recommendedPower: 120, rewards: { min: 60, max: 100 } },
-        ];
-        const EVENT_START_DATE = new Date('2025-10-14T00:00:00');
-        const EVENT_END_DATE = new Date('2025-10-24T23:59:59');
-
-        // --- 게임 상태 ---
-        let playerCurrency = 100;
-        let playerInventory = [];
-        let playerDeck = [];
-        let inventoryCapacity = 100;
-        let representativeCharacter = null;
-        const DECK_CAPACITY = 5;
-        const PULL_ONE_COST = 10;
-        const PULL_TEN_COST = 100;
-        const EXPAND_COST = 50;
-        const EXPAND_AMOUNT = 10;
-        const SAVE_DATA_KEY = 'gachaGameSaveData_v3'; // 버전을 명시하여 이전 데이터와 충돌 방지
-
-        // --- HTML 요소 가져오기 ---
-        const currencyDisplay = document.getElementById('currency-display');
-        const messageArea = document.getElementById('message-area');
-        const allTabs = document.querySelectorAll('.tab-button');
-        const allViews = document.querySelectorAll('main > div');
-        const pullOneButton = document.getElementById('pull-one');
-        const pullTenButton = document.getElementById('pull-ten');
-        const pullOneEventButton = document.getElementById('pull-one-event');
-        const pullTenEventButton = document.getElementById('pull-ten-event');
-        const resultsContainer = document.getElementById('results-container');
-        const inventoryContainer = document.getElementById('inventory-container');
-        const inventoryStatus = document.getElementById('inventory-status');
-        const expandInventoryButton = document.getElementById('expand-inventory');
-        const deckStatus = document.getElementById('deck-status');
-        const deckSlotsContainer = document.getElementById('deck-slots-container');
-        const deckInventoryContainer = document.getElementById('deck-inventory-container');
-        const autoFillDeckButton = document.getElementById('auto-fill-deck');
-        const deckPowerDisplay = document.getElementById('deck-power-display');
-        const combatMessageArea = document.getElementById('combat-message-area');
-        const dungeonListContainer = document.getElementById('dungeon-list-container');
-        const homeCharacterContainer = document.getElementById('home-character-container');
-        const homeCharacterImage = document.getElementById('home-character-image');
-        const homeDialogueContainer = document.getElementById('home-dialogue-container');
-        const homeDefaultMessage = document.getElementById('home-default-message');
-        const homeCharacterName = document.getElementById('home-character-name');
-        const homeCharacterDialogue = document.getElementById('home-character-dialogue');
-        const eventBanner = document.getElementById('event-banner');
-        const gachaTabNormal = document.getElementById('gacha-tab-normal');
-        const gachaTabEvent = document.getElementById('gacha-tab-event');
-        const normalGachaView = document.getElementById('normal-gacha-view');
-        const eventGachaView = document.getElementById('event-gacha-view');
-        const resetButton = document.getElementById('reset-game');
-        const storageWarning = document.getElementById('storage-warning');
-        
-        // --- 이벤트 리스너 ---
-        allTabs.forEach(tab => {
-            tab.addEventListener('click', () => switchTab(tab.id.split('-')[1]));
-        });
-        pullOneButton.addEventListener('click', () => handlePull(1, PULL_ONE_COST, 'normal'));
-        pullTenButton.addEventListener('click', () => handlePull(10, PULL_TEN_COST, 'normal'));
-        pullOneEventButton.addEventListener('click', () => handlePull(1, PULL_ONE_COST, 'event'));
-        pullTenEventButton.addEventListener('click', () => handlePull(10, PULL_TEN_COST, 'event'));
-        expandInventoryButton.addEventListener('click', expandInventory);
-        autoFillDeckButton.addEventListener('click', autoFillDeck);
-        gachaTabNormal.addEventListener('click', () => switchGachaTab('normal'));
-        gachaTabEvent.addEventListener('click', () => switchGachaTab('event'));
-        deckSlotsContainer.addEventListener('click', (e) => { if (e.target.dataset.action === 'remove-from-deck') removeFromDeck(e.target.dataset.cardName); });
-        deckInventoryContainer.addEventListener('click', (e) => { if (e.target.dataset.action === 'add-to-deck') addToDeck(e.target.dataset.cardName); });
-        inventoryContainer.addEventListener('click', (e) => { if (e.target.dataset.action === 'set-representative') setRepresentative(e.target.dataset.cardName); });
-        dungeonListContainer.addEventListener('click', (e) => { if (e.target.dataset.action === 'challenge-dungeon') challengeDungeon(parseInt(e.target.dataset.dungeonIndex)); });
-        homeCharacterContainer.addEventListener('click', () => { if (representativeCharacter) displayHomeView(true); });
-        eventBanner.addEventListener('click', () => {
-            showMessage('[타락천사] 확률 UP 이벤트 진행 중!', 'text-blue-300', messageArea);
-            switchTab('gacha');
-        });
-        resetButton.addEventListener('click', resetGame);
-
-        // --- 데이터 저장/불러오기 함수 ---
-        function isStorageAvailable() {
-            try {
-                const key = "__test_localstorage__";
-                localStorage.setItem(key, key);
-                localStorage.removeItem(key);
-                return true;
-            } catch (e) {
-                return false;
-            }
-        }
-
-        function saveGame() {
-            if (!isStorageAvailable()) return;
-            const saveData = {
-                currency: playerCurrency,
-                inventory: playerInventory.map(card => card.name), // 이름만 저장
-                deck: playerDeck.map(card => card.name), // 이름만 저장
-                capacity: inventoryCapacity,
-                representative: representativeCharacter ? representativeCharacter.name : null,
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- 게임 설정 ---
+            const characters = [
+                // name(고유), baseName, rarity, faction, stats, imageUrl, cardImageUrl, dialogues, skills, deathDialogue
+                { name: '[소설가] 서도진', baseName: '서도진', rarity: 'N', faction: '조수', stats: { hp: 50, atk: 5, def: 5 }, imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=서도진', cardImageUrl: 'https://placehold.co/150x180/a0aec0/ffffff?text=서도진', dialogues: ['이야기의 시작은...'], skills: [{ name: '고뇌', dialogue: '음...', power: 1.2, type: 'damage' }], deathDialogue: '마감이...' },
+                { name: '[탐정] 서도진', baseName: '서도진', rarity: 'R', faction: '탐정', stats: { hp: 100, atk: 15, def: 10 }, imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=서도진', cardImageUrl: 'https://placehold.co/150x180/63b3ed/ffffff?text=서도진', dialogues: ['사건 현장은 보존해주시죠.'], skills: [{ name: '추리', dialogue: '범인은 바로 당신!', power: 1.5, type: 'damage' }], deathDialogue: '이런... 실수를...' },
+                { name: '[핏빛 욕조] 서도진', baseName: '서도진', rarity: 'SR', faction: '범인', stats: { hp: 200, atk: 30, def: 15 }, imageUrl: 'https://placehold.co/300x500/b794f4/ffffff?text=서도진', cardImageUrl: 'https://placehold.co/150x180/b794f4/ffffff?text=서도진', dialogues: ['완벽한 트릭이었는데.'], skills: [{ name: '알리바이', dialogue: '그 시간에 전 여기 없었습니다만?', power: 1.8, type: 'damage' }], deathDialogue: '들켜버렸나...' },
+                { name: '[추리의 제왕] 서도진', baseName: '서도진', rarity: 'SSR', faction: '탐정', stats: { hp: 380, atk: 42, def: 28 }, imageUrl: 'https://placehold.co/300x500/f6e05e/000000?text=서도진', cardImageUrl: 'https://placehold.co/150x180/f6e05e/000000?text=서도진', dialogues: ['진실은 언제나 하나.'], skills: [{ name: '사건 재구성', dialogue: '모든 조각이 맞춰졌어.', power: 2.2, type: 'damage' }, { name: '최종 변론', dialogue: '이의 있습니까!', power: 1.5, type: 'debuff_def' }], deathDialogue: '내 추리가... 틀렸을 리가...' },
+                
+                { name: '[목격자] 윤필규', baseName: '윤필규', rarity: 'N', faction: '조수', stats: { hp: 60, atk: 8, def: 3 }, imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=윤필규', cardImageUrl: 'https://placehold.co/150x180/a0aec0/ffffff?text=윤필규', dialogues: ['저... 봤어요!'], skills: [{ name: '증언', dialogue: '저 사람이 그랬어요!', power: 1.3, type: 'damage' }], deathDialogue: '못 본 걸로 할 걸...' },
+                { name: '[용의자] 윤서천', baseName: '윤서천', rarity: 'R', faction: '범인', stats: { hp: 110, atk: 16, def: 8 }, imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=윤서천', cardImageUrl: 'https://placehold.co/150x180/63b3ed/ffffff?text=윤서천', dialogues: ['내가 아니라고!'], skills: [{ name: '발뺌', dialogue: '증거 있어?', power: 1.4, type: 'damage' }], deathDialogue: '결국...' },
+                { name: '[탐정] 도천영', baseName: '도천영', rarity: 'R', faction: '탐정', stats: { hp: 90, atk: 18, def: 7 }, imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=도천영', cardImageUrl: 'https://placehold.co/150x180/63b3ed/ffffff?text=도천영', dialogues: ['사건의 실마리가 보이는군...', '내 추리에서 벗어날 순 없어.', '진실을 향하여.'], skills: [{ name: '꿰뚫어보기', dialogue: '모든 것이 선명하게 보이는군!', power: 1.8, type: 'damage' }], deathDialogue: '이런... 예리한 함정이었나...' },
+                { name: '[기자] 강은율', baseName: '강은율', rarity: 'SR', faction: '조수', stats: { hp: 250, atk: 25, def: 18 }, imageUrl: 'https://placehold.co/300x500/b794f4/ffffff?text=강은율', cardImageUrl: 'https://placehold.co/150x180/b794f4/ffffff?text=강은율', dialogues: ['특종의 냄새가 나는군요.'], skills: [{ name: '정보 수집', dialogue: '이건 기사화될 겁니다!', power: 1.8, type: 'damage' }], deathDialogue: '이건... 너무 큰 특종이야...' },
+                { name: '[프로파일러] 백정문', baseName: '백정문', rarity: 'SR', faction: '탐정', stats: { hp: 180, atk: 35, def: 12 }, imageUrl: 'https://placehold.co/300x500/b794f4/ffffff?text=백정문', cardImageUrl: 'https://placehold.co/150x180/b794f4/ffffff?text=백정문', dialogues: ['범인의 심리가 보이는군.'], skills: [{ name: '심리 분석', dialogue: '당신, 지금 거짓말을 하고 있군.', power: 2.2, type: 'damage' }], deathDialogue: '생각과... 다른데...' },
+                { name: '[검사] 독고유진', baseName: '독고유진', rarity: 'SSR', faction: '탐정', stats: { hp: 360, atk: 44, def: 27 }, imageUrl: 'https://placehold.co/300x500/f6e05e/000000?text=독고유진', cardImageUrl: 'https://placehold.co/150x180/f6e05e/000000?text=독고유진', dialogues: ['법은 당신 편이 아닙니다.'], skills: [{ name: '기소', dialogue: '유죄를 선고합니다.', power: 2.3, type: 'damage' }, { name: '압수수색', dialogue: '모조리 찾아내!', power: 1.3, type: 'debuff_def' }], deathDialogue: '법정에서... 지다니...' },
+                { name: '[의사] 양석민', baseName: '양석민', rarity: 'SSR', faction: '조수', stats: { hp: 420, atk: 38, def: 32 }, imageUrl: 'https://placehold.co/300x500/f6e05e/000000?text=양석민', cardImageUrl: 'https://placehold.co/150x180/f6e05e/000000?text=양석민', dialogues: ['사인은... 질식사로군요.'], skills: [{ name: '부검', dialogue: '메스를 잡을 시간이군.', power: 2.1, type: 'damage' }, { name: '긴급 처치', dialogue: '아직 살릴 수 있어!', power: 1.8, type: 'vampire' }], deathDialogue: '내가... 죽다니... 사인은...' },
+            ];
+            
+            const monsters = {
+                '슬라임 킹': { name: '슬라임 킹', stats: { hp: 300, atk: 15, def: 10 }, imageUrl: 'https://placehold.co/300x300/a0aec0/ffffff?text=Slime+King' },
+                '오크 대장': { name: '오크 대장', stats: { hp: 800, atk: 30, def: 20 }, imageUrl: 'https://placehold.co/300x300/63b3ed/ffffff?text=Orc+Chief' },
+                '레드 드래곤': { name: '레드 드래곤', stats: { hp: 2000, atk: 50, def: 35 }, imageUrl: 'https://placehold.co/300x300/f56565/000000?text=Red+Dragon' },
             };
-            localStorage.setItem(SAVE_DATA_KEY, JSON.stringify(saveData));
-        }
 
-        function loadGame() {
-            if (!isStorageAvailable()) {
-                storageWarning.classList.remove('hidden');
-                resetButton.disabled = true;
-                // 저장 기능 없이 새 게임 시작
-                playerInventory.push(characters.find(c => c.name === '슬라임'));
-                playerInventory.push(characters.find(c => c.name === '엘프 궁수'));
-            } else {
-                const savedDataString = localStorage.getItem(SAVE_DATA_KEY);
-                if (savedDataString) {
-                    try {
-                        const savedData = JSON.parse(savedDataString);
-                        playerCurrency = savedData.currency ?? 100; // 0도 정상 값으로 인식하도록 수정
-                        // 이름 배열을 기반으로 전체 캐릭터 정보 재구성
-                        playerInventory = (savedData.inventory || []).map(name => characters.find(c => c.name === name)).filter(Boolean);
-                        playerDeck = (savedData.deck || []).map(name => characters.find(c => c.name === name)).filter(Boolean);
-                        inventoryCapacity = savedData.capacity ?? 100; // 0도 정상 값으로 인식하도록 수정
-                        if (savedData.representative) {
-                            representativeCharacter = characters.find(c => c.name === savedData.representative) || null;
+            const dungeons = [
+                { name: '초보자의 숲', monsterName: '슬라임 킹', rewards: { min: 10, max: 20 } },
+                { name: '오크 점령지', monsterName: '오크 대장', rewards: { min: 25, max: 40 } },
+                { name: '용의 둥지', monsterName: '레드 드래곤', rewards: { min: 60, max: 100 } },
+            ];
+
+            const rarityProbabilities = { 'SSR': 3, 'SR': 12, 'R': 35, 'N': 50 };
+            const eventRarityProbabilities = { 'SSR': 6, 'SR': 14, 'R': 30, 'N': 50 };
+            const EVENT_CHARACTER_NAME = '[핏빛 욕조] 서도진';
+            const EVENT_START_DATE = new Date('2025-10-14T00:00:00');
+            const EVENT_END_DATE = new Date('2025-10-24T23:59:59');
+
+            // --- 게임 상태 ---
+            let playerCurrency = 100;
+            let playerInventory = [];
+            let playerDeck = [];
+            let inventoryCapacity = 100;
+            let representativeCharacter = null;
+            let isCombatRunning = false;
+            let combatSpeedMultiplier = 1;
+            const DECK_CAPACITY = 5;
+            const PULL_ONE_COST = 10;
+            const PULL_TEN_COST = 100;
+            const EXPAND_COST = 50;
+            const EXPAND_AMOUNT = 10;
+            const SAVE_DATA_KEY = 'gachaGameSaveData_v6';
+
+            // --- HTML 요소 가져오기 ---
+            const currencyDisplay = document.getElementById('currency-display');
+            const messageArea = document.getElementById('message-area');
+            const allTabs = document.querySelectorAll('.tab-button');
+            const allViews = document.querySelectorAll('main > div:not(#combat-result-modal):not(#card-detail-modal)');
+            const pullOneButton = document.getElementById('pull-one');
+            const pullTenButton = document.getElementById('pull-ten');
+            const pullOneEventButton = document.getElementById('pull-one-event');
+            const pullTenEventButton = document.getElementById('pull-ten-event');
+            const resultsContainer = document.getElementById('results-container');
+            const inventoryContainer = document.getElementById('inventory-container');
+            const inventoryStatus = document.getElementById('inventory-status');
+            const expandInventoryButton = document.getElementById('expand-inventory');
+            const deckStatus = document.getElementById('deck-status');
+            const deckSlotsContainer = document.getElementById('deck-slots-container');
+            const deckInventoryContainer = document.getElementById('deck-inventory-container');
+            const autoFillDeckButton = document.getElementById('auto-fill-deck');
+            const deckPowerDisplay = document.getElementById('deck-power-display');
+            const combatMessageArea = document.getElementById('combat-message-area');
+            const dungeonListContainer = document.getElementById('dungeon-list-container');
+            const homeCharacterContainer = document.getElementById('home-character-container');
+            const homeCharacterImage = document.getElementById('home-character-image');
+            const homeDialogueContainer = document.getElementById('home-dialogue-container');
+            const homeDefaultMessage = document.getElementById('home-default-message');
+            const homeCharacterName = document.getElementById('home-character-name');
+            const homeCharacterDialogue = document.getElementById('home-character-dialogue');
+            const eventBanner = document.getElementById('event-banner');
+            const gachaTabNormal = document.getElementById('gacha-tab-normal');
+            const gachaTabEvent = document.getElementById('gacha-tab-event');
+            const normalGachaView = document.getElementById('normal-gacha-view');
+            const eventGachaView = document.getElementById('event-gacha-view');
+            const resetButton = document.getElementById('reset-game');
+            const storageWarning = document.getElementById('storage-warning');
+            const combatInProgressView = document.getElementById('combat-in-progress-view');
+            const combatPlayerDeck = document.getElementById('combat-player-deck');
+            const combatMonsterArea = document.getElementById('combat-monster-area');
+            const combatLogContainer = document.getElementById('combat-log-container');
+            const combatLog = document.getElementById('combat-log');
+            const combatResultModal = document.getElementById('combat-result-modal');
+            const combatResultTitle = document.getElementById('combat-result-title');
+            const combatResultMessage = document.getElementById('combat-result-message');
+            const closeCombatResultButton = document.getElementById('close-combat-result');
+            const cardDetailModal = document.getElementById('card-detail-modal');
+            const closeCardDetailButton = document.getElementById('close-card-detail');
+            const speed1xButton = document.getElementById('speed-1x');
+            const speed2xButton = document.getElementById('speed-2x');
+            const speed4xButton = document.getElementById('speed-4x');
+
+            
+            // --- 데이터 저장/불러오기 함수 ---
+            function isStorageAvailable() {
+                try {
+                    const key = "__test_localstorage__";
+                    localStorage.setItem(key, key);
+                    localStorage.removeItem(key);
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            }
+
+            function saveGame() {
+                if (!isStorageAvailable()) return;
+                const saveData = {
+                    currency: playerCurrency,
+                    inventory: playerInventory.map(card => card.name),
+                    deck: playerDeck.map(card => card.name),
+                    capacity: inventoryCapacity,
+                    representative: representativeCharacter ? representativeCharacter.name : null,
+                };
+                localStorage.setItem(SAVE_DATA_KEY, JSON.stringify(saveData));
+            }
+
+            function loadGame() {
+                if (!isStorageAvailable()) {
+                    storageWarning.classList.remove('hidden');
+                    resetButton.disabled = true;
+                    playerInventory.push(findCharacter('[소설가] 서도진'));
+                    playerInventory.push(findCharacter('[탐정] 도천영'));
+                } else {
+                    const savedDataString = localStorage.getItem(SAVE_DATA_KEY);
+                    if (savedDataString) {
+                        try {
+                            const savedData = JSON.parse(savedDataString);
+                            playerCurrency = savedData.currency ?? 100;
+                            playerInventory = (savedData.inventory || []).map(name => findCharacter(name)).filter(Boolean);
+                            playerDeck = (savedData.deck || []).map(name => findCharacter(name)).filter(Boolean);
+                            inventoryCapacity = savedData.capacity ?? 100;
+                            if (savedData.representative) {
+                                representativeCharacter = findCharacter(savedData.representative) || null;
+                            }
+                        } catch (e) {
+                            console.error("저장된 데이터 파싱 오류:", e);
+                            playerInventory.push(findCharacter('[소설가] 서도진'));
+                            playerInventory.push(findCharacter('[탐정] 도천영'));
                         }
-                    } catch (e) {
-                         console.error("저장된 데이터 파싱 오류:", e);
-                         // 파싱 실패 시 초기 상태로 시작
-                        playerInventory.push(characters.find(c => c.name === '슬라임'));
-                        playerInventory.push(characters.find(c => c.name === '엘프 궁수'));
+                    } else {
+                        playerInventory.push(findCharacter('[소설가] 서도진'));
+                        playerInventory.push(findCharacter('[탐정] 도천영'));
+                        saveGame();
+                    }
+                }
+                updateUI();
+                checkEventStatus();
+                switchTab('home');
+            }
+
+            function resetGame() {
+                if (!isStorageAvailable()) return;
+                if (resetButton.dataset.confirming === 'true') {
+                    localStorage.removeItem(SAVE_DATA_KEY);
+                    location.reload();
+                } else {
+                    resetButton.textContent = '확인?';
+                    resetButton.dataset.confirming = 'true';
+                    resetButton.classList.remove('bg-red-600', 'hover:bg-red-700');
+                    resetButton.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
+                    setTimeout(() => {
+                        resetButton.textContent = '초기화';
+                        resetButton.dataset.confirming = 'false';
+                        resetButton.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
+                        resetButton.classList.add('bg-red-600', 'hover:bg-red-700');
+                    }, 3000);
+                }
+            }
+
+
+            // --- 핵심 게임 로직 함수 ---
+            function switchTab(tabName) {
+                if (isCombatRunning) return;
+                allViews.forEach(view => view.classList.add('hidden'));
+                allTabs.forEach(tab => tab.classList.remove('active'));
+                document.getElementById(`${tabName}-view`).classList.remove('hidden');
+                document.getElementById(`tab-${tabName}`).classList.add('active');
+                if (tabName === 'home') displayHomeView();
+                else if (tabName === 'inventory') displayInventory(); 
+                else if (tabName === 'deck') displayDeckManagement();
+                else if (tabName === 'combat') displayCombatView();
+            }
+
+            function switchGachaTab(tabName) {
+                if (tabName === 'normal') {
+                    normalGachaView.classList.remove('hidden');
+                    eventGachaView.classList.add('hidden');
+                    gachaTabNormal.classList.add('active');
+                    gachaTabEvent.classList.remove('active');
+                } else {
+                    normalGachaView.classList.add('hidden');
+                    eventGachaView.classList.remove('hidden');
+                    gachaTabNormal.classList.remove('active');
+                    gachaTabEvent.classList.add('active');
+                }
+            }
+
+            function checkEventStatus() {
+                const now = new Date();
+                const isEventActive = now >= EVENT_START_DATE && now <= EVENT_END_DATE;
+                if (isEventActive) {
+                    eventBanner.classList.remove('hidden');
+                    gachaTabEvent.classList.remove('hidden');
+                } else {
+                    eventBanner.classList.add('hidden');
+                    gachaTabEvent.classList.add('hidden');
+                    if(gachaTabEvent.classList.contains('active')) {
+                        switchGachaTab('normal');
+                    }
+                }
+            }
+
+            function displayHomeView(cycleDialogue = false) {
+                if (representativeCharacter) {
+                    homeCharacterContainer.classList.remove('hidden');
+                    homeDialogueContainer.classList.remove('hidden');
+                    homeDefaultMessage.classList.add('hidden');
+                    homeCharacterImage.src = representativeCharacter.imageUrl;
+                    homeCharacterName.textContent = representativeCharacter.name;
+                    if (cycleDialogue) {
+                        const currentDialogue = homeCharacterDialogue.textContent;
+                        let newDialogue;
+                        do {
+                            newDialogue = representativeCharacter.dialogues[Math.floor(Math.random() * representativeCharacter.dialogues.length)];
+                        } while (representativeCharacter.dialogues.length > 1 && newDialogue === currentDialogue);
+                        homeCharacterDialogue.textContent = newDialogue;
+                    } else {
+                         homeCharacterDialogue.textContent = representativeCharacter.dialogues[0];
                     }
                 } else {
-                    // 새로운 게임 시작
-                    playerInventory.push(characters.find(c => c.name === '슬라임'));
-                    playerInventory.push(characters.find(c => c.name === '엘프 궁수'));
-                    saveGame(); // 최초 시작 시 한 번 저장
+                    homeCharacterContainer.classList.add('hidden');
+                    homeDialogueContainer.classList.add('hidden');
+                    homeDefaultMessage.classList.remove('hidden');
                 }
             }
-            updateUI();
-            checkEventStatus();
-            switchTab('home');
-        }
 
-        function resetGame() {
-            if (!isStorageAvailable()) return;
-            if (resetButton.dataset.confirming === 'true') {
-                localStorage.removeItem(SAVE_DATA_KEY);
-                location.reload();
-            } else {
-                resetButton.textContent = '확인?';
-                resetButton.dataset.confirming = 'true';
-                resetButton.classList.remove('bg-red-600', 'hover:bg-red-700');
-                resetButton.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
-                setTimeout(() => {
-                    resetButton.textContent = '초기화';
-                    resetButton.dataset.confirming = 'false';
-                    resetButton.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
-                    resetButton.classList.add('bg-red-600', 'hover:bg-red-700');
-                }, 3000);
+            function setRepresentative(cardName) {
+                const cardData = findCharacter(cardName);
+                if (cardData) {
+                    representativeCharacter = cardData;
+                    showMessage(`${cardData.name}(을)를 대표로 설정했습니다!`, 'text-blue-300', messageArea);
+                    displayInventory();
+                    saveGame();
+                }
             }
-        }
-
-
-        // --- 핵심 게임 로직 함수 ---
-        function switchTab(tabName) {
-            allViews.forEach(view => view.classList.add('hidden'));
-            allTabs.forEach(tab => tab.classList.remove('active'));
-
-            document.getElementById(`${tabName}-view`).classList.remove('hidden');
-            document.getElementById(`tab-${tabName}`).classList.add('active');
-
-            if (tabName === 'home') displayHomeView();
-            else if (tabName === 'inventory') displayInventory(); 
-            else if (tabName === 'deck') displayDeckManagement();
-            else if (tabName === 'combat') displayCombatView();
-        }
-
-        function switchGachaTab(tabName) {
-            if (tabName === 'normal') {
-                normalGachaView.classList.remove('hidden');
-                eventGachaView.classList.add('hidden');
-                gachaTabNormal.classList.add('active');
-                gachaTabEvent.classList.remove('active');
-            } else {
-                normalGachaView.classList.add('hidden');
-                eventGachaView.classList.remove('hidden');
-                gachaTabNormal.classList.remove('active');
-                gachaTabEvent.classList.add('active');
-            }
-        }
-
-        function checkEventStatus() {
-            const now = new Date();
-            const isEventActive = now >= EVENT_START_DATE && now <= EVENT_END_DATE;
             
-            if (isEventActive) {
-                eventBanner.classList.remove('hidden');
-                gachaTabEvent.classList.remove('hidden');
-            } else {
-                eventBanner.classList.add('hidden');
-                gachaTabEvent.classList.add('hidden');
-                if(gachaTabEvent.classList.contains('active')) {
-                    switchGachaTab('normal');
+            function handlePull(count, cost, gachaType = 'normal') {
+                if (playerInventory.length + count > inventoryCapacity) {
+                    showMessage('보관함 공간이 부족합니다!', 'text-yellow-400', messageArea); return;
                 }
-            }
-        }
-
-        function displayHomeView(cycleDialogue = false) {
-            if (representativeCharacter) {
-                homeCharacterContainer.classList.remove('hidden');
-                homeDialogueContainer.classList.remove('hidden');
-                homeDefaultMessage.classList.add('hidden');
-
-                homeCharacterImage.src = representativeCharacter.imageUrl;
-                homeCharacterName.textContent = representativeCharacter.name;
-                
-                if (cycleDialogue) {
-                    const currentDialogue = homeCharacterDialogue.textContent;
-                    let newDialogue;
-                    do {
-                        newDialogue = representativeCharacter.dialogues[Math.floor(Math.random() * representativeCharacter.dialogues.length)];
-                    } while (representativeCharacter.dialogues.length > 1 && newDialogue === currentDialogue);
-                    homeCharacterDialogue.textContent = newDialogue;
+                if (playerCurrency >= cost) {
+                    playerCurrency -= cost;
+                    showMessage(`-💎${cost}`, 'text-red-400', messageArea);
+                    performPulls(count, gachaType);
                 } else {
-                     homeCharacterDialogue.textContent = representativeCharacter.dialogues[0];
+                    showMessage('재화가 부족합니다!', 'text-red-400', messageArea);
+                }
+            }
+            
+            function expandInventory() {
+                if (playerCurrency >= EXPAND_COST) {
+                    playerCurrency -= EXPAND_COST; inventoryCapacity += EXPAND_AMOUNT;
+                    showMessage(`보관함이 ${inventoryCapacity}칸으로 확장되었습니다!`, 'text-green-300', messageArea);
+                    updateUI(); displayInventory(); saveGame();
+                } else {
+                    showMessage('보석이 부족하여 확장할 수 없습니다.', 'text-red-400', messageArea);
+                }
+            }
+
+            function updateUI() {
+                currencyDisplay.textContent = playerCurrency;
+                const buttons = [pullOneButton, pullTenButton, pullOneEventButton, pullTenEventButton];
+                buttons.forEach(btn => {
+                    if (btn.id.includes('ten')) btn.disabled = playerCurrency < PULL_TEN_COST;
+                    else btn.disabled = playerCurrency < PULL_ONE_COST;
+                });
+                expandInventoryButton.disabled = playerCurrency < EXPAND_COST;
+            }
+
+            function showMessage(message, colorClass, element) {
+                element.textContent = message;
+                element.className = `text-center text-lg h-8 mb-4 transition-opacity duration-300 ${colorClass}`;
+                setTimeout(() => { element.textContent = ''; }, 2000);
+            }
+
+            function performPulls(count, gachaType = 'normal') {
+                const results = [];
+                let guaranteedSR = (count === 10);
+                for (let i = 0; i < count; i++) {
+                    let pulledChar;
+                    if (guaranteedSR && i === count - 1 && !results.some(c => c.rarity === 'SR' || c.rarity === 'SSR')) {
+                        pulledChar = pullCharacter(['SR', 'SSR'], gachaType);
+                    } else {
+                        pulledChar = pullCharacter(null, gachaType);
+                    }
+                    results.push(pulledChar);
+                    playerInventory.push(pulledChar); 
+                }
+                displayResults(results); updateUI(); saveGame();
+            }
+
+            function pullCharacter(allowedRarities = null, gachaType = 'normal') {
+                const now = new Date();
+                const isEventActive = now >= EVENT_START_DATE && now <= EVENT_END_DATE;
+                const useEventRates = gachaType === 'event' && isEventActive;
+                const probabilities = useEventRates ? eventRarityProbabilities : rarityProbabilities;
+                
+                let selectedRarity = '';
+                if (allowedRarities) {
+                    const highTierProb = { 'SSR': probabilities['SSR'], 'SR': probabilities['SR'] };
+                    const totalProb = highTierProb.SSR + highTierProb.SR;
+                    selectedRarity = (Math.random() * totalProb < highTierProb.SSR) ? 'SSR' : 'SR';
+                } else {
+                    const rand = Math.random() * 100; let cumulativeProb = 0;
+                    for (const rarity in probabilities) {
+                        cumulativeProb += probabilities[rarity];
+                        if (rand < cumulativeProb) { selectedRarity = rarity; break; }
+                    }
                 }
 
-            } else {
-                homeCharacterContainer.classList.add('hidden');
-                homeDialogueContainer.classList.add('hidden');
-                homeDefaultMessage.classList.remove('hidden');
-            }
-        }
+                if (useEventRates && (selectedRarity === 'SSR' || selectedRarity === 'SR')) {
+                    if (Math.random() < 0.5) { // 50% chance for event character
+                        return characters.find(c => c.name === EVENT_CHARACTER_NAME);
+                    } else {
+                        const otherChars = characters.filter(c => c.rarity === selectedRarity && c.name !== EVENT_CHARACTER_NAME);
+                        if (otherChars.length > 0) return otherChars[Math.floor(Math.random() * otherChars.length)];
+                        return characters.find(c => c.name === EVENT_CHARACTER_NAME); // Fallback
+                    }
+                }
 
-        function setRepresentative(cardName) {
-            const cardData = characters.find(c => c.name === cardName);
-            if (cardData) {
-                representativeCharacter = cardData;
-                showMessage(`${cardData.name}(을)를 대표로 설정했습니다!`, 'text-blue-300', messageArea);
-                displayInventory(); // Re-render inventory to update button state
+                const possibleCharacters = characters.filter(char => char.rarity === selectedRarity);
+                return possibleCharacters[Math.floor(Math.random() * possibleCharacters.length)];
+            }
+
+            function displayResults(pulledCharacters) {
+                resultsContainer.innerHTML = '';
+                pulledCharacters.forEach((character, index) => {
+                    resultsContainer.appendChild(createCard(character, { animationIndex: index }));
+                });
+            }
+            
+            function getUniqueInventory() {
+                const cardCounts = playerInventory.reduce((acc, card) => {
+                    if (card && card.name) {
+                        if (!acc[card.name]) { acc[card.name] = { ...card, count: 0 }; }
+                        acc[card.name].count++;
+                    }
+                    return acc;
+                }, {});
+                const rarityOrder = { 'SSR': 4, 'SR': 3, 'R': 2, 'N': 1 };
+                return Object.values(cardCounts).sort((a, b) => (rarityOrder[b.rarity] - rarityOrder[a.rarity]) || a.name.localeCompare(b.name));
+            }
+
+            function displayInventory() {
+                inventoryStatus.textContent = `${playerInventory.length} / ${inventoryCapacity}`;
+                inventoryContainer.innerHTML = '';
+                const uniqueCards = getUniqueInventory();
+                if (uniqueCards.length === 0) {
+                    inventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">아직 수집한 동료가 없습니다.</p>`; return;
+                }
+                uniqueCards.forEach((character, index) => {
+                    inventoryContainer.appendChild(createCard(character, { animationIndex: index, isInventory: true }));
+                });
+            }
+
+            function displayDeckManagement() {
+                deckStatus.textContent = `현재 덱: ${playerDeck.length} / ${DECK_CAPACITY}`;
+                deckStatus.classList.toggle('text-green-400', playerDeck.length === DECK_CAPACITY);
+                deckSlotsContainer.innerHTML = '';
+                for (let i = 0; i < DECK_CAPACITY; i++) {
+                    if (playerDeck[i]) {
+                        deckSlotsContainer.appendChild(createCard(playerDeck[i], { isDeckSlot: true }));
+                    } else {
+                        const emptySlot = document.createElement('div');
+                        emptySlot.className = 'deck-slot rounded-lg'; emptySlot.textContent = '비어있음';
+                        deckSlotsContainer.appendChild(emptySlot);
+                    }
+                }
+                deckInventoryContainer.innerHTML = '';
+                const uniqueCards = getUniqueInventory();
+                 if (uniqueCards.length === 0) {
+                    deckInventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">덱에 추가할 카드가 없습니다.</p>`; return;
+                }
+                uniqueCards.forEach((character, index) => {
+                    const isCardInDeck = playerDeck.some(deckCard => deckCard.name === character.name);
+                    const isDeckFull = playerDeck.length >= DECK_CAPACITY;
+                    deckInventoryContainer.appendChild(createCard(character, { animationIndex: index, isDeckBuilder: true, isCardInDeck, isDeckFull }));
+                });
+            }
+            
+            function autoFillDeck() {
+                const uniqueCards = getUniqueInventory();
+                const sortedByPower = uniqueCards.sort((a, b) => (b.stats.atk + b.stats.def) - (a.stats.atk + a.stats.def));
+                playerDeck = sortedByPower.slice(0, DECK_CAPACITY);
+                displayDeckManagement();
+                showMessage('가장 강력한 카드로 덱을 자동 편성했습니다!', 'text-blue-300', messageArea);
                 saveGame();
             }
-        }
-        
-        function handlePull(count, cost, gachaType = 'normal') {
-            if (playerInventory.length + count > inventoryCapacity) {
-                showMessage('보관함 공간이 부족합니다!', 'text-yellow-400', messageArea); return;
-            }
-            if (playerCurrency >= cost) {
-                playerCurrency -= cost;
-                showMessage(`-💎${cost}`, 'text-red-400', messageArea);
-                performPulls(count, gachaType);
-            } else {
-                showMessage('재화가 부족합니다!', 'text-red-400', messageArea);
-            }
-        }
-        
-        function expandInventory() {
-            if (playerCurrency >= EXPAND_COST) {
-                playerCurrency -= EXPAND_COST; inventoryCapacity += EXPAND_AMOUNT;
-                showMessage(`보관함이 ${inventoryCapacity}칸으로 확장되었습니다!`, 'text-green-300', messageArea);
-                updateUI(); displayInventory(); saveGame();
-            } else {
-                showMessage('보석이 부족하여 확장할 수 없습니다.', 'text-red-400', messageArea);
-            }
-        }
 
-        function updateUI() {
-            currencyDisplay.textContent = playerCurrency;
-            const buttons = [pullOneButton, pullTenButton, pullOneEventButton, pullTenEventButton];
-            buttons.forEach(btn => {
-                if (btn.id.includes('ten')) btn.disabled = playerCurrency < PULL_TEN_COST;
-                else btn.disabled = playerCurrency < PULL_ONE_COST;
-            });
-            expandInventoryButton.disabled = playerCurrency < EXPAND_COST;
-        }
-
-        function showMessage(message, colorClass, element) {
-            element.textContent = message;
-            element.className = `text-center text-lg h-8 mb-4 transition-opacity duration-300 ${colorClass}`;
-            setTimeout(() => { element.textContent = ''; }, 2000);
-        }
-
-        function performPulls(count, gachaType = 'normal') {
-            const results = [];
-            let guaranteedSR = (count === 10);
-            for (let i = 0; i < count; i++) {
-                let pulledChar;
-                if (guaranteedSR && i === count - 1 && !results.some(c => c.rarity === 'SR' || c.rarity === 'SSR')) {
-                    pulledChar = pullCharacter(['SR', 'SSR'], gachaType);
-                } else {
-                    pulledChar = pullCharacter(null, gachaType);
-                }
-                results.push(pulledChar);
-                playerInventory.push(pulledChar); 
+            function addToDeck(cardName) {
+                if (playerDeck.length >= DECK_CAPACITY || playerDeck.some(card => card.name === cardName)) return;
+                const cardToAdd = findCharacter(cardName);
+                if (cardToAdd) { playerDeck.push(cardToAdd); displayDeckManagement(); saveGame(); }
             }
-            displayResults(results); updateUI(); saveGame();
-        }
-
-        function pullCharacter(allowedRarities = null, gachaType = 'normal') {
-            const now = new Date();
-            const isEventActive = now >= EVENT_START_DATE && now <= EVENT_END_DATE;
-            const useEventRates = gachaType === 'event' && isEventActive;
-            const probabilities = useEventRates ? eventRarityProbabilities : rarityProbabilities;
             
-            let selectedRarity = '';
-            if (allowedRarities) {
-                const highTierProb = { 'SSR': probabilities['SSR'], 'SR': probabilities['SR'] };
-                const totalProb = highTierProb.SSR + highTierProb.SR;
-                selectedRarity = (Math.random() * totalProb < highTierProb.SSR) ? 'SSR' : 'SR';
-            } else {
-                const rand = Math.random() * 100; let cumulativeProb = 0;
-                for (const rarity in probabilities) {
-                    cumulativeProb += probabilities[rarity];
-                    if (rand < cumulativeProb) { selectedRarity = rarity; break; }
+            function removeFromDeck(cardName) {
+                const indexToRemove = playerDeck.findIndex(card => card.name === cardName);
+                if(indexToRemove > -1) {
+                    playerDeck.splice(indexToRemove, 1);
                 }
+                displayDeckManagement();
+                saveGame();
+            }
+            
+            function calculateDeckPower() {
+                return playerDeck.reduce((total, card) => total + (card.stats.atk + card.stats.def + Math.floor(card.stats.hp / 10)), 0);
             }
 
-            if (useEventRates && selectedRarity === 'SSR') {
-                if (Math.random() < 0.5) { // 50% chance for event character
-                    return characters.find(c => c.name === EVENT_CHARACTER_NAME);
-                } else {
-                    const otherSSRs = characters.filter(c => c.rarity === 'SSR' && c.name !== EVENT_CHARACTER_NAME);
-                    if (otherSSRs.length > 0) return otherSSRs[Math.floor(Math.random() * otherSSRs.length)];
-                    return characters.find(c => c.name === EVENT_CHARACTER_NAME); // Fallback
+            function displayCombatView() {
+                deckPowerDisplay.textContent = calculateDeckPower();
+                dungeonListContainer.innerHTML = '';
+                dungeons.forEach((dungeon, index) => {
+                    const monster = monsters[dungeon.monsterName];
+                    const recommendedPower = monster.stats.atk*5 + monster.stats.def*5 + Math.floor(monster.stats.hp / 5);
+                    const dungeonEl = document.createElement('div');
+                    dungeonEl.className = 'bg-black/20 p-4 rounded-lg text-center';
+                    dungeonEl.innerHTML = `
+                        <h3 class="text-xl font-bold text-yellow-300">${dungeon.name}</h3>
+                        <p class="text-gray-300">권장 전투력: ${recommendedPower}</p>
+                        <p class="text-gray-300">예상 보상: 💎${dungeon.rewards.min} ~ ${dungeon.rewards.max}</p>
+                        <button data-action="challenge-dungeon" data-dungeon-index="${index}" class="gacha-button bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-full mt-4">도전</button>
+                    `;
+                    dungeonListContainer.appendChild(dungeonEl);
+                });
+            }
+            
+            function challengeDungeon(dungeonIndex) {
+                if (playerDeck.length < DECK_CAPACITY) {
+                    showMessage('덱을 5장으로 모두 채워야 합니다!', 'text-yellow-400', document.getElementById('combat-message-area') || messageArea);
+                    return;
                 }
+                startCombat(dungeonIndex);
             }
 
-            const possibleCharacters = characters.filter(char => char.rarity === selectedRarity);
-            return possibleCharacters[Math.floor(Math.random() * possibleCharacters.length)];
-        }
-
-        function displayResults(pulledCharacters) {
-            resultsContainer.innerHTML = '';
-            pulledCharacters.forEach((character, index) => {
-                resultsContainer.appendChild(createCard(character, { animationIndex: index }));
-            });
-        }
-        
-        function getUniqueInventory() {
-            const cardCounts = playerInventory.reduce((acc, card) => {
-                if (card && card.name) {
-                    if (!acc[card.name]) { acc[card.name] = { ...card, count: 0 }; }
-                    acc[card.name].count++;
-                }
-                return acc;
-            }, {});
-            const rarityOrder = { 'SSR': 4, 'SR': 3, 'R': 2, 'N': 1 };
-            return Object.values(cardCounts).sort((a, b) => (rarityOrder[b.rarity] - rarityOrder[a.rarity]) || a.name.localeCompare(b.name));
-        }
-
-        function displayInventory() {
-            inventoryStatus.textContent = `${playerInventory.length} / ${inventoryCapacity}`;
-            inventoryContainer.innerHTML = '';
-            const uniqueCards = getUniqueInventory();
-            if (uniqueCards.length === 0) {
-                inventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">아직 수집한 동료가 없습니다.</p>`; return;
+            function setCombatSpeed(speed) {
+                combatSpeedMultiplier = speed;
+                const allSpeedButtons = document.querySelectorAll('.speed-button');
+                allSpeedButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.classList.add('bg-gray-600');
+                    btn.classList.remove('bg-blue-500');
+                });
+                document.getElementById(`speed-${speed}x`).classList.add('active', 'bg-blue-500');
+                document.getElementById(`speed-${speed}x`).classList.remove('bg-gray-600');
             }
-            uniqueCards.forEach((character, index) => {
-                inventoryContainer.appendChild(createCard(character, { animationIndex: index, isInventory: true }));
-            });
-        }
 
-        function displayDeckManagement() {
-            deckStatus.textContent = `현재 덱: ${playerDeck.length} / ${DECK_CAPACITY}`;
-            deckStatus.classList.toggle('text-green-400', playerDeck.length === DECK_CAPACITY);
-            deckSlotsContainer.innerHTML = '';
-            for (let i = 0; i < DECK_CAPACITY; i++) {
-                if (playerDeck[i]) {
-                    deckSlotsContainer.appendChild(createCard(playerDeck[i], { isDeckSlot: true }));
-                } else {
-                    const emptySlot = document.createElement('div');
-                    emptySlot.className = 'deck-slot rounded-lg'; emptySlot.textContent = '비어있음';
-                    deckSlotsContainer.appendChild(emptySlot);
-                }
-            }
-            deckInventoryContainer.innerHTML = '';
-            const uniqueCards = getUniqueInventory();
-             if (uniqueCards.length === 0) {
-                deckInventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">덱에 추가할 카드가 없습니다.</p>`; return;
-            }
-            uniqueCards.forEach((character, index) => {
-                const isCardInDeck = playerDeck.some(deckCard => deckCard.name === character.name);
-                const isDeckFull = playerDeck.length >= DECK_CAPACITY;
-                deckInventoryContainer.appendChild(createCard(character, { animationIndex: index, isDeckBuilder: true, isCardInDeck, isDeckFull }));
-            });
-        }
-        
-        function autoFillDeck() {
-            const uniqueCards = getUniqueInventory();
-            const sortedByPower = uniqueCards.sort((a, b) => b.power - a.power);
-            playerDeck = sortedByPower.slice(0, DECK_CAPACITY);
-            displayDeckManagement();
-            showMessage('가장 강력한 카드로 덱을 자동 편성했습니다!', 'text-blue-300', messageArea);
-            saveGame();
-        }
+            async function startCombat(dungeonIndex) {
+                isCombatRunning = true;
+                setCombatSpeed(1); // 전투 시작 시 1배속으로 초기화
+                const dungeon = dungeons[dungeonIndex];
+                const monsterData = JSON.parse(JSON.stringify(monsters[dungeon.monsterName]));
+                const combatDeck = JSON.parse(JSON.stringify(playerDeck));
 
-        function addToDeck(cardName) {
-            if (playerDeck.length >= DECK_CAPACITY || playerDeck.some(card => card.name === cardName)) return;
-            const cardToAdd = characters.find(card => card.name === cardName);
-            if (cardToAdd) { playerDeck.push(cardToAdd); displayDeckManagement(); saveGame(); }
-        }
-        
-        function removeFromDeck(cardName) {
-            playerDeck = playerDeck.filter(card => card.name !== cardName);
-            displayDeckManagement();
-            saveGame();
-        }
-        
-        function calculateDeckPower() {
-            return playerDeck.reduce((total, card) => total + (card.power || 0), 0);
-        }
+                allViews.forEach(view => view.classList.add('hidden'));
+                combatInProgressView.classList.remove('hidden');
+                combatLog.innerHTML = '';
+                combatPlayerDeck.innerHTML = '';
+                combatDeck.forEach((card, index) => {
+                    const cardEl = document.createElement('div');
+                    cardEl.className = 'bg-gray-700 p-2 rounded';
+                    cardEl.innerHTML = `
+                        <p class="font-bold text-sm truncate">${card.name}</p>
+                        <div class="hp-bar-background rounded-full h-2.5 mt-1">
+                            <div id="player-hp-bar-${index}" class="hp-bar-foreground h-2.5 rounded-full" style="width: 100%"></div>
+                        </div>
+                        <p id="player-hp-text-${index}" class="text-xs text-center mt-0.5">${card.stats.hp} / ${card.stats.hp}</p>
+                    `;
+                    combatPlayerDeck.appendChild(cardEl);
+                });
 
-        function displayCombatView() {
-            deckPowerDisplay.textContent = calculateDeckPower();
-            dungeonListContainer.innerHTML = '';
-            dungeons.forEach((dungeon, index) => {
-                const dungeonEl = document.createElement('div');
-                dungeonEl.className = 'bg-black/20 p-4 rounded-lg text-center';
-                dungeonEl.innerHTML = `
-                    <h3 class="text-xl font-bold text-yellow-300">${dungeon.name}</h3>
-                    <p class="text-gray-300">권장 전투력: ${dungeon.recommendedPower}</p>
-                    <p class="text-gray-300">예상 보상: 💎${dungeon.rewards.min} ~ ${dungeon.rewards.max}</p>
-                    <button data-action="challenge-dungeon" data-dungeon-index="${index}" class="gacha-button bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-full mt-4">도전</button>
+                combatMonsterArea.innerHTML = `
+                    <h3 class="text-2xl font-bold">${monsterData.name}</h3>
+                    <img id="combat-monster-image" src="${monsterData.imageUrl}" alt="${monsterData.name}" class="my-4 h-48 w-48 object-contain">
+                    <div class="w-full hp-bar-background rounded-full h-4">
+                        <div id="monster-hp-bar" class="hp-bar-foreground h-4 rounded-full" style="width: 100%"></div>
+                    </div>
+                    <p id="monster-hp-text" class="text-sm mt-1">${monsterData.stats.hp} / ${monsterData.stats.hp}</p>
                 `;
-                dungeonListContainer.appendChild(dungeonEl);
-            });
-        }
-        
-        function challengeDungeon(dungeonIndex) {
-            if (playerDeck.length < DECK_CAPACITY) {
-                showMessage('덱을 5장으로 모두 채워야 합니다!', 'text-yellow-400', combatMessageArea);
-                return;
+                
+                await runCombatLoop(combatDeck, monsterData, dungeon);
+            }
+
+            const delay = ms => new Promise(res => setTimeout(res, ms / combatSpeedMultiplier));
+
+            async function runCombatLoop(combatDeck, monsterData, dungeon) {
+                const originalMonsterDef = monsterData.stats.def;
+
+                while (monsterData.stats.hp > 0 && combatDeck.some(c => c.stats.hp > 0)) {
+                    for (let i = 0; i < combatDeck.length; i++) {
+                        const card = combatDeck[i];
+                        if (card.stats.hp > 0) {
+                            await delay(800);
+                            const monsterImage = document.getElementById('combat-monster-image');
+                            
+                            const useUltimate = card.rarity === 'SSR' && Math.random() < 0.25;
+                            const useSkill = Math.random() < 0.4;
+                            let skillToUse = null;
+
+                            if (useUltimate && card.skills.length > 1) skillToUse = card.skills[1];
+                            else if (useSkill) skillToUse = card.skills[0];
+
+                            let damage = 0;
+                            if (skillToUse) {
+                                logCombat(`<strong>${card.name}</strong>의 스킬! <span class="text-yellow-300">"${skillToUse.name}"</span>`);
+                                await delay(400);
+                                logCombat(`<em>"${skillToUse.dialogue}"</em>`);
+                                
+                                damage = Math.max(1, Math.floor(card.stats.atk * skillToUse.power) - monsterData.stats.def);
+                                
+                                if (skillToUse.type === 'vampire') {
+                                    const healedAmount = Math.floor(damage * 0.5);
+                                    const originalCardData = playerDeck[i];
+                                    card.stats.hp = Math.min(originalCardData.stats.hp, card.stats.hp + healedAmount);
+                                    logCombat(`<strong>${card.name}</strong>이(가) ${healedAmount}의 체력을 회복했다!`);
+                                }
+                                if (skillToUse.type === 'debuff_def') {
+                                    monsterData.stats.def = Math.max(0, Math.floor(monsterData.stats.def * 0.8));
+                                    logCombat(`<strong>${monsterData.name}</strong>의 방어력이 감소했다!`);
+                                }
+
+                            } else {
+                                logCombat(`<strong>${card.name}</strong>의 일반 공격!`);
+                                damage = Math.max(1, card.stats.atk - monsterData.stats.def);
+                            }
+                            
+                            monsterData.stats.hp = Math.max(0, monsterData.stats.hp - damage);
+                            logCombat(`<strong>${monsterData.name}</strong>에게 ${damage}의 데미지!`);
+                            monsterImage.classList.add('shake-animation');
+                            updateCombatUI(combatDeck, monsterData);
+                            setTimeout(() => monsterImage.classList.remove('shake-animation'), 300 / combatSpeedMultiplier);
+
+                            if (monsterData.stats.hp <= 0) break;
+                        }
+                    }
+                    if (monsterData.stats.hp <= 0) break;
+
+                    await delay(1000);
+                    const alivePlayers = combatDeck.filter(c => c.stats.hp > 0);
+                    if (alivePlayers.length > 0) {
+                        const targetCard = alivePlayers[Math.floor(Math.random() * alivePlayers.length)];
+                        logCombat(`<strong>${monsterData.name}</strong>의 공격!`);
+                        const damage = Math.max(1, monsterData.stats.atk - targetCard.stats.def);
+                        const hpBeforeAttack = targetCard.stats.hp;
+                        targetCard.stats.hp = Math.max(0, targetCard.stats.hp - damage);
+                        logCombat(`<strong>${targetCard.name}</strong>에게 ${damage}의 데미지!`);
+                        
+                        if (targetCard.stats.hp <= 0 && hpBeforeAttack > 0) {
+                            await delay(400);
+                            logCombat(`<strong>${targetCard.name}</strong>: <em>"${targetCard.deathDialogue}"</em>`);
+                        }
+
+                        updateCombatUI(combatDeck, monsterData);
+                    }
+                }
+                
+                await delay(1000);
+                monsterData.stats.def = originalMonsterDef;
+                endCombat(monsterData.stats.hp <= 0, dungeon);
+            }
+
+            function logCombat(message) {
+                combatLog.innerHTML += `<p>${message}</p>`;
+                combatLogContainer.scrollTop = combatLogContainer.scrollHeight;
+            }
+
+            function updateCombatUI(deck, monster) {
+                deck.forEach((card, index) => {
+                    const originalCard = playerDeck.find(c => c.name === card.name);
+                    if(!originalCard) return;
+                    const maxHp = originalCard.stats.hp;
+                    const currentHp = card.stats.hp;
+                    const hpPercent = (currentHp / maxHp) * 100;
+                    document.getElementById(`player-hp-bar-${index}`).style.width = `${hpPercent}%`;
+                    document.getElementById(`player-hp-text-${index}`).textContent = `${currentHp} / ${maxHp}`;
+                });
+
+                const monsterMaxHp = monsters[monster.name].stats.hp;
+                const monsterHpPercent = (monster.stats.hp / monsterMaxHp) * 100;
+                document.getElementById('monster-hp-bar').style.width = `${monsterHpPercent}%`;
+                document.getElementById('monster-hp-text').textContent = `${monster.stats.hp} / ${monsterMaxHp}`;
             }
             
-            const dungeon = dungeons[dungeonIndex];
-            const deckPower = calculateDeckPower();
-            
-            if (deckPower < dungeon.recommendedPower) {
-                if (Math.random() < 0.3) {
-                    const earnedReward = dungeon.rewards.min;
+            function endCombat(isVictory, dungeon) {
+                if (isVictory) {
+                    const earnedReward = dungeon.rewards.min + Math.floor(Math.random() * (dungeon.rewards.max - dungeon.rewards.min + 1));
                     playerCurrency += earnedReward;
-                    showMessage(`기적! 약세를 극복하고 승리! 💎${earnedReward} 획득!`, 'text-green-300', combatMessageArea);
+                    combatResultTitle.textContent = "승리!";
+                    combatResultTitle.className = "text-4xl font-bold mb-4 text-green-400";
+                    combatResultMessage.textContent = `던전 클리어! 💎${earnedReward}를 획득했습니다.`;
                 } else {
                     const penalty = dungeon.rewards.min;
                     playerCurrency = Math.max(0, playerCurrency - penalty);
-                    showMessage(`전투 패배... 💎${penalty}를 잃었습니다.`, 'text-red-400', combatMessageArea);
+                    combatResultTitle.textContent = "패배...";
+                    combatResultTitle.className = "text-4xl font-bold mb-4 text-red-400";
+                    combatResultMessage.textContent = `전투에서 패배했습니다... 💎${penalty}를 잃었습니다.`;
                 }
-            } else {
-                let powerRatio = Math.min(deckPower / dungeon.recommendedPower, 1.5);
-                let rewardRange = dungeon.rewards.max - dungeon.rewards.min;
-                let earnedReward = dungeon.rewards.min + Math.floor(rewardRange * powerRatio * Math.random());
-                earnedReward = Math.min(earnedReward, dungeon.rewards.max * 2);
-
-                playerCurrency += earnedReward;
-                showMessage(`탐험 성공! 💎${earnedReward} 획득!`, 'text-green-300', combatMessageArea);
+                
+                updateUI();
+                saveGame();
+                combatResultModal.classList.remove('hidden');
+                isCombatRunning = false;
             }
-            updateUI();
-            saveGame();
-        }
 
-        function createCard(character, options = {}) {
-            const { animationIndex, isDeckSlot, isDeckBuilder, isInventory, isCardInDeck, isDeckFull } = options;
-            const card = document.createElement('div');
-            card.className = `rarity-${character.rarity} relative text-center rounded-lg shadow-md p-2 transform transition-transform duration-300 hover:scale-105`;
-            const rarityColor = { 'N': 'text-gray-600', 'R': 'text-blue-800', 'SR': 'text-white', 'SSR': 'text-black' }[character.rarity];
+            function createCard(character, options = {}) {
+                const { animationIndex, isDeckSlot, isDeckBuilder, isInventory, isCardInDeck, isDeckFull } = options;
+                const card = document.createElement('div');
+                card.className = `rarity-${character.rarity} relative text-center rounded-lg shadow-md p-2 transform transition-transform duration-300 hover:scale-105 cursor-pointer`;
+                card.dataset.cardName = character.name;
+                card.title = character.name;
+                const rarityColor = { 'N': 'text-gray-600', 'R': 'text-blue-800', 'SR': 'text-white', 'SSR': 'text-black' }[character.rarity];
+                const factionColors = {
+                    '탐정': 'bg-blue-500 text-white',
+                    '조수': 'bg-green-500 text-white',
+                    '범인': 'bg-red-500 text-white'
+                };
+                
+                let badgeHTML = character.count > 1 ? `<div class="count-badge">x${character.count}</div>` : '';
+                if(isDeckSlot) badgeHTML = '';
+
+                let actionButtonsHTML = '';
+                if (isDeckBuilder) {
+                    const disabled = isDeckFull || isCardInDeck;
+                    const buttonText = isCardInDeck ? '추가됨' : '추가';
+                    const buttonColor = disabled ? 'bg-gray-500' : 'bg-green-500 hover:bg-green-600';
+                    actionButtonsHTML = `<button data-action="add-to-deck" data-card-name="${character.name}" class="w-full mt-2 py-1 rounded-md text-white font-bold text-sm ${buttonColor}" ${disabled ? 'disabled' : ''}>${buttonText}</button>`;
+                } else if (isInventory) {
+                    const isRepresentative = representativeCharacter && representativeCharacter.name === character.name;
+                    const repButtonText = isRepresentative ? '대표' : '대표 설정';
+                    const repButtonColor = isRepresentative ? 'bg-yellow-500' : 'bg-gray-600 hover:bg-gray-700';
+                    actionButtonsHTML = `<button data-action="set-representative" data-card-name="${character.name}" class="w-full mt-2 py-1 rounded-md text-white font-bold text-sm ${repButtonColor}" ${isRepresentative ? 'disabled' : ''}>${repButtonText}</button>`;
+                }
+                
+                let deckSlotButton = '';
+                if(isDeckSlot) {
+                    deckSlotButton = `<button data-action="remove-from-deck" data-card-name="${character.name}" class="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 text-sm font-bold flex items-center justify-center z-10">X</button>`;
+                }
+
+                const factionBadge = `<span class="absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full ${factionColors[character.faction]} z-10">${character.faction}</span>`;
+
+                card.innerHTML = `
+                    ${badgeHTML} ${deckSlotButton} ${factionBadge}
+                    <div class="relative pointer-events-none">
+                        <img src="${character.cardImageUrl}" alt="${character.name}" class="w-full h-auto rounded-md mb-2 border-2 border-white/50">
+                        <p class="font-bold text-sm ${rarityColor} truncate">${character.name}</p>
+                        <p class="font-black text-lg ${rarityColor}" style="text-shadow: 1px 1px 2px rgba(255,255,255,0.5);">${character.rarity}</p>
+                    </div>
+                     ${actionButtonsHTML}
+                `;
+                if (typeof animationIndex === 'number') {
+                    card.style.opacity = '0';
+                    card.style.animationDelay = `${animationIndex * 0.05}s`;
+                    card.classList.add('card-animation');
+                }
+                if(isDeckBuilder && isCardInDeck) {
+                    card.classList.add('opacity-50');
+                }
+                return card;
+            }
+
+            function getSkillDescription(skill) {
+                switch(skill.type) {
+                    case 'damage': return `공격력의 ${skill.power * 100}% 만큼 피해를 줍니다.`;
+                    case 'debuff_def': return `적의 방어력을 일시적으로 감소시킵니다.`;
+                    case 'vampire': return `가한 피해의 50% 만큼 체력을 회복합니다.`;
+                    default: return '특별한 효과를 가진 스킬입니다.';
+                }
+            }
+
+            function showCardDetails(cardName) {
+                const character = findCharacter(cardName);
+                if (!character) return;
+
+                document.getElementById('detail-card-image').src = character.imageUrl;
+                document.getElementById('detail-card-name').textContent = character.name;
+                const rarityEl = document.getElementById('detail-card-rarity');
+                rarityEl.textContent = character.rarity;
+                const rarityColor = { 'N': 'text-gray-400', 'R': 'text-blue-400', 'SR': 'text-purple-400', 'SSR': 'text-yellow-400' }[character.rarity];
+                rarityEl.className = `font-bold text-2xl ${rarityColor}`;
+
+                const factionEl = document.getElementById('detail-card-faction');
+                factionEl.textContent = character.faction;
+                const factionColors = {
+                    '탐정': 'bg-blue-500 text-white',
+                    '조수': 'bg-green-500 text-white',
+                    '범인': 'bg-red-500 text-white'
+                };
+                factionEl.className = `font-bold text-lg px-3 py-1 rounded-full ${factionColors[character.faction]}`;
+
+
+                document.getElementById('detail-stat-hp').textContent = character.stats.hp;
+                document.getElementById('detail-stat-atk').textContent = character.stats.atk;
+                document.getElementById('detail-stat-def').textContent = character.stats.def;
+
+                const skillsContainer = document.getElementById('detail-skills-container');
+                skillsContainer.innerHTML = '';
+                character.skills.forEach((skill, index) => {
+                    const isUltimate = character.rarity === 'SSR' && index === 1;
+                    const skillEl = document.createElement('div');
+                    skillEl.className = 'bg-black/20 p-3 rounded-lg';
+                    skillEl.innerHTML = `
+                        <h4 class="font-bold ${isUltimate ? 'text-yellow-300' : 'text-white'}">${isUltimate ? '궁극기' : '일반 스킬'}: ${skill.name}</h4>
+                        <p class="text-gray-300 italic">"${skill.dialogue}"</p>
+                        <p class="text-sm mt-1">${getSkillDescription(skill)}</p>
+                    `;
+                    skillsContainer.appendChild(skillEl);
+                });
+                cardDetailModal.classList.remove('hidden');
+            }
+
+            function hideCardDetails() {
+                cardDetailModal.classList.add('hidden');
+            }
             
-            let badgeHTML = character.count > 1 ? `<div class="count-badge">x${character.count}</div>` : '';
-            if(isDeckSlot) badgeHTML = '';
-
-            let actionButtonsHTML = '';
-            if (isDeckBuilder) {
-                const disabled = isDeckFull || isCardInDeck;
-                const buttonText = isCardInDeck ? '추가됨' : '추가';
-                const buttonColor = disabled ? 'bg-gray-500' : 'bg-green-500 hover:bg-green-600';
-                actionButtonsHTML = `<button data-action="add-to-deck" data-card-name="${character.name}" class="w-full mt-2 py-1 rounded-md text-white font-bold text-sm ${buttonColor}" ${disabled ? 'disabled' : ''}>${buttonText}</button>`;
-            } else if (isInventory) {
-                 const isRepresentative = representativeCharacter && representativeCharacter.name === character.name;
-                 const repButtonText = isRepresentative ? '대표' : '대표 설정';
-                 const repButtonColor = isRepresentative ? 'bg-yellow-500' : 'bg-gray-600 hover:bg-gray-700';
-                 actionButtonsHTML = `<button data-action="set-representative" data-card-name="${character.name}" class="w-full mt-2 py-1 rounded-md text-white font-bold text-sm ${repButtonColor}" ${isRepresentative ? 'disabled' : ''}>${repButtonText}</button>`;
+            function findCharacter(name) {
+                return characters.find(c => c.name === name);
             }
             
-            let deckSlotButton = '';
-            if(isDeckSlot) {
-                 deckSlotButton = `<button data-action="remove-from-deck" data-card-name="${character.name}" class="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 text-sm font-bold flex items-center justify-center z-10">X</button>`;
-            }
+            // --- 이벤트 리스너 ---
+            allTabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.id.split('-')[1])));
+            pullOneButton.addEventListener('click', () => handlePull(1, PULL_ONE_COST, 'normal'));
+            pullTenButton.addEventListener('click', () => handlePull(10, PULL_TEN_COST, 'normal'));
+            pullOneEventButton.addEventListener('click', () => handlePull(1, PULL_ONE_COST, 'event'));
+            pullTenEventButton.addEventListener('click', () => handlePull(10, PULL_TEN_COST, 'event'));
+            expandInventoryButton.addEventListener('click', expandInventory);
+            autoFillDeckButton.addEventListener('click', autoFillDeck);
+            gachaTabNormal.addEventListener('click', () => switchGachaTab('normal'));
+            gachaTabEvent.addEventListener('click', () => switchGachaTab('event'));
+            
+            const cardContainers = [inventoryContainer, deckInventoryContainer, deckSlotsContainer];
+            cardContainers.forEach(container => {
+                container.addEventListener('click', (e) => {
+                    const actionButton = e.target.closest('[data-action]');
+                    if (actionButton) {
+                        const action = actionButton.dataset.action;
+                        const cardName = actionButton.dataset.cardName;
+                        if (action === 'set-representative') setRepresentative(cardName);
+                        else if (action === 'add-to-deck') addToDeck(cardName);
+                        else if (action === 'remove-from-deck') removeFromDeck(cardName);
+                    } else {
+                        const cardElement = e.target.closest('[data-card-name]');
+                        if (cardElement) showCardDetails(cardElement.dataset.cardName);
+                    }
+                });
+            });
 
+            dungeonListContainer.addEventListener('click', (e) => { if (e.target.dataset.action === 'challenge-dungeon') challengeDungeon(parseInt(e.target.dataset.dungeonIndex)); });
+            homeCharacterContainer.addEventListener('click', () => { if (representativeCharacter) displayHomeView(true); });
+            eventBanner.addEventListener('click', () => {
+                showMessage(`[${EVENT_CHARACTER_NAME}] 확률 UP 이벤트 진행 중!`, 'text-blue-300', messageArea);
+                switchTab('gacha');
+            });
+            resetButton.addEventListener('click', resetGame);
+            closeCombatResultButton.addEventListener('click', () => {
+                combatResultModal.classList.add('hidden');
+                combatInProgressView.classList.add('hidden');
+                switchTab('combat');
+            });
+            closeCardDetailButton.addEventListener('click', hideCardDetails);
+            cardDetailModal.addEventListener('click', (e) => {
+                if (e.target === cardDetailModal) hideCardDetails();
+            });
 
-            card.innerHTML = `
-                ${badgeHTML} ${deckSlotButton}
-                <div class="relative pointer-events-none">
-                    <img src="${character.cardImageUrl}" alt="${character.name}" class="w-full h-auto rounded-md mb-2 border-2 border-white/50">
-                    <p class="font-bold text-sm ${rarityColor} truncate">${character.name}</p>
-                    <p class="font-black text-lg ${rarityColor}" style="text-shadow: 1px 1px 2px rgba(255,255,255,0.5);">${character.rarity}</p>
-                </div>
-                 ${actionButtonsHTML}
-            `;
-            if (typeof animationIndex === 'number') {
-                card.style.opacity = '0';
-                card.style.animationDelay = `${animationIndex * 0.05}s`;
-                card.classList.add('card-animation');
-            }
-            if(isDeckBuilder && isCardInDeck) {
-                card.classList.add('opacity-50');
-            }
-            return card;
-        }
-
-        // --- 게임 시작 ---
-        loadGame();
+            speed1xButton.addEventListener('click', () => setCombatSpeed(1));
+            speed2xButton.addEventListener('click', () => setCombatSpeed(2));
+            speed4xButton.addEventListener('click', () => setCombatSpeed(4));
+            
+            // --- 게임 시작 ---
+            loadGame();
+        });
     </script>
 </body>
 </html>
-
 
