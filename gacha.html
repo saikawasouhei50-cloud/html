@@ -211,16 +211,16 @@
     <script>
         // --- 게임 설정 ---
         const characters = [
-            { name: '슬라임', rarity: 'N', power: 1, imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=Slime', dialogues: ['꾸물... 꾸물...', '내가... 대표?', '말랑말랑...'] }, 
-            { name: '고블린', rarity: 'N', power: 2, imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=Goblin', dialogues: ['키킥!', '반짝이는 거, 좋아!', '내 몽둥이, 강하다!'] }, 
-            { name: '들쥐', rarity: 'N', power: 1, imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=Rat', dialogues: ['찍찍!', '치즈... 좋아...', '숨는 건 자신있어.'] }, 
-            { name: '오크 전사', rarity: 'R', power: 5, imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=Orc', dialogues: ['크아아! 전투다!', '내 도끼를 받아라!', '더 강한 자는 없나?'] }, 
-            { name: '엘프 궁수', rarity: 'R', power: 7, imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=Elf', dialogues: ['바람의 속삭임이 들리는군...', '내 화살은 빗나가지 않아.', '숲을 위하여.'] }, 
-            { name: '인간 기사', rarity: 'R', power: 6, imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=Knight', dialogues: ['정의의 이름으로!', '방패 뒤에 서도록.', '이 검에 맹세하지.'] }, 
-            { name: '하이 오크', rarity: 'SR', power: 15, imageUrl: 'https://placehold.co/300x500/b794f4/ffffff?text=High+Orc', dialogues: ['모조리 부숴주마!', '나는... 부족의 자랑이다.', '힘こそ全て(힘이야말로 전부)!'] }, 
-            { name: '마법사', rarity: 'SR', power: 18, imageUrl: 'https://placehold.co/300x500/b794f4/ffffff?text=Mage', dialogues: ['지식의 심연을 들여다본 적 있나?', '마나의 흐름이 느껴진다...', '이게 바로... 마법이다.'] }, 
-            { name: '드래곤', rarity: 'SSR', power: 35, imageUrl: 'https://placehold.co/300x500/f6e05e/000000?text=Dragon', dialogues: ['하찮은 필멸자로군.', '나의 분노를 감당할 수 있겠나?', '이 세상의 지배자는 나다.'] }, 
-            { name: '타락천사', rarity: 'SSR', power: 40, imageUrl: 'https://placehold.co/300x500/f6e05e/000000?text=Fallen+Angel', dialogues: ['날개는 잃었지만, 긍지는 잃지 않았다.', '어둠 속에서... 진실을 보았지.', '후회는 없다.'] },
+            { name: '슬라임', rarity: 'N', power: 1, imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=Slime', cardImageUrl: 'https://placehold.co/150x180/a0aec0/ffffff?text=Slime', dialogues: ['꾸물... 꾸물...', '내가... 대표?', '말랑말랑...'] }, 
+            { name: '고블린', rarity: 'N', power: 2, imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=Goblin', cardImageUrl: 'https://placehold.co/150x180/a0aec0/ffffff?text=Goblin', dialogues: ['키킥!', '반짝이는 거, 좋아!', '내 몽둥이, 강하다!'] }, 
+            { name: '들쥐', rarity: 'N', power: 1, imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=Rat', cardImageUrl: 'https://placehold.co/150x180/a0aec0/ffffff?text=Rat', dialogues: ['찍찍!', '치즈... 좋아...', '숨는 건 자신있어.'] }, 
+            { name: '오크 전사', rarity: 'R', power: 5, imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=Orc', cardImageUrl: 'https://placehold.co/150x180/63b3ed/ffffff?text=Orc', dialogues: ['크아아! 전투다!', '내 도끼를 받아라!', '더 강한 자는 없나?'] }, 
+            { name: '엘프 궁수', rarity: 'R', power: 7, imageUrl: 'https://i.postimg.cc/MKyM7Bqx/900px-Electron-shell-001-Hydrogen-no-label-svg.png', cardImageUrl: 'https://i.postimg.cc/k4tLVq8v/900px-Electron-shell-001-Hydrogen-no-label-svg.png', dialogues: ['바람의 속삭임이 들리는군...', '내 화살은 빗나가지 않아.', '숲을 위하여.'] }, 
+            { name: '인간 기사', rarity: 'R', power: 6, imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=Knight', cardImageUrl: 'https://placehold.co/150x180/63b3ed/ffffff?text=Knight', dialogues: ['정의의 이름으로!', '방패 뒤에 서도록.', '이 검에 맹세하지.'] }, 
+            { name: '하이 오크', rarity: 'SR', power: 15, imageUrl: 'https://placehold.co/300x500/b794f4/ffffff?text=High+Orc', cardImageUrl: 'https://placehold.co/150x180/b794f4/ffffff?text=High+Orc', dialogues: ['모조리 부숴주마!', '나는... 부족의 자랑이다.', '힘こそ全て(힘이야말로 전부)!'] }, 
+            { name: '마법사', rarity: 'SR', power: 18, imageUrl: 'https://placehold.co/300x500/b794f4/ffffff?text=Mage', cardImageUrl: 'https://placehold.co/150x180/b794f4/ffffff?text=Mage', dialogues: ['지식의 심연을 들여다본 적 있나?', '마나의 흐름이 느껴진다...', '이게 바로... 마법이다.'] }, 
+            { name: '드래곤', rarity: 'SSR', power: 35, imageUrl: 'https://placehold.co/300x500/f6e05e/000000?text=Dragon', cardImageUrl: 'https://placehold.co/150x180/f6e05e/000000?text=Dragon', dialogues: ['하찮은 필멸자로군.', '나의 분노를 감당할 수 있겠나?', '이 세상의 지배자는 나다.'] }, 
+            { name: '타락천사', rarity: 'SSR', power: 40, imageUrl: 'https://placehold.co/300x500/f6e05e/000000?text=Fallen+Angel', cardImageUrl: 'https://placehold.co/150x180/f6e05e/000000?text=Fallen+Angel', dialogues: ['날개는 잃었지만, 긍지는 잃지 않았다.', '어둠 속에서... 진실을 보았지.', '후회는 없다.'] },
         ];
         const rarityProbabilities = { 'SSR': 3, 'SR': 12, 'R': 35, 'N': 50 };
         const eventRarityProbabilities = { 'SSR': 6, 'SR': 14, 'R': 30, 'N': 50 };
@@ -244,7 +244,7 @@
         const PULL_TEN_COST = 100;
         const EXPAND_COST = 50;
         const EXPAND_AMOUNT = 10;
-        const SAVE_DATA_KEY = 'gachaGameSaveData_v2'; // 버전을 명시하여 이전 데이터와 충돌 방지
+        const SAVE_DATA_KEY = 'gachaGameSaveData_v3'; // 버전을 명시하여 이전 데이터와 충돌 방지
 
         // --- HTML 요소 가져오기 ---
         const currencyDisplay = document.getElementById('currency-display');
@@ -337,14 +337,21 @@
             } else {
                 const savedDataString = localStorage.getItem(SAVE_DATA_KEY);
                 if (savedDataString) {
-                    const savedData = JSON.parse(savedDataString);
-                    playerCurrency = savedData.currency || 100;
-                    // 이름 배열을 기반으로 전체 캐릭터 정보 재구성
-                    playerInventory = (savedData.inventory || []).map(name => characters.find(c => c.name === name)).filter(Boolean);
-                    playerDeck = (savedData.deck || []).map(name => characters.find(c => c.name === name)).filter(Boolean);
-                    inventoryCapacity = savedData.capacity || 100;
-                    if (savedData.representative) {
-                        representativeCharacter = characters.find(c => c.name === savedData.representative) || null;
+                    try {
+                        const savedData = JSON.parse(savedDataString);
+                        playerCurrency = savedData.currency ?? 100; // 0도 정상 값으로 인식하도록 수정
+                        // 이름 배열을 기반으로 전체 캐릭터 정보 재구성
+                        playerInventory = (savedData.inventory || []).map(name => characters.find(c => c.name === name)).filter(Boolean);
+                        playerDeck = (savedData.deck || []).map(name => characters.find(c => c.name === name)).filter(Boolean);
+                        inventoryCapacity = savedData.capacity ?? 100; // 0도 정상 값으로 인식하도록 수정
+                        if (savedData.representative) {
+                            representativeCharacter = characters.find(c => c.name === savedData.representative) || null;
+                        }
+                    } catch (e) {
+                         console.error("저장된 데이터 파싱 오류:", e);
+                         // 파싱 실패 시 초기 상태로 시작
+                        playerInventory.push(characters.find(c => c.name === '슬라임'));
+                        playerInventory.push(characters.find(c => c.name === '엘프 궁수'));
                     }
                 } else {
                     // 새로운 게임 시작
@@ -556,8 +563,11 @@
         
         function getUniqueInventory() {
             const cardCounts = playerInventory.reduce((acc, card) => {
-                if (!acc[card.name]) { acc[card.name] = { ...card, count: 0 }; }
-                acc[card.name].count++; return acc;
+                if (card && card.name) {
+                    if (!acc[card.name]) { acc[card.name] = { ...card, count: 0 }; }
+                    acc[card.name].count++;
+                }
+                return acc;
             }, {});
             const rarityOrder = { 'SSR': 4, 'SR': 3, 'R': 2, 'N': 1 };
             return Object.values(cardCounts).sort((a, b) => (rarityOrder[b.rarity] - rarityOrder[a.rarity]) || a.name.localeCompare(b.name));
@@ -611,7 +621,7 @@
 
         function addToDeck(cardName) {
             if (playerDeck.length >= DECK_CAPACITY || playerDeck.some(card => card.name === cardName)) return;
-            const cardToAdd = playerInventory.find(card => card.name === cardName);
+            const cardToAdd = characters.find(card => card.name === cardName);
             if (cardToAdd) { playerDeck.push(cardToAdd); displayDeckManagement(); saveGame(); }
         }
         
@@ -622,7 +632,7 @@
         }
         
         function calculateDeckPower() {
-            return playerDeck.reduce((total, card) => total + card.power, 0);
+            return playerDeck.reduce((total, card) => total + (card.power || 0), 0);
         }
 
         function displayCombatView() {
@@ -676,7 +686,6 @@
         function createCard(character, options = {}) {
             const { animationIndex, isDeckSlot, isDeckBuilder, isInventory, isCardInDeck, isDeckFull } = options;
             const card = document.createElement('div');
-            const cardImageUrl = character.imageUrl.replace('300x500', '150x180'); // Use smaller images for cards
             card.className = `rarity-${character.rarity} relative text-center rounded-lg shadow-md p-2 transform transition-transform duration-300 hover:scale-105`;
             const rarityColor = { 'N': 'text-gray-600', 'R': 'text-blue-800', 'SR': 'text-white', 'SSR': 'text-black' }[character.rarity];
             
@@ -705,7 +714,7 @@
             card.innerHTML = `
                 ${badgeHTML} ${deckSlotButton}
                 <div class="relative pointer-events-none">
-                    <img src="${cardImageUrl}" alt="${character.name}" class="w-full h-auto rounded-md mb-2 border-2 border-white/50">
+                    <img src="${character.cardImageUrl}" alt="${character.name}" class="w-full h-auto rounded-md mb-2 border-2 border-white/50">
                     <p class="font-bold text-sm ${rarityColor} truncate">${character.name}</p>
                     <p class="font-black text-lg ${rarityColor}" style="text-shadow: 1px 1px 2px rgba(255,255,255,0.5);">${character.rarity}</p>
                 </div>
@@ -727,4 +736,5 @@
     </script>
 </body>
 </html>
+
 
