@@ -133,7 +133,7 @@
                     <!-- 이벤트 배너 -->
                     <div id="event-banner" class="hidden absolute top-4 right-4 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 p-4 rounded-lg shadow-lg cursor-pointer transform hover:scale-105 transition-transform duration-300 z-10">
                         <h3 class="text-white text-lg font-bold drop-shadow-md">기간 한정 이벤트!</h3>
-                        <p class="text-white text-sm drop-shadow-md">[핏빛 욕조] 서도진 확률 UP!</p>
+                        <p id="event-banner-text" class="text-white text-sm drop-shadow-md"></p>
                     </div>
 
                     <div id="home-character-container" class="flex-grow flex items-center justify-center cursor-pointer">
@@ -163,8 +163,8 @@
                     </div>
                 </div>
                 <div id="event-gacha-view" class="hidden">
-                    <div class="text-center p-2 mb-2 rounded-lg bg-yellow-500/20">
-                        <p class="font-bold text-yellow-300">[핏빛 욕조] 서도진 등장 확률 UP!</p>
+                    <div id="event-gacha-info" class="text-center p-2 mb-2 rounded-lg bg-yellow-500/20">
+                        <p class="font-bold text-yellow-300"></p>
                     </div>
                     <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mb-4">
                         <button id="pull-one-event" class="gacha-button w-full sm:w-auto bg-gradient-to-r from-red-500 to-yellow-500 hover:from-red-600 hover:to-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-8 rounded-full shadow-lg">🔥 1회 뽑기 (10)</button>
@@ -279,9 +279,21 @@
                 { name: '[핏빛 욕조] 서도진', baseName: '서도진', rarity: 'SR', faction: '범인', stats: { hp: 200, atk: 30, def: 15 }, imageUrl: 'https://placehold.co/300x500/b794f4/ffffff?text=서도진', cardImageUrl: 'https://placehold.co/150x180/b794f4/ffffff?text=서도진', dialogues: ['완벽한 트릭이었는데.'], skills: [{ name: '알리바이', dialogue: '그 시간에 전 여기 없었습니다만?', power: 1.8, type: 'damage' }], deathDialogue: '들켜버렸나...' },
                 { name: '[추리의 제왕] 서도진', baseName: '서도진', rarity: 'SSR', faction: '탐정', stats: { hp: 380, atk: 42, def: 28 }, imageUrl: 'https://placehold.co/300x500/f6e05e/000000?text=서도진', cardImageUrl: 'https://placehold.co/150x180/f6e05e/000000?text=서도진', dialogues: ['진실은 언제나 하나.'], skills: [{ name: '사건 재구성', dialogue: '모든 조각이 맞춰졌어.', power: 2.2, type: 'damage' }, { name: '최종 변론', dialogue: '이의 있습니까!', power: 1.5, type: 'debuff_def' }], deathDialogue: '내 추리가... 틀렸을 리가...' },
                 
-                { name: '[목격자] 윤필규', baseName: '윤필규', rarity: 'N', faction: '조수', stats: { hp: 60, atk: 8, def: 3 }, imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=윤필규', cardImageUrl: 'https://placehold.co/150x180/a0aec0/ffffff?text=윤필규', dialogues: ['저... 봤어요!'], skills: [{ name: '증언', dialogue: '저 사람이 그랬어요!', power: 1.3, type: 'damage' }], deathDialogue: '못 본 걸로 할 걸...' },
-                { name: '[용의자] 윤서천', baseName: '윤서천', rarity: 'R', faction: '범인', stats: { hp: 110, atk: 16, def: 8 }, imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=윤서천', cardImageUrl: 'https://placehold.co/150x180/63b3ed/ffffff?text=윤서천', dialogues: ['내가 아니라고!'], skills: [{ name: '발뺌', dialogue: '증거 있어?', power: 1.4, type: 'damage' }], deathDialogue: '결국...' },
-                { name: '[탐정] 도천영', baseName: '도천영', rarity: 'R', faction: '탐정', stats: { hp: 90, atk: 18, def: 7 }, imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=도천영', cardImageUrl: 'https://placehold.co/150x180/63b3ed/ffffff?text=도천영', dialogues: ['사건의 실마리가 보이는군...', '내 추리에서 벗어날 순 없어.', '진실을 향하여.'], skills: [{ name: '꿰뚫어보기', dialogue: '모든 것이 선명하게 보이는군!', power: 1.8, type: 'damage' }], deathDialogue: '이런... 예리한 함정이었나...' },
+                { name: '[편집자] 윤필규', baseName: '윤필규', rarity: 'N', faction: '조수', stats: { hp: 60, atk: 8, def: 3 }, imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=윤필규', cardImageUrl: 'https://placehold.co/150x180/a0aec0/ffffff?text=윤필규', dialogues: ['오타입니다.'], skills: [{ name: '교정', dialogue: '이 문장은 틀렸습니다.', power: 1.3, type: 'damage' }], deathDialogue: '마감만은... 제발...' },
+                { name: '[조수] 윤필규', baseName: '윤필규', rarity: 'R', faction: '조수', stats: { hp: 110, atk: 14, def: 11 }, imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=윤필규', cardImageUrl: 'https://placehold.co/150x180/63b3ed/ffffff?text=윤필규', dialogues: ['제가 돕겠습니다.'], skills: [{ name: '자료 조사', dialogue: '찾았습니다!', power: 1.4, type: 'damage' }], deathDialogue: '죄송합니다...' },
+                { name: '[동거인] 윤필규', baseName: '윤필규', rarity: 'SR', faction: '조수', stats: { hp: 240, atk: 26, def: 19 }, imageUrl: 'https://placehold.co/300x500/b794f4/ffffff?text=윤필규', cardImageUrl: 'https://placehold.co/150x180/b794f4/ffffff?text=윤필규', dialogues: ['집세... 잊지 않으셨죠?'], skills: [{ name: '잔소리', dialogue: '방 좀 치우세요!', power: 1.9, type: 'damage' }], deathDialogue: '그래도... 즐거웠어...' },
+                { name: '[올곧은 정의] 윤필규', baseName: '윤필규', rarity: 'SSR', faction: '탐정', stats: { hp: 370, atk: 43, def: 29 }, imageUrl: 'https://placehold.co/300x500/f6e05e/000000?text=윤필규', cardImageUrl: 'https://placehold.co/150x180/f6e05e/000000?text=윤필규', dialogues: ['진실을 외면할 순 없습니다.'], skills: [{ name: '내부고발', dialogue: '제가 모든 것을 밝히겠습니다.', power: 2.4, type: 'damage' }, { name: '굳은 의지', dialogue: '저는 꺾이지 않습니다!', power: 1.8, type: 'vampire' }], deathDialogue: '정의는... 살아있다...' },
+
+                { name: '[연구자] 윤서천', baseName: '윤서천', rarity: 'N', faction: '조수', stats: { hp: 45, atk: 9, def: 4 }, imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=윤서천', cardImageUrl: 'https://placehold.co/150x180/a0aec0/ffffff?text=윤서천', dialogues: ['흥미로운 샘플이군.'], skills: [{ name: '분석', dialogue: '결과가 나왔군.', power: 1.3, type: 'damage' }], deathDialogue: '데이터가... 부족해...' },
+                { name: '[범인] 윤서천', baseName: '윤서천', rarity: 'R', faction: '범인', stats: { hp: 100, atk: 17, def: 9 }, imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=윤서천', cardImageUrl: 'https://placehold.co/150x180/63b3ed/ffffff?text=윤서천', dialogues: ['계획通り...'], skills: [{ name: '독극물', dialogue: '치사량이야.', power: 1.6, type: 'damage' }], deathDialogue: '계획에 없었는데...' },
+                { name: '[실험쥐] 윤서천', baseName: '윤서천', rarity: 'SR', faction: '조수', stats: { hp: 260, atk: 24, def: 17 }, imageUrl: 'https://placehold.co/300x500/b794f4/ffffff?text=윤서천', cardImageUrl: 'https://placehold.co/150x180/b794f4/ffffff?text=윤서천', dialogues: ['이 주사... 정말 괜찮은 건가?'], skills: [{ name: '이상 반응', dialogue: '몸이... 뜨거워...!', power: 2.0, type: 'damage' }], deathDialogue: '결과는... 실패인가...' },
+                { name: '[in vivo] 윤서천', baseName: '윤서천', rarity: 'SSR', faction: '범인', stats: { hp: 340, atk: 48, def: 24 }, imageUrl: 'https://placehold.co/300x500/f6e05e/000000?text=윤서천', cardImageUrl: 'https://placehold.co/150x180/f6e05e/000000?text=윤서천', dialogues: ['인류를 위한 희생이다.'], skills: [{ name: '임상실험', dialogue: '넌 훌륭한 샘플이야.', power: 2.5, type: 'damage' }, { name: '부작용', dialogue: '예상 밖인데!', power: 1.4, type: 'debuff_def' }], deathDialogue: '최고의... 샘플이었는데...' },
+
+                { name: '[서점 주인] 한 현', baseName: '한 현', rarity: 'N', faction: '조수', stats: { hp: 70, atk: 6, def: 6 }, imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=한현', cardImageUrl: 'https://placehold.co/150x180/a0aec0/ffffff?text=한현', dialogues: ['어서오세요.'], skills: [{ name: '책 추천', dialogue: '이건 어떠신지?', power: 1.1, type: 'damage' }], deathDialogue: '가게는... 누가...' },
+                { name: '[조수] 한 현', baseName: '한 현', rarity: 'R', faction: '조수', stats: { hp: 140, atk: 14, def: 13 }, imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=한현', cardImageUrl: 'https://placehold.co/150x180/63b3ed/ffffff?text=한현', dialogues: ['제가 가보겠습니다.'], skills: [{ name: '현장 조사', dialogue: '뭔가 있군요.', power: 1.4, type: 'damage' }], deathDialogue: '제가... 너무 나섰나요...' },
+                { name: '[동행인] 한 현', baseName: '한 현', rarity: 'SR', faction: '조수', stats: { hp: 230, atk: 28, def: 20 }, imageUrl: 'https://placehold.co/300x500/b794f4/ffffff?text=한현', cardImageUrl: 'https://placehold.co/150x180/b794f4/ffffff?text=한현', dialogues: ['혼자 가게 둘 순 없죠.'], skills: [{ name: '엄호', dialogue: '뒤는 맡겨주세요!', power: 1.7, type: 'damage' }], deathDialogue: '먼저... 가세요...' },
+                { name: '[한때는, 탐정] 한 현', baseName: '한 현', rarity: 'SSR', faction: '탐정', stats: { hp: 390, atk: 40, def: 30 }, imageUrl: 'https://placehold.co/300x500/f6e05e/000000?text=한현', cardImageUrl: 'https://placehold.co/150x180/f6e05e/000000?text=한현', dialogues: ['오랜만이군, 이 감각.'], skills: [{ name: '오래된 통찰', dialogue: '범인은... 이 안에 없어.', power: 2.2, type: 'damage' }, { name: '감싸기', dialogue: '더는 다치게 둘 수 없지!', power: 1.9, type: 'vampire' }], deathDialogue: '결국... 여기까지인가...' },
+
                 { name: '[기자] 강은율', baseName: '강은율', rarity: 'SR', faction: '조수', stats: { hp: 250, atk: 25, def: 18 }, imageUrl: 'https://placehold.co/300x500/b794f4/ffffff?text=강은율', cardImageUrl: 'https://placehold.co/150x180/b794f4/ffffff?text=강은율', dialogues: ['특종의 냄새가 나는군요.'], skills: [{ name: '정보 수집', dialogue: '이건 기사화될 겁니다!', power: 1.8, type: 'damage' }], deathDialogue: '이건... 너무 큰 특종이야...' },
                 { name: '[프로파일러] 백정문', baseName: '백정문', rarity: 'SR', faction: '탐정', stats: { hp: 180, atk: 35, def: 12 }, imageUrl: 'https://placehold.co/300x500/b794f4/ffffff?text=백정문', cardImageUrl: 'https://placehold.co/150x180/b794f4/ffffff?text=백정문', dialogues: ['범인의 심리가 보이는군.'], skills: [{ name: '심리 분석', dialogue: '당신, 지금 거짓말을 하고 있군.', power: 2.2, type: 'damage' }], deathDialogue: '생각과... 다른데...' },
                 { name: '[검사] 독고유진', baseName: '독고유진', rarity: 'SSR', faction: '탐정', stats: { hp: 360, atk: 44, def: 27 }, imageUrl: 'https://placehold.co/300x500/f6e05e/000000?text=독고유진', cardImageUrl: 'https://placehold.co/150x180/f6e05e/000000?text=독고유진', dialogues: ['법은 당신 편이 아닙니다.'], skills: [{ name: '기소', dialogue: '유죄를 선고합니다.', power: 2.3, type: 'damage' }, { name: '압수수색', dialogue: '모조리 찾아내!', power: 1.3, type: 'debuff_def' }], deathDialogue: '법정에서... 지다니...' },
@@ -348,10 +360,12 @@
             const homeCharacterName = document.getElementById('home-character-name');
             const homeCharacterDialogue = document.getElementById('home-character-dialogue');
             const eventBanner = document.getElementById('event-banner');
+            const eventBannerText = document.getElementById('event-banner-text');
             const gachaTabNormal = document.getElementById('gacha-tab-normal');
             const gachaTabEvent = document.getElementById('gacha-tab-event');
             const normalGachaView = document.getElementById('normal-gacha-view');
             const eventGachaView = document.getElementById('event-gacha-view');
+            const eventGachaInfo = document.getElementById('event-gacha-info');
             const resetButton = document.getElementById('reset-game');
             const storageWarning = document.getElementById('storage-warning');
             const combatInProgressView = document.getElementById('combat-in-progress-view');
@@ -398,8 +412,8 @@
                 if (!isStorageAvailable()) {
                     storageWarning.classList.remove('hidden');
                     resetButton.disabled = true;
-                    playerInventory.push(findCharacter('[소설가] 서도진'));
-                    playerInventory.push(findCharacter('[탐정] 도천영'));
+                    playerInventory.push(findCharacter('[편집자] 윤필규'));
+                    playerInventory.push(findCharacter('[조수] 한 현'));
                 } else {
                     const savedDataString = localStorage.getItem(SAVE_DATA_KEY);
                     if (savedDataString) {
@@ -414,12 +428,12 @@
                             }
                         } catch (e) {
                             console.error("저장된 데이터 파싱 오류:", e);
-                            playerInventory.push(findCharacter('[소설가] 서도진'));
-                            playerInventory.push(findCharacter('[탐정] 도천영'));
+                            playerInventory.push(findCharacter('[편집자] 윤필규'));
+                            playerInventory.push(findCharacter('[조수] 한 현'));
                         }
                     } else {
-                        playerInventory.push(findCharacter('[소설가] 서도진'));
-                        playerInventory.push(findCharacter('[탐정] 도천영'));
+                        playerInventory.push(findCharacter('[편집자] 윤필규'));
+                        playerInventory.push(findCharacter('[조수] 한 현'));
                         saveGame();
                     }
                 }
@@ -480,6 +494,8 @@
                 const isEventActive = now >= EVENT_START_DATE && now <= EVENT_END_DATE;
                 if (isEventActive) {
                     eventBanner.classList.remove('hidden');
+                    eventBannerText.textContent = `${EVENT_CHARACTER_NAME} 확률 UP!`;
+                    eventGachaInfo.querySelector('p').textContent = `[${EVENT_CHARACTER_NAME}] 등장 확률 UP!`;
                     gachaTabEvent.classList.remove('hidden');
                 } else {
                     eventBanner.classList.add('hidden');
@@ -749,7 +765,7 @@
                     const cardEl = document.createElement('div');
                     cardEl.className = 'bg-gray-700 p-2 rounded';
                     cardEl.innerHTML = `
-                        <p class="font-bold text-sm truncate">${card.name}</p>
+                        <p class="font-bold text-sm truncate" title="${card.name}">${card.name}</p>
                         <div class="hp-bar-background rounded-full h-2.5 mt-1">
                             <div id="player-hp-bar-${index}" class="hp-bar-foreground h-2.5 rounded-full" style="width: 100%"></div>
                         </div>
