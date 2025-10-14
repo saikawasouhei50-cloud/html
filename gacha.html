@@ -102,17 +102,19 @@
         
         <!-- 제목 부분 -->
         <header class="text-center mb-4">
-            <h1 class="text-4xl md:text-5xl font-bold tracking-wider text-yellow-300" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">✨ 캐릭터 월드 ✨</h1>
+            <h1 class="text-4xl md:text-5xl font-bold tracking-wider text-yellow-300" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Kside_</h1>
         </header>
 
         <!-- 재화 및 탭 메뉴 영역 -->
         <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
             <div class="bg-black/20 rounded-full p-1 flex-shrink-0">
                 <button id="tab-home" class="tab-button active font-bold py-2 px-6 rounded-full">홈</button>
-                <button id="tab-gacha" class="tab-button font-bold py-2 px-6 rounded-full">뽑기</button>
-                <button id="tab-inventory" class="tab-button font-bold py-2 px-6 rounded-full">보관함</button>
-                <button id="tab-deck" class="tab-button font-bold py-2 px-6 rounded-full">덱 관리</button>
+                <button id="tab-gacha" class="tab-button font-bold py-2 px-6 rounded-full">서고</button>
+                <button id="tab-inventory" class="tab-button font-bold py-2 px-6 rounded-full">당신의 책장</button>
+                <button id="tab-deck" class="tab-button font-bold py-2 px-6 rounded-full">편찬</button>
+                <button id="tab-collection" class="tab-button font-bold py-2 px-6 rounded-full">도감</button>
                 <button id="tab-combat" class="tab-button font-bold py-2 px-6 rounded-full">전투</button>
+                
             </div>
             <div class="flex items-center gap-4">
                 <div class="text-2xl font-bold text-yellow-300 bg-black/20 py-2 px-6 rounded-full inline-block">💎 <span id="currency-display">100</span></div>
@@ -137,24 +139,24 @@
                     </div>
 
                     <div id="home-character-container" class="flex-grow flex items-center justify-center cursor-pointer">
-                        <img id="home-character-image" src="" alt="대표 캐릭터" class="max-w-full">
+                        <img id="home-character-image" src="" alt="대표 등장인물" class="max-w-full">
                     </div>
                     <div id="home-dialogue-container" class="w-full max-w-2xl bg-black/30 backdrop-blur-sm p-4 rounded-xl mt-4">
                         <p id="home-character-name" class="font-bold text-lg text-yellow-300"></p>
                         <p id="home-character-dialogue" class="text-white"></p>
                     </div>
                      <div id="home-default-message" class="text-2xl text-gray-300">
-                        보관함에서 대표 캐릭터를 설정해주세요!
+                        보관함에서 대표 등장인물을 설정해주세요!
                     </div>
                 </div>
             </div>
 
             <!-- 뽑기 화면 -->
             <div id="gacha-view" class="hidden">
-                <p class="text-center text-gray-200 mt-2 mb-4">운명을 시험하여 전설의 동료를 만나보세요!</p>
+                <p class="text-center text-gray-200 mt-2 mb-4">운명을 시험해 독자님의 등장인물을 만나보세요.</p>
                 <div class="bg-black/20 rounded-full p-1 flex justify-center items-center mb-4 max-w-sm mx-auto">
-                    <button id="gacha-tab-normal" class="gacha-tab-button active w-1/2 font-bold py-2 px-6 rounded-full">일반 뽑기</button>
-                    <button id="gacha-tab-event" class="gacha-tab-button w-1/2 font-bold py-2 px-6 rounded-full hidden">이벤트 뽑기</button>
+                    <button id="gacha-tab-normal" class="gacha-tab-button active w-1/2 font-bold py-2 px-6 rounded-full">일반 서고</button>
+                    <button id="gacha-tab-event" class="gacha-tab-button w-1/2 font-bold py-2 px-6 rounded-full hidden">이벤트 서고</button>
                 </div>
                 <div id="normal-gacha-view">
                     <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mb-4">
@@ -178,7 +180,7 @@
             <!-- 보관함 화면 -->
             <div id="inventory-view" class="hidden">
                  <div class="text-center mb-4">
-                    <p class="text-gray-200">지금까지 수집한 동료들입니다.</p>
+                    <p class="text-gray-200">지금까지 수집한 등장인물들입니다.</p>
                     <div class="mt-2 flex justify-center items-center gap-4">
                         <p id="inventory-status" class="text-lg font-bold bg-black/20 py-2 px-4 rounded-full"></p>
                         <button id="expand-inventory" class="gacha-button bg-yellow-500 hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold py-2 px-4 rounded-full shadow-lg text-sm">칸 확장 (💎50)</button>
@@ -190,7 +192,7 @@
             <!-- 덱 관리 화면 -->
             <div id="deck-view" class="hidden">
                 <div class="text-center mb-4">
-                    <p class="text-gray-200">최강의 덱을 구성하여 전투를 준비하세요! (5장 필수)</p>
+                    <p class="text-gray-200">등장인물들과 함께 독서를 준비하세요. (5장 필수)</p>
                     <div class="mt-2 flex justify-center items-center gap-4">
                         <div id="deck-status" class="text-lg font-bold text-yellow-300"></div>
                         <button id="auto-fill-deck" class="gacha-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full shadow-lg text-sm">자동 편성</button>
@@ -203,8 +205,8 @@
             <!-- 전투 화면 (던전 선택) -->
             <div id="combat-view" class="hidden">
                 <div class="text-center mb-4">
-                    <p class="text-gray-200">편성한 덱으로 던전에 도전하여 보상을 획득하세요!</p>
-                    <p class="text-xl font-bold">현재 덱 전투력: <span id="deck-power-display" class="text-yellow-300">0</span></p>
+                    <p class="text-gray-200">편찬한 책으로 던전에 도전하여 보상을 획득하세요!</p>
+                    <p class="text-xl font-bold">현재 책 전투력: <span id="deck-power-display" class="text-yellow-300">0</span></p>
                 </div>
                 <div id="dungeon-list-container" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
             </div>
@@ -234,6 +236,16 @@
                     </div>
                 </div>
             </div>
+
+             <!-- 도감 화면 -->
+            <div id="collection-view" class="hidden">
+                <div class="text-center mb-4">
+                    <p class="text-gray-200">수집한 등장인물와 아직 만나지 못한 등장인물를 확인하세요.</p>
+                </div>
+                <div id="collection-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 min-h-[400px] max-h-[60vh] overflow-y-auto bg-black/20 p-4 rounded-xl">
+                </div>
+            </div>
+
 
             <!-- 카드 상세 정보 모달 -->
             <div id="card-detail-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-30">
@@ -382,6 +394,7 @@
             const speed1xButton = document.getElementById('speed-1x');
             const speed2xButton = document.getElementById('speed-2x');
             const speed4xButton = document.getElementById('speed-4x');
+            const collectionContainer = document.getElementById('collection-container');
 
             
             // --- 데이터 저장/불러오기 함수 ---
@@ -400,8 +413,8 @@
                 if (!isStorageAvailable()) return;
                 const saveData = {
                     currency: playerCurrency,
-                    inventory: playerInventory.map(card => card.name),
-                    deck: playerDeck.map(card => card.name),
+                    inventory: playerInventory.map(card => card ? card.name : null).filter(Boolean),
+                    deck: playerDeck.map(card => card ? card.name : null).filter(Boolean),
                     capacity: inventoryCapacity,
                     representative: representativeCharacter ? representativeCharacter.name : null,
                 };
@@ -473,6 +486,7 @@
                 else if (tabName === 'inventory') displayInventory(); 
                 else if (tabName === 'deck') displayDeckManagement();
                 else if (tabName === 'combat') displayCombatView();
+                else if (tabName === 'collection') displayCollection();
             }
 
             function switchGachaTab(tabName) {
@@ -631,7 +645,7 @@
             function displayResults(pulledCharacters) {
                 resultsContainer.innerHTML = '';
                 pulledCharacters.forEach((character, index) => {
-                    resultsContainer.appendChild(createCard(character, { animationIndex: index }));
+                    resultsContainer.appendChild(createCard(character, { animationIndex: index, mode: 'gachaResult' }));
                 });
             }
             
@@ -655,9 +669,24 @@
                     inventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">아직 수집한 동료가 없습니다.</p>`; return;
                 }
                 uniqueCards.forEach((character, index) => {
-                    inventoryContainer.appendChild(createCard(character, { animationIndex: index, isInventory: true }));
+                    inventoryContainer.appendChild(createCard(character, { animationIndex: index, mode: 'inventory' }));
                 });
             }
+
+            function displayCollection() {
+                collectionContainer.innerHTML = '';
+                const collectedCardNames = new Set(playerInventory.map(card => card.name));
+
+                characters.forEach((character, index) => {
+                    const isCollected = collectedCardNames.has(character.name);
+                    collectionContainer.appendChild(createCard(character, {
+                        animationIndex: index,
+                        mode: 'collection',
+                        isCollected: isCollected
+                    }));
+                });
+            }
+
 
             function displayDeckManagement() {
                 deckStatus.textContent = `현재 덱: ${playerDeck.length} / ${DECK_CAPACITY}`;
@@ -665,7 +694,7 @@
                 deckSlotsContainer.innerHTML = '';
                 for (let i = 0; i < DECK_CAPACITY; i++) {
                     if (playerDeck[i]) {
-                        deckSlotsContainer.appendChild(createCard(playerDeck[i], { isDeckSlot: true }));
+                        deckSlotsContainer.appendChild(createCard(playerDeck[i], { mode: 'deckSlot' }));
                     } else {
                         const emptySlot = document.createElement('div');
                         emptySlot.className = 'deck-slot rounded-lg'; emptySlot.textContent = '비어있음';
@@ -680,7 +709,7 @@
                 uniqueCards.forEach((character, index) => {
                     const isCardInDeck = playerDeck.some(deckCard => deckCard.name === character.name);
                     const isDeckFull = playerDeck.length >= DECK_CAPACITY;
-                    deckInventoryContainer.appendChild(createCard(character, { animationIndex: index, isDeckBuilder: true, isCardInDeck, isDeckFull }));
+                    deckInventoryContainer.appendChild(createCard(character, { animationIndex: index, mode: 'deckBuilder', isCardInDeck, isDeckFull }));
                 });
             }
             
@@ -908,7 +937,7 @@
             }
 
             function createCard(character, options = {}) {
-                const { animationIndex, isDeckSlot, isDeckBuilder, isInventory, isCardInDeck, isDeckFull } = options;
+                const { animationIndex, mode = 'default', isCardInDeck, isDeckFull, isCollected } = options;
                 const card = document.createElement('div');
                 card.className = `rarity-${character.rarity} relative text-center rounded-lg shadow-md p-2 transform transition-transform duration-300 hover:scale-105 cursor-pointer`;
                 card.dataset.cardName = character.name;
@@ -920,16 +949,18 @@
                     '범인': 'bg-red-500 text-white'
                 };
                 
-                let badgeHTML = character.count > 1 ? `<div class="count-badge">x${character.count}</div>` : '';
-                if(isDeckSlot) badgeHTML = '';
+                let badgeHTML = '';
+                if(mode === 'inventory' && character.count > 1) {
+                    badgeHTML = `<div class="count-badge">x${character.count}</div>`;
+                }
 
                 let actionButtonsHTML = '';
-                if (isDeckBuilder) {
+                if (mode === 'deckBuilder') {
                     const disabled = isDeckFull || isCardInDeck;
                     const buttonText = isCardInDeck ? '추가됨' : '추가';
                     const buttonColor = disabled ? 'bg-gray-500' : 'bg-green-500 hover:bg-green-600';
                     actionButtonsHTML = `<button data-action="add-to-deck" data-card-name="${character.name}" class="w-full mt-2 py-1 rounded-md text-white font-bold text-sm ${buttonColor}" ${disabled ? 'disabled' : ''}>${buttonText}</button>`;
-                } else if (isInventory) {
+                } else if (mode === 'inventory') {
                     const isRepresentative = representativeCharacter && representativeCharacter.name === character.name;
                     const repButtonText = isRepresentative ? '대표' : '대표 설정';
                     const repButtonColor = isRepresentative ? 'bg-yellow-500' : 'bg-gray-600 hover:bg-gray-700';
@@ -937,7 +968,7 @@
                 }
                 
                 let deckSlotButton = '';
-                if(isDeckSlot) {
+                if(mode === 'deckSlot') {
                     deckSlotButton = `<button data-action="remove-from-deck" data-card-name="${character.name}" class="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 text-sm font-bold flex items-center justify-center z-10">X</button>`;
                 }
 
@@ -957,8 +988,16 @@
                     card.style.animationDelay = `${animationIndex * 0.05}s`;
                     card.classList.add('card-animation');
                 }
-                if(isDeckBuilder && isCardInDeck) {
+                if(mode === 'deckBuilder' && isCardInDeck) {
                     card.classList.add('opacity-50');
+                }
+                if (mode === 'collection') {
+                    if (isCollected) {
+                        card.dataset.isCollected = "true";
+                    } else {
+                        card.dataset.isCollected = "false";
+                        card.classList.add('grayscale', 'opacity-75', 'hover:grayscale-0', 'hover:opacity-100');
+                    }
                 }
                 return card;
             }
@@ -1032,11 +1071,12 @@
             gachaTabNormal.addEventListener('click', () => switchGachaTab('normal'));
             gachaTabEvent.addEventListener('click', () => switchGachaTab('event'));
             
-            const cardContainers = [inventoryContainer, deckInventoryContainer, deckSlotsContainer];
-            cardContainers.forEach(container => {
+            const cardClickableContainers = [inventoryContainer, deckInventoryContainer, deckSlotsContainer, collectionContainer];
+            cardClickableContainers.forEach(container => {
                 container.addEventListener('click', (e) => {
                     const actionButton = e.target.closest('[data-action]');
                     if (actionButton) {
+                        e.stopPropagation(); // Prevent card detail from opening when a button is clicked
                         const action = actionButton.dataset.action;
                         const cardName = actionButton.dataset.cardName;
                         if (action === 'set-representative') setRepresentative(cardName);
@@ -1044,7 +1084,12 @@
                         else if (action === 'remove-from-deck') removeFromDeck(cardName);
                     } else {
                         const cardElement = e.target.closest('[data-card-name]');
-                        if (cardElement) showCardDetails(cardElement.dataset.cardName);
+                        if (cardElement) {
+                             if (container === collectionContainer && cardElement.dataset.isCollected === 'false') {
+                                return;
+                            }
+                            showCardDetails(cardElement.dataset.cardName);
+                        }
                     }
                 });
             });
