@@ -123,7 +123,7 @@
             </div>
             <div class="flex items-center gap-4">
                 <div id="event-point-display" class="hidden text-xl font-bold text-pink-300 bg-black/20 py-2 px-4 rounded-full">EVENT P: <span id="event-points">0</span></div>
-                <div class="text-xl font-bold text-cyan-300 bg-black/20 py-2 px-4 rounded-full inline-block">🔖 <span id="bookmark-display">10</span> / <span id="max-bookmark-display">10</span></div>
+                <div class="text-xl font-bold text-cyan-300 bg-black/20 py-2 px-4 rounded-full inline-block">🔖 <span id="bookmark-display">10</span> / <span id="max-bookmark-display">10</span><span id="bookmark-timer-container" class="text-sm ml-2"></span></div>
                 <div class="text-2xl font-bold text-yellow-300 bg-black/20 py-2 px-6 rounded-full inline-block">💎 <span id="currency-display">100</span></div>
                 <button id="reset-game" class="gacha-button bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full text-sm">초기화</button>
             </div>
@@ -450,7 +450,7 @@
 
             const rarityProbabilities = { 'SSR': 3, 'SR': 12, 'R': 35, 'N': 50 };
             const eventRarityProbabilities = { 'SSR': 6, 'SR': 14, 'R': 30, 'N': 50 };
-            const EVENT_CHARACTER_NAME = '[악몽] 서도진';
+            const EVENT_CHARACTER_NAME = '[핏빛 욕조] 서도진';
             const EVENT_START_DATE = new Date('2025-10-14T00:00:00');
             const EVENT_END_DATE = new Date('2025-10-24T23:59:59');
 
@@ -552,6 +552,7 @@
             const eventShopContainer = document.getElementById('event-shop-container');
             const bookmarkDisplay = document.getElementById('bookmark-display');
             const maxBookmarkDisplay = document.getElementById('max-bookmark-display');
+            const bookmarkTimerContainer = document.getElementById('bookmark-timer-container'); 
 
             
             // --- 데이터 저장/불러오기 함수 ---
@@ -857,16 +858,31 @@
 
             function startBookmarkRegenTimer() {
                 setInterval(() => {
+                    // 이 블록은 책갈피가 실제로 충전되는 로직입니다.
                     if (playerBookmarks < MAX_BOOKMARKS) {
                         const now = Date.now();
                         if (now - lastBookmarkUpdateTime >= BOOKMARK_REGEN_TIME) {
                             playerBookmarks++;
-                            lastBookmarkUpdateTime = now; // Update time to now
+                            lastBookmarkUpdateTime = now; // 타이머를 현재 시간으로 초기화합니다.
                             updateUI();
                             saveGame();
                         }
                     }
-                }, 1000); // Check every second
+
+                    // 이 블록은 남은 시간을 화면에 표시하는 로직입니다.
+                    if (playerBookmarks < MAX_BOOKMARKS) {
+                        const timeRemaining = BOOKMARK_REGEN_TIME - (Date.now() - lastBookmarkUpdateTime);
+                        const minutes = Math.floor(timeRemaining / 60000);
+                        const seconds = Math.floor((timeRemaining % 60000) / 1000);
+                        
+                        // MM:SS 형식으로 표시합니다. (예: 04:32)
+                        bookmarkTimerContainer.textContent = `(${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')})`;
+                        bookmarkTimerContainer.classList.remove('hidden');
+                    } else {
+                        // 책갈피가 가득 차면 타이머를 숨깁니다.
+                        bookmarkTimerContainer.classList.add('hidden');
+                    }
+                }, 1000); // 1초마다 반복
             }
 
 
@@ -1609,6 +1625,5 @@
     </script>
 </body>
 </html>
-
 
 
