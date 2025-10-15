@@ -120,6 +120,7 @@
                 <button id="tab-combat" class="tab-button font-bold py-2 px-6 rounded-full">독서</button>
                 <button id="tab-story" class="tab-button font-bold py-2 px-6 rounded-full">스토리</button>
                 <button id="tab-collection" class="tab-button font-bold py-2 px-6 rounded-full">도감</button>
+                <button id="tab-achievements" class="tab-button font-bold py-2 px-6 rounded-full">업적</button>
             </div>
             <div class="flex items-center gap-4">
                 <div id="event-point-display" class="hidden text-xl font-bold text-pink-300 bg-black/20 py-2 px-4 rounded-full">EVENT P: <span id="event-points">0</span></div>
@@ -282,6 +283,18 @@
                 </div>
                 <div id="main-story-container" class="space-y-3 max-h-[60vh] overflow-y-auto bg-black/20 p-4 rounded-xl">
                 </div>
+            </div>
+
+             <div id="achievements-view" class="hidden">
+                <div class="text-center mb-4">
+                    <p class="text-gray-200">다양한 목표를 달성하고 특별한 보상을 획득하세요.</p>
+                </div>
+                <div id="achievements-container" class="space-y-3 max-h-[60vh] overflow-y-auto bg-black/20 p-4 rounded-xl">
+                    </div>
+            </div>
+
+            <div id="toast-notification" class="hidden fixed bottom-10 left-1/2 -translate-x-1/2 bg-yellow-400 text-black font-bold py-3 px-6 rounded-full shadow-lg transition-all duration-300 z-50">
+                🎉 업적 달성!
             </div>
 
 
@@ -448,6 +461,16 @@
                 { title: '3장: 마지막 퍼즐', dungeonToUnlock: '용의 둥지', content: `윤서천의 연구실에서 나온 뒤, 서도진은 계속해서 위화감을 느꼈다. 현장에서 발견된 단서들, 의사의 제보, 윤서천의 알리바이. 모든 것이 너무나도 완벽하게 맞아떨어지는 것이 오히려 부자연스러웠다. 마치 잘 짜인 각본처럼. 그는 처음부터 모든 것을 다시 되짚어보기 시작했다. 박민준의 소설, 현장의 소품들, 용의자들의 증언. 모든 조각들을 머릿속에서 재구성하던 서도진의 눈에 한 가지 가능성이 스쳤다. 만약, 범인이 한 명이 아니라면? 만약, 이 모든 것이 누군가를 범인으로 지목하기 위한 거대한 연극이라면?[PAGE_BREAK]그 순간, 도천영에게서 전화가 걸려왔다. 박민준의 유서 필적이, 그의 담당 편집자였던 윤필규의 필적과 상당 부분 일치한다는 감정 결과가 나왔다는 것이다. 윤필규. 언제나 묵묵히 서도진과 박민준의 뒤에서 그들의 작품을 도왔던 남자. 그는 언제나 조용했고, 눈에 띄지 않았다. 하지만 그랬기에, 모두를 속일 수 있었다. 서도진은 깨달았다. 이 비극적인 소설의 진정한 작가는, 바로 가장 가까이에 있었던 그였음을. 이제 남은 것은 마지막 장을 넘기는 것뿐이었다. 진실이라는 이름의, 잔혹한 결말을.` }
             ];
 
+            // --- 업적 데이터 ---
+            const achievements = [
+                { id: 'ach_001', title: '첫걸음', description: '누군가의 서고에서 1회 뽑기', condition: (state) => state.stats.totalPulls >= 1, reward: { currency: 10 } },
+                { id: 'ach_002', title: '수집의 시작', description: '누군가의 서고에서 10회 뽑기', condition: (state) => state.stats.totalPulls >= 10, reward: { currency: 50 } },
+                { id: 'ach_003', title: '인연의 실', description: '등장인물 10종류 수집', condition: (state) => new Set(state.inventory.map(c => c.name)).size >= 10, reward: { currency: 50 } },
+                { id: 'ach_004', title: '탐정의 자질', description: 'SSR 등급 등장인물 획득', condition: (state) => state.inventory.some(c => c.rarity === 'SSR'), reward: { currency: 100 } },
+                { id: 'ach_005', title: '숲의 정복자', description: "'초보자의 숲' 클리어", condition: (state) => state.clearedDungeons.includes('초보자의 숲'), reward: { bookmarks: 5 } },
+                { id: 'ach_006', title: '넓어진 서재', description: '보관함 1회 확장', condition: (state) => state.capacity > 100, reward: { currency: 30 } },
+            ];
+            
             const rarityProbabilities = { 'SSR': 3, 'SR': 12, 'R': 35, 'N': 50 };
             const eventRarityProbabilities = { 'SSR': 6, 'SR': 14, 'R': 30, 'N': 50 };
             const EVENT_CHARACTER_NAME = '[핏빛 욕조] 서도진';
@@ -473,6 +496,8 @@
             const MAX_BOOKMARKS = 10;
             let lastBookmarkUpdateTime = Date.now();
             const BOOKMARK_REGEN_TIME = 5 * 60 * 1000; // 5 minutes
+            let playerAchievements = {}; // { ach_001: 'unlocked' | 'claimed' }
+            let playerStats = { totalPulls: 0 };
 
             const DECK_CAPACITY = 5;
             const PULL_ONE_COST = 10;
@@ -553,7 +578,8 @@
             const bookmarkDisplay = document.getElementById('bookmark-display');
             const maxBookmarkDisplay = document.getElementById('max-bookmark-display');
             const bookmarkTimerContainer = document.getElementById('bookmark-timer-container'); 
-
+            const achievementsContainer = document.getElementById('achievements-container'); // 이 줄 추가
+            const toastNotification = document.getElementById('toast-notification'); // 이 줄 추가
             
             // --- 데이터 저장/불러오기 함수 ---
             function isStorageAvailable() {
@@ -581,6 +607,8 @@
                     purchasedEventItems: purchasedEventItems,
                     bookmarks: playerBookmarks,
                     lastBookmarkUpdate: lastBookmarkUpdateTime,
+                    achievements: playerAchievements, // 이 줄 추가
+                    stats: playerStats,
                 };
                 localStorage.setItem(SAVE_DATA_KEY, JSON.stringify(saveData));
             }
@@ -606,6 +634,8 @@
                             purchasedEventItems = savedData.purchasedEventItems || {};
                             playerBookmarks = savedData.bookmarks ?? MAX_BOOKMARKS;
                             lastBookmarkUpdateTime = savedData.lastBookmarkUpdate ?? Date.now();
+                            playerAchievements = savedData.achievements || {}; // 이 줄 추가
+                            playerStats = savedData.stats || { totalPulls: 0 };
                             if (savedData.representative) {
                                 representativeCharacter = findCharacter(savedData.representative) || null;
                             }
@@ -622,6 +652,7 @@
                 updateUI();
                 checkEventStatus();
                 switchTab('home');
+                checkAchievements();
             }
 
             function initializeNewGameData() {
@@ -651,6 +682,85 @@
                 }
             }
 
+            // --- 업적 관련 함수 ---
+            function showToast() {
+                toastNotification.classList.remove('hidden');
+                setTimeout(() => {
+                    toastNotification.classList.add('hidden');
+                }, 2000); // 2초 후 사라짐
+            }
+
+            function checkAchievements() {
+                const currentState = {
+                    inventory: playerInventory,
+                    stats: playerStats,
+                    clearedDungeons: clearedDungeons,
+                    capacity: inventoryCapacity,
+                };
+                let newAchievementUnlocked = false;
+                achievements.forEach(ach => {
+                    // 아직 달성하지 않은 업적만 체크
+                    if (!playerAchievements[ach.id]) {
+                        if (ach.condition(currentState)) {
+                            playerAchievements[ach.id] = 'unlocked';
+                            newAchievementUnlocked = true;
+                        }
+                    }
+                });
+                if (newAchievementUnlocked) {
+                    showToast();
+                    // 현재 업적 탭을 보고 있다면 UI를 즉시 갱신
+                    if (document.getElementById('achievements-view').classList.contains('hidden') === false) {
+                        displayAchievements();
+                    }
+                }
+            }
+            
+            function displayAchievements() {
+                achievementsContainer.innerHTML = '';
+                achievements.forEach(ach => {
+                    const status = playerAchievements[ach.id]; // 'unlocked' or 'claimed' or undefined
+                    const achEl = document.createElement('div');
+                    achEl.className = `p-4 rounded-lg flex justify-between items-center transition-all ${status ? 'bg-white/20' : 'bg-black/30 opacity-60'}`;
+                    
+                    let rewardText = '';
+                    if (ach.reward.currency) rewardText = `💎 ${ach.reward.currency}`;
+                    if (ach.reward.bookmarks) rewardText = `🔖 ${ach.reward.bookmarks}`;
+
+                    let buttonHTML = '';
+                    if (status === 'claimed') {
+                        buttonHTML = `<button class="gacha-button bg-gray-600 text-white font-bold py-2 px-4 rounded-full text-sm" disabled>달성 완료</button>`;
+                    } else if (status === 'unlocked') {
+                        buttonHTML = `<button data-ach-id="${ach.id}" class="gacha-button bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full text-sm">보상 받기</button>`;
+                    } else {
+                        buttonHTML = `<button class="gacha-button bg-gray-800 text-gray-400 font-bold py-2 px-4 rounded-full text-sm" disabled>진행 중</button>`;
+                    }
+
+                    achEl.innerHTML = `
+                        <div>
+                            <h3 class="text-lg font-bold ${status ? 'text-yellow-300' : 'text-gray-400'}">${ach.title}</h3>
+                            <p class="text-sm text-gray-300">${ach.description} (보상: ${rewardText})</p>
+                        </div>
+                        ${buttonHTML}
+                    `;
+                    achievementsContainer.appendChild(achEl);
+                });
+            }
+            
+            function claimAchievement(achievementId) {
+                const ach = achievements.find(a => a.id === achievementId);
+                if (!ach || playerAchievements[ach.id] !== 'unlocked') return;
+
+                // 보상 지급
+                if (ach.reward.currency) playerCurrency += ach.reward.currency;
+                if (ach.reward.bookmarks) playerBookmarks = Math.min(MAX_BOOKMARKS, playerBookmarks + ach.reward.bookmarks);
+                
+                playerAchievements[ach.id] = 'claimed'; // 상태 변경
+                
+                updateUI();
+                displayAchievements(); // UI 갱신
+                saveGame();
+            }
 
             // --- 핵심 게임 로직 함수 ---
             function switchTab(tabName) {
@@ -666,6 +776,7 @@
                 else if (tabName === 'collection') displayCollection();
                 else if (tabName === 'story') displayStoryView();
                 else if (tabName === 'event') displayEventView();
+                else if (tabName === 'achievements') displayAchievements();
             }
             
             function switchSubTab(viewContainer, button) {
@@ -914,6 +1025,7 @@
                     playerCurrency -= EXPAND_COST; inventoryCapacity += EXPAND_AMOUNT;
                     showMessage(`보관함이 ${inventoryCapacity}칸으로 확장되었습니다!`, 'text-green-300', messageArea);
                     updateUI(); displayInventory(); saveGame();
+                    checkAchievements();
                 } else {
                     showMessage('보석이 부족하여 확장할 수 없습니다.', 'text-red-400', messageArea);
                 }
@@ -951,8 +1063,10 @@
                     }
                     results.push(pulledChar);
                     playerInventory.push(pulledChar); 
+                    playerStats.totalPulls++; // 이 줄 추가
                 }
                 displayResults(results); updateUI(); saveGame();
+                checkAchievements(); // 이 줄 추가
             }
 
             function pullCharacter(allowedRarities = null, gachaType = 'normal') {
@@ -1306,6 +1420,7 @@
                 
                 updateUI();
                 saveGame();
+                checkAchievements();
                 combatResultModal.classList.remove('hidden');
                 isCombatRunning = false;
             }
@@ -1499,6 +1614,12 @@
             
             // --- 이벤트 리스너 ---
             allTabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.id.split('-')[1])));
+            achievementsContainer.addEventListener('click', (e) => {
+                const button = e.target.closest('[data-ach-id]');
+                if (button) {
+                    claimAchievement(button.dataset.achId);
+                }
+            });
             pullOneButton.addEventListener('click', () => handlePull(1, PULL_ONE_COST, 'normal'));
             pullTenButton.addEventListener('click', () => handlePull(10, PULL_TEN_COST, 'normal'));
             pullOneEventButton.addEventListener('click', () => handlePull(1, PULL_ONE_COST, 'event'));
