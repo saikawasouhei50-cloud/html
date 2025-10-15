@@ -123,6 +123,7 @@
             </div>
             <div class="flex items-center gap-4">
                 <div id="event-point-display" class="hidden text-xl font-bold text-pink-300 bg-black/20 py-2 px-4 rounded-full">EVENT P: <span id="event-points">0</span></div>
+                <div class="text-xl font-bold text-cyan-300 bg-black/20 py-2 px-4 rounded-full inline-block">🔖 <span id="bookmark-display">10</span> / <span id="max-bookmark-display">10</span></div>
                 <div class="text-2xl font-bold text-yellow-300 bg-black/20 py-2 px-6 rounded-full inline-block">💎 <span id="currency-display">100</span></div>
                 <button id="reset-game" class="gacha-button bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full text-sm">초기화</button>
             </div>
@@ -344,1183 +345,1269 @@
     </div>
 
     <script>
-        // 이 곳에 위의 game-script.js 파일의 내용을 복사하여 붙여넣으세요.
-        // 여기에 전체 스크립트 코드가 들어갑니다.
         document.addEventListener('DOMContentLoaded', () => {
-    // --- 게임 설정 ---
-    const characters = [
-        // name(고유), baseName, rarity, faction, stats, imageUrl, cardImageUrl, dialogues, skills, deathDialogue, story
-        { name: '[소설가] 서도진', baseName: '서도진', rarity: 'N', faction: '조수', stats: { hp: 50, atk: 5, def: 5 }, imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=서도진', cardImageUrl: 'https://placehold.co/150x180/a0aec0/ffffff?text=서도진', dialogues: ['이야기의 시작은...'], skills: [{ name: '고뇌', dialogue: '음...', power: 1.2, type: 'damage' }], deathDialogue: '마감이...', story: `서재에 앉아 잉크 냄새를 맡는 것이 세상에서 가장 큰 행복이었던 남자, 서도진. 그는 베스트셀러 작가였지만, 세상의 명성보다는 자신만의 이야기 세계에 침잠하는 것을 더 즐겼다. 그의 손끝에서 태어나는 문장들은 때로는 날카로운 추리가 되고, 때로는 비극적인 사랑이 되었다. 독자들은 그의 이야기에 열광했지만, 정작 그 자신은 자신의 이야기가 현실을 침범하리라고는 상상조차 하지 못했다.\n\n그의 서재는 고요했다. 창밖의 도시 소음만이 희미하게 들려올 뿐, 공간을 채우는 것은 오직 오래된 종이 냄새와 그가 내쉬는 깊은 한숨뿐이었다. 벽면을 가득 채운 책들은 그가 걸어온 길이자, 앞으로 나아갈 길을 비추는 등대였다. 하지만 오늘따라 그 등대는 희미했다. 다음 작품의 마감이 코앞이었지만, 이야기의 마지막 조각이 맞춰지지 않았다. 마치 안개 속을 헤매는 기분이었다. 그의 주인공은 범인의 그림자를 쫓고 있었지만, 그 그림자는 손에 잡힐 듯 잡히지 않고 교묘하게 빠져나갔다. "젠장, 이럴 때가 아닌데..." 그는 헝클어진 머리를 거칠게 쓸어 넘겼다.[PAGE_BREAK]그러던 어느 날, 그의 오랜 친구이자 경쟁자였던 작가가 싸늘한 시신으로 발견되었다. 현장은 마치 소설의 한 장면처럼 기묘하게 꾸며져 있었고, 경찰은 단순 사고로 종결하려 했다. 하지만 서도진은 직감했다. 이것은 사고가 아니다. 누군가가 의도적으로 만들어낸, 잔혹한 이야기의 시작이라는 것을. 그는 친구의 억울한 죽음의 진실을 밝히기 위해, 그리고 자신의 이야기가 더는 더럽혀지는 것을 막기 위해 직접 사건에 뛰어들기로 결심한다. 그의 손에는 만년필 대신, 차가운 루페가 들려 있었다.` },
-        { name: '[탐정] 서도진', baseName: '서도진', rarity: 'R', faction: '탐정', stats: { hp: 100, atk: 15, def: 10 }, imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=서도진', cardImageUrl: 'https://placehold.co/150x180/63b3ed/ffffff?text=서도진', dialogues: ['사건 현장은 보존해주시죠.'], skills: [{ name: '추리', dialogue: '범인은 바로 당신!', power: 1.5, type: 'damage' }], deathDialogue: '이런... 실수를...', story: '사건을 파헤치기 위해, 그는 펜 대신 돋보기를 들었다. 그의 날카로운 시선은 거짓을 꿰뚫는다.' },
-        { name: '[핏빛 욕조] 서도진', baseName: '서도진', rarity: 'SR', faction: '범인', stats: { hp: 200, atk: 30, def: 15 }, imageUrl: 'https://placehold.co/300x500/b794f4/ffffff?text=서도진', cardImageUrl: 'https://placehold.co/150x180/b794f4/ffffff?text=서도진', dialogues: ['완벽한 트릭이었는데.'], skills: [{ name: '알리바이', dialogue: '그 시간에 전 여기 없었습니다만?', power: 1.8, type: 'damage' }], deathDialogue: '들켜버렸나...', story: '가장 완벽한 범죄는, 아무도 상상하지 못한 곳에서 이루어진다. 그는 자신의 소설을 현실로 만들고자 했다.' },
-        { name: '[추리의 제왕] 서도진', baseName: '서도진', rarity: 'SSR', faction: '탐정', stats: { hp: 380, atk: 42, def: 28 }, imageUrl: 'https://placehold.co/300x500/f6e05e/000000?text=서도진', cardImageUrl: 'https://placehold.co/150x180/f6e05e/000000?text=서도진', dialogues: ['진실은 언제나 하나.'], skills: [{ name: '사건 재구성', dialogue: '모든 조각이 맞춰졌어.', power: 2.2, type: 'damage' }, { name: '최종 변론', dialogue: '이의 있습니까!', power: 1.5, type: 'debuff_def' }], deathDialogue: '내 추리가... 틀렸을 리가...', story: '수많은 사건을 해결하며 살아있는 전설이 되었다. 그의 이름 앞에서는 어떠한 거짓도 통하지 않는다.' },
-        
-        { name: '[편집자] 윤필규', baseName: '윤필규', rarity: 'N', faction: '조수', stats: { hp: 60, atk: 8, def: 3 }, imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=윤필규', cardImageUrl: 'https://placehold.co/150x180/a0aec0/ffffff?text=윤필규', dialogues: ['오타입니다.'], skills: [{ name: '교정', dialogue: '이 문장은 틀렸습니다.', power: 1.3, type: 'damage' }], deathDialogue: '마감만은... 제발...', story: '그저 성실한 편집자일 뿐이었다. 담당 작가의 사건에 휘말리기 전까진.' },
-        { name: '[조수] 윤필규', baseName: '윤필규', rarity: 'R', faction: '조수', stats: { hp: 110, atk: 14, def: 11 }, imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=윤필규', cardImageUrl: 'https://placehold.co/150x180/63b3ed/ffffff?text=윤필규', dialogues: ['제가 돕겠습니다.'], skills: [{ name: '자료 조사', dialogue: '찾았습니다!', power: 1.4, type: 'damage' }], deathDialogue: '죄송합니다...', story: '어리숙해 보이지만, 그의 꼼꼼함은 사건 해결의 중요한 실마리가 된다.' },
-        { name: '[동거인] 윤필규', baseName: '윤필규', rarity: 'SR', faction: '조수', stats: { hp: 240, atk: 26, def: 19 }, imageUrl: 'https://placehold.co/300x500/b794f4/ffffff?text=윤필규', cardImageUrl: 'https://placehold.co/150x180/b794f4/ffffff?text=윤필규', dialogues: ['집세... 잊지 않으셨죠?'], skills: [{ name: '잔소리', dialogue: '방 좀 치우세요!', power: 1.9, type: 'damage' }], deathDialogue: '그래도... 즐거웠어...', story: '사건에 휘말린 작가와 함께 살며, 본의 아니게 사건의 중심에 서게 된다.' },
-        { name: '[올곧은 정의] 윤필규', baseName: '윤필규', rarity: 'SSR', faction: '탐정', stats: { hp: 370, atk: 43, def: 29 }, imageUrl: 'https://placehold.co/300x500/f6e05e/000000?text=윤필규', cardImageUrl: 'https://placehold.co/150x180/f6e05e/000000?text=윤필규', dialogues: ['진실을 외면할 순 없습니다.'], skills: [{ name: '내부고발', dialogue: '제가 모든 것을 밝히겠습니다.', power: 2.4, type: 'damage' }, { name: '굳은 의지', dialogue: '저는 꺾이지 않습니다!', power: 1.8, type: 'vampire' }], deathDialogue: '정의는... 살아있다...', story: '평범했던 그는, 수많은 불의를 목격하며 스스로가 정의의 목소리가 되기로 결심했다.' },
+            // --- 게임 설정 ---
+            const characters = [
+                // name(고유), baseName, rarity, faction, stats, imageUrl, cardImageUrl, dialogues, skills, deathDialogue, story
+                { name: '[소설가] 서도진', baseName: '서도진', rarity: 'N', faction: '탐정', stats: { hp: 50, atk: 5, def: 5 }, imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=서도진', cardImageUrl: 'https://placehold.co/150x180/a0aec0/ffffff?text=서도진', dialogues: ['이야기의 시작은...'], skills: [{ name: '고뇌', dialogue: '음...', power: 1.2, type: 'damage' }], deathDialogue: '마감이...', story: `서재에 앉아 잉크 냄새를 맡는 것이 세상에서 가장 큰 행복이었던 남자, 서도진. 그는 베스트셀러 작가였지만, 세상의 명성보다는 자신만의 이야기 세계에 침잠하는 것을 더 즐겼다. 그의 손끝에서 태어나는 문장들은 때로는 날카로운 추리가 되고, 때로는 비극적인 사랑이 되었다. 독자들은 그의 이야기에 열광했지만, 정작 그 자신은 자신의 이야기가 현실을 침범하리라고는 상상조차 하지 못했다.\n\n그의 서재는 고요했다. 창밖의 도시 소음만이 희미하게 들려올 뿐, 공간을 채우는 것은 오직 오래된 종이 냄새와 그가 내쉬는 깊은 한숨뿐이었다. 벽면을 가득 채운 책들은 그가 걸어온 길이자, 앞으로 나아갈 길을 비추는 등대였다. 하지만 오늘따라 그 등대는 희미했다. 다음 작품의 마감이 코앞이었지만, 이야기의 마지막 조각이 맞춰지지 않았다. 마치 안개 속을 헤매는 기분이었다. 그의 주인공은 범인의 그림자를 쫓고 있었지만, 그 그림자는 손에 잡힐 듯 잡히지 않고 교묘하게 빠져나갔다. "젠장, 이럴 때가 아닌데..." 그는 헝클어진 머리를 거칠게 쓸어 넘겼다.[PAGE_BREAK]그러던 어느 날, 그의 오랜 친구이자 경쟁자였던 작가가 싸늘한 시신으로 발견되었다. 현장은 마치 소설의 한 장면처럼 기묘하게 꾸며져 있었고, 경찰은 단순 사고로 종결하려 했다. 하지만 서도진은 직감했다. 이것은 사고가 아니다. 누군가가 의도적으로 만들어낸, 잔혹한 이야기의 시작이라는 것을. 그는 친구의 억울한 죽음의 진실을 밝히기 위해, 그리고 자신의 이야기가 더는 더럽혀지는 것을 막기 위해 직접 사건에 뛰어들기로 결심한다. 그의 손에는 만년필 대신, 차가운 루페가 들려 있었다.` },
+                { name: '[탐정] 서도진', baseName: '서도진', rarity: 'R', faction: '탐정', stats: { hp: 100, atk: 15, def: 10 }, imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=서도진', cardImageUrl: 'https://placehold.co/150x180/63b3ed/ffffff?text=서도진', dialogues: ['사건 현장은 보존해주시죠.'], skills: [{ name: '추리', dialogue: '범인은 바로 당신!', power: 1.5, type: 'damage' }], deathDialogue: '이런... 실수를...', story: '사건을 파헤치기 위해, 그는 펜 대신 돋보기를 들었다. 그의 날카로운 시선은 거짓을 꿰뚫는다.' },
+                { name: '[악몽] 서도진', baseName: '서도진', rarity: 'SR', faction: '탐정', stats: { hp: 200, atk: 30, def: 15 }, imageUrl: 'https://placehold.co/300x500/718096/ffffff?text=서도진', cardImageUrl: 'https://placehold.co/150x180/718096/ffffff?text=서도진', dialogues: ['자, 내 소설의 다음 페이지를 넘겨볼까?'], skills: [{ name: '현실 침식', dialogue: '이게 꿈이 아니라고 확신할 수 있나?', power: 1.8, type: 'damage' }], deathDialogue: '이 악몽은... 이제 시작일 뿐이야...', story: '그가 쓴 소설은 단순한 이야기가 아니다. 독자의 마음속 가장 깊은 공포를 파고드는 현실의 악몽 그 자체다. 그는 자신의 펜 끝에서 벌어지는 비극을 즐긴다.' },
+                { name: '[작가의 우울] 서도진', baseName: '서도진', rarity: 'SSR', faction: '탐정', stats: { hp: 380, atk: 42, def: 28 }, imageUrl: 'https://placehold.co/300x500/4a5568/ffffff?text=서도진', cardImageUrl: 'https://placehold.co/150x180/4a5568/ffffff?text=서도진', dialogues: ['이야기의 끝은... 언제나 비극이지.'], skills: [{ name: '행간 읽기', dialogue: '모든 비극엔 이유가 있는 법.', power: 2.2, type: 'damage' }, { name: '에필로그', dialogue: '이제, 이 이야기의 막을 내리죠.', power: 1.5, type: 'debuff_def' }], deathDialogue: '결국... 나 또한 이야기의 일부였을 뿐인가...', story: '범인의 마음을 너무 깊이 이해해버린 천재 작가. 그는 사건의 진실을 꿰뚫어 볼수록, 인간 내면의 깊은 어둠과 마주하며 끝없는 우울에 잠긴다.' },
+                { name: '[편집자] 윤필규', baseName: '윤필규', rarity: 'N', faction: '조수', stats: { hp: 60, atk: 8, def: 3 }, imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=윤필규', cardImageUrl: 'https://placehold.co/150x180/a0aec0/ffffff?text=윤필규', dialogues: ['오타입니다.'], skills: [{ name: '교정', dialogue: '이 문장은 틀렸습니다.', power: 1.3, type: 'damage' }], deathDialogue: '마감만은... 제발...', story: '그저 성실한 편집자일 뿐이었다. 담당 작가의 사건에 휘말리기 전까진.' },
+                { name: '[조수] 윤필규', baseName: '윤필규', rarity: 'R', faction: '조수', stats: { hp: 110, atk: 14, def: 11 }, imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=윤필규', cardImageUrl: 'https://placehold.co/150x180/63b3ed/ffffff?text=윤필규', dialogues: ['제가 돕겠습니다.'], skills: [{ name: '자료 조사', dialogue: '찾았습니다!', power: 1.4, type: 'damage' }], deathDialogue: '죄송합니다...', story: '어리숙해 보이지만, 그의 꼼꼼함은 사건 해결의 중요한 실마리가 된다.' },
+                { name: '[동거인] 윤필규', baseName: '윤필규', rarity: 'SR', faction: '조수', stats: { hp: 240, atk: 26, def: 19 }, imageUrl: 'https://placehold.co/300x500/b794f4/ffffff?text=윤필규', cardImageUrl: 'https://placehold.co/150x180/b794f4/ffffff?text=윤필규', dialogues: ['집세... 잊지 않으셨죠?'], skills: [{ name: '잔소리', dialogue: '방 좀 치우세요!', power: 1.9, type: 'damage' }], deathDialogue: '그래도... 즐거웠어...', story: '사건에 휘말린 작가와 함께 살며, 본의 아니게 사건의 중심에 서게 된다.' },
+                { name: '[올곧은 정의] 윤필규', baseName: '윤필규', rarity: 'SSR', faction: '조수', stats: { hp: 370, atk: 43, def: 29 }, imageUrl: 'https://placehold.co/300x500/f6e05e/000000?text=윤필규', cardImageUrl: 'https://placehold.co/150x180/f6e05e/000000?text=윤필규', dialogues: ['진실을 외면할 순 없습니다.'], skills: [{ name: '내부고발', dialogue: '제가 모든 것을 밝히겠습니다.', power: 2.4, type: 'damage' }, { name: '굳은 의지', dialogue: '저는 꺾이지 않습니다!', power: 1.8, type: 'vampire' }], deathDialogue: '정의는... 살아있다...', story: '평범했던 그는, 수많은 불의를 목격하며 스스로가 정의의 목소리가 되기로 결심했다.' },
+                { name: '[연구자] 윤서천', baseName: '윤서천', rarity: 'N', faction: '조수', stats: { hp: 45, atk: 9, def: 4 }, imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=윤서천', cardImageUrl: 'https://placehold.co/150x180/a0aec0/ffffff?text=윤서천', dialogues: ['흥미로운 샘플이군.'], skills: [{ name: '분석', dialogue: '결과가 나왔군.', power: 1.3, type: 'damage' }], deathDialogue: '데이터가... 부족해...', story: '그의 연구 노트에는 이해할 수 없는 화학식들만 가득했다.' },
+                { name: '[범인] 윤서천', baseName: '윤서천', rarity: 'R', faction: '범인', stats: { hp: 100, atk: 17, def: 9 }, imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=윤서천', cardImageUrl: 'https://placehold.co/150x180/63b3ed/ffffff?text=윤서천', dialogues: ['계획通り...'], skills: [{ name: '독극물', dialogue: '치사량이야.', power: 1.6, type: 'damage' }], deathDialogue: '계획에 없었는데...', story: '천재적인 두뇌는 때로는 위험한 방향으로 흐르기도 한다.' },
+                { name: '[실험쥐] 윤서천', baseName: '윤서천', rarity: 'SR', faction: '범인', stats: { hp: 260, atk: 24, def: 17 }, imageUrl: 'https://placehold.co/300x500/b794f4/ffffff?text=윤서천', cardImageUrl: 'https://placehold.co/150x180/b794f4/ffffff?text=윤서천', dialogues: ['이 주사... 정말 괜찮은 건가?'], skills: [{ name: '이상 반응', dialogue: '몸이... 뜨거워...!', power: 2.0, type: 'damage' }], deathDialogue: '결과는... 실패인가...', story: '스스로를 실험체로 삼는 것. 그것은 광기인가, 아니면 위대한 희생인가.' },
+                { name: '[in vivo] 윤서천', baseName: '윤서천', rarity: 'SSR', faction: '탐정', stats: { hp: 340, atk: 48, def: 24 }, imageUrl: 'https://placehold.co/300x500/f6e05e/000000?text=윤서천', cardImageUrl: 'https://placehold.co/150x180/f6e05e/000000?text=윤서천', dialogues: ['인류를 위한 희생이다.'], skills: [{ name: '임상실험', dialogue: '넌 훌륭한 샘플이야.', power: 2.5, type: 'damage' }, { name: '부작용', dialogue: '예상 밖인데!', power: 1.4, type: 'debuff_def' }], deathDialogue: '최고의... 샘플이었는데...', story: '그는 자신의 연구가 세상을 구원할 것이라 굳게 믿고 있다. 그 과정에서 발생하는 사소한 희생은 어쩔 수 없다고 생각한다.' },
+                { name: '[서점 주인] 한 현', baseName: '한 현', rarity: 'N', faction: '조수', stats: { hp: 70, atk: 6, def: 6 }, imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=한현', cardImageUrl: 'https://placehold.co/150x180/a0aec0/ffffff?text=한현', dialogues: ['어서오세요.'], skills: [{ name: '책 추천', dialogue: '이건 어떠신지?', power: 1.1, type: 'damage' }], deathDialogue: '가게는... 누가...', story: '동네의 작은 서점을 운영하는 평범한 청년. 그가 숨겨진 과거를 가지고 있다는 사실을 아는 이는 거의 없다.' },
+                { name: '[조수] 한 현', baseName: '한 현', rarity: 'R', faction: '조수', stats: { hp: 140, atk: 14, def: 13 }, imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=한현', cardImageUrl: 'https://placehold.co/150x180/63b3ed/ffffff?text=한현', dialogues: ['제가 가보겠습니다.'], skills: [{ name: '현장 조사', dialogue: '뭔가 있군요.', power: 1.4, type: 'damage' }], deathDialogue: '제가... 너무 나섰나요...', story: '사건의 진상을 파헤치는 탐정을 보며, 그는 잊고 있던 과거의 자신을 떠올린다.' },
+                { name: '[동행인] 한 현', baseName: '한 현', rarity: 'SR', faction: '조수', stats: { hp: 230, atk: 28, def: 20 }, imageUrl: 'https://placehold.co/300x500/b794f4/ffffff?text=한현', cardImageUrl: 'https://placehold.co/150x180/b794f4/ffffff?text=한현', dialogues: ['혼자 가게 둘 순 없죠.'], skills: [{ name: '엄호', dialogue: '뒤는 맡겨주세요!', power: 1.7, type: 'damage' }], deathDialogue: '먼저... 가세요...', story: '위험한 길이라는 것을 알면서도, 그는 동료를 위해 기꺼이 그 길에 함께 오른다.' },
+                { name: '[한때는, 탐정] 한 현', baseName: '한 현', rarity: 'SSR', faction: '탐정', stats: { hp: 390, atk: 40, def: 30 }, imageUrl: 'https://placehold.co/300x500/f6e05e/000000?text=한현', cardImageUrl: 'https://placehold.co/150x180/f6e05e/000000?text=한현', dialogues: ['오랜만이군, 이 감각.'], skills: [{ name: '오래된 통찰', dialogue: '범인은... 이 안에 없어.', power: 2.2, type: 'damage' }, { name: '감싸기', dialogue: '더는 다치게 둘 수 없지!', power: 1.9, type: 'vampire' }], deathDialogue: '결국... 여기까지인가...', story: '과거의 명성을 뒤로 하고 평범한 삶을 택했던 그. 하지만 눈앞의 사건은 그를 다시 탐정의 길로 이끈다.' },
+                // ==================== 도천영 ====================
+                { name: '[연구자] 도천영', baseName: '도천영', rarity: 'N', faction: '탐정', stats: { hp: 65, atk: 7, def: 5 }, imageUrl: 'https://placehold.co/300x500/4fd1c5/ffffff?text=도천영', cardImageUrl: 'https://placehold.co/150x180/4fd1c5/ffffff?text=도천영', dialogues: ['가설을 세워보죠.'], skills: [{ name: '데이터 분석', dialogue: '변수를 통제해야 합니다.', power: 1.1, type: 'damage' }], deathDialogue: '데이터가... 부족했어...', story: '세상의 모든 현상을 데이터로 이해하려는 냉철한 연구자. 그의 연구실은 언제나 서늘한 공기가 감돈다.' },
+                { name: '[탐정] 도천영', baseName: '도천영', rarity: 'R', faction: '탐정', stats: { hp: 130, atk: 15, def: 12 }, imageUrl: 'https://placehold.co/300x500/319795/ffffff?text=도천영', cardImageUrl: 'https://placehold.co/150x180/319795/ffffff?text=도천영', dialogues: ['현장은 거짓말을 하지 않습니다.'], skills: [{ name: '증거 수집', dialogue: '이건... 흥미롭군요.', power: 1.4, type: 'damage' }], deathDialogue: '이런 변수는... 계산에 없었는데...', story: '사건 현장을 하나의 거대한 실험실로 간주한다. 그에게 미제 사건이란 아직 증명되지 않은 가설일 뿐이다.' },
+                { name: '[in vitro] 도천영', baseName: '도천영', rarity: 'SR', faction: '탐정', stats: { hp: 220, atk: 29, def: 19 }, imageUrl: 'https://placehold.co/300x500/086f83/ffffff?text=도천영', cardImageUrl: 'https://placehold.co/150x180/086f83/ffffff?text=도천영', dialogues: ['자, 실험을 시작하죠.'], skills: [{ name: '가설 검증', dialogue: '결과는 명확하군요.', power: 1.8, type: 'damage' }], deathDialogue: '오염... 됐어...', story: '통제된 환경, 완벽한 변수 통제 하에 진실을 규명한다. 그의 손끝에서 벌어지는 작은 실험은 사건 전체를 뒤흔든다.' },
+                // ==================== 박연우 ====================
+                { name: '[연구자] 박연우', baseName: '박연우', rarity: 'N', faction: '탐정', stats: { hp: 75, atk: 5, def: 6 }, imageUrl: 'https://placehold.co/300x500/f6ad55/ffffff?text=박연우', cardImageUrl: 'https://placehold.co/150x180/f6ad55/ffffff?text=박연우', dialogues: ['기초부터 차근차근.'], skills: [{ name: '문헌 조사', dialogue: '선행 연구를 참고하죠.', power: 1.1, type: 'damage' }], deathDialogue: '아직...이었는데...', story: '언제나 미소를 잃지 않는 긍정적인 성격의 유기화학 연구자. 복잡한 화학 구조식 속에서 아름다움을 찾는다.' },
+                { name: '[탐정] 박연우', baseName: '박연우', rarity: 'R', faction: '탐정', stats: { hp: 150, atk: 12, def: 14 }, imageUrl: 'https://placehold.co/300x500/dd6b20/ffffff?text=박연우', cardImageUrl: 'https://placehold.co/150x180/dd6b20/ffffff?text=박연우', dialogues: ['조각들을 맞춰볼까요?'], skills: [{ name: '알리바이 분석', dialogue: '이 시간엔... 이게 불가능해요.', power: 1.4, type: 'damage' }], deathDialogue: '마지막 퍼즐이...', story: '흩어진 단서들을 모아 하나의 진실로 완성시키는 과정을 즐긴다. 그에게 사건 해결은 곧 완벽한 분자를 합성하는 것과 같다.' },
+                { name: '[total synthesis] 박연우', baseName: '박연우', rarity: 'SR', faction: '탐정', stats: { hp: 240, atk: 25, def: 22 }, imageUrl: 'https://placehold.co/300x500/c05621/ffffff?text=박연우', cardImageUrl: 'https://placehold.co/150x180/c05621/ffffff?text=박연우', dialogues: ['자, 모든 것이 모였습니다.'], skills: [{ name: '전합성', dialogue: '이것이 바로 진실의 구조입니다!', power: 1.8, type: 'damage' }], deathDialogue: '반응이... 멈췄어...', story: '아무것도 없는 곳에서 시작하여 단 하나의 완벽한 진실을 구축해낸다. 그의 통찰력은 사건의 전모를 꿰뚫는다.' },
+                // ==================== 강은율 ====================
+                { name: '[연구자] 강은율', baseName: '강은율', rarity: 'N', faction: '조수', stats: { hp: 60, atk: 8, def: 5 }, imageUrl: 'https://placehold.co/300x500/76e4f7/000000?text=강은율', cardImageUrl: 'https://placehold.co/150x180/76e4f7/000000?text=강은율', dialogues: ['시뮬레이션을 돌려보겠습니다.'], skills: [{ name: '모델링', dialogue: '예상 결과는 이렇습니다.', power: 1.1, type: 'damage' }], deathDialogue: '계산 오류인가...', story: '컴퓨터와 숫자를 더 신뢰하는 계산화학 연구자. 복잡한 현실보다는 깔끔한 가상 세계에서의 계산을 선호한다.' },
+                { name: '[조수] 강은율', baseName: '강은율', rarity: 'R', faction: '조수', stats: { hp: 125, atk: 16, def: 11 }, imageUrl: 'https://placehold.co/300x500/0bc5ea/ffffff?text=강은율', cardImageUrl: 'https://placehold.co/150x180/0bc5ea/ffffff?text=강은율', dialogues: ['필요한 정보는 전부 모았습니다.'], skills: [{ name: '정보 처리', dialogue: '여기서 유의미한 패턴이...', power: 1.4, type: 'damage' }], deathDialogue: '제 정보가... 틀렸을 리 없는데...', story: '탐정의 요청에 따라 방대한 양의 데이터를 수집하고 분석하며 그의 활동을 돕는다. 여전히 사람보단 숫자를 믿는다.' },
+                { name: '[in silico] 강은율', baseName: '강은율', rarity: 'SR', faction: '조수', stats: { hp: 210, atk: 30, def: 18 }, imageUrl: 'https://placehold.co/300x500/0987a0/ffffff?text=강은율', cardImageUrl: 'https://placehold.co/150x180/0987a0/ffffff?text=강은율', dialogues: ['모든 경우의 수를 예측했습니다.'], skills: [{ name: '예측 분석', dialogue: '범인은, 그리로 갈 겁니다.', power: 1.8, type: 'damage' }], deathDialogue: '최적해가... 아니었단 말인가...', story: '사건의 모든 정보를 데이터로 변환하여 가장 가능성이 높은 진실을 도출해낸다. 그의 예측은 거의 빗나가는 법이 없다.' },
+                // ==================== 백정문 ====================
+                { name: '[연구자] 백정문', baseName: '백정문', rarity: 'N', faction: '탐정', stats: { hp: 70, atk: 6, def: 6 }, imageUrl: 'https://placehold.co/300x500/fbb6ce/000000?text=백정문', cardImageUrl: 'https://placehold.co/150x180/fbb6ce/000000?text=백정문', dialogues: ['에너지를 측정해보죠.'], skills: [{ name: '분광학', dialogue: '빛이 모든 걸 말해줄 겁니다.', power: 1.1, type: 'damage' }], deathDialogue: '에너지가... 부족해...', story: '들뜬 상태의 분자를 연구하는 물리화학자. 평소엔 차분하지만, 흥미로운 현상을 발견하면 누구보다 뜨거워진다.' },
+                { name: '[탐정] 백정문', baseName: '백정문', rarity: 'R', faction: '탐정', stats: { hp: 140, atk: 14, def: 13 }, imageUrl: 'https://placehold.co/300x500/f687b3/ffffff?text=백정문', cardImageUrl: 'https://placehold.co/150x180/f687b3/ffffff?text=백정문', dialogues: ['보이지 않는 에너지가 느껴지는군요.'], skills: [{ name: '열 추적', dialogue: '아직... 온기가 남아있어.', power: 1.4, type: 'damage' }], deathDialogue: '결정적인 순간에...', story: '사건 현장에 남은 미세한 에너지의 흔적을 쫓아 진실에 다가간다. 그의 눈에는 보이지 않는 것들이 보인다.' },
+                { name: '[삼중항] 백정문', baseName: '백정문', rarity: 'SR', faction: '탐정', stats: { hp: 230, atk: 28, def: 20 }, imageUrl: 'https://placehold.co/300x500/d53f8c/ffffff?text=백정문', cardImageUrl: 'https://placehold.co/150x180/d53f8c/ffffff?text=백정문', dialogues: ['자, 들떠볼 시간입니다!'], skills: [{ name: '인광(燐光)', dialogue: '숨어있는 진실을 비춰라!', power: 1.8, type: 'damage' }], deathDialogue: '다시... 바닥상태로...', story: '사건이 교착 상태에 빠졌을 때, 그는 평범한 상태에서는 보이지 않는 진실을 꿰뚫어 보는 힘을 발휘한다.' },
+                // ==================== 독고유진 ====================
+                { name: '[소설가] 독고유진', baseName: '독고유진', rarity: 'N', faction: '조수', stats: { hp: 80, atk: 6, def: 5 }, imageUrl: 'https://placehold.co/300x500/9f7aea/ffffff?text=독고유진', cardImageUrl: 'https://placehold.co/150x180/9f7aea/ffffff?text=독고유진', dialogues: ['재미있는 이야기네요.'], skills: [{ name: '인물 설정', dialogue: '그 사람은... 그런 말을 할 리가 없어요.', power: 1.1, type: 'damage' }], deathDialogue: '결말이... 이래선 안되는데...', story: '사람들의 이야기를 듣고 쓰는 것을 좋아하는 미스터리 소설가. 그의 상상력은 때로 현실보다 더 현실 같다.' },
+                { name: '[조수] 독고유진', baseName: '독고유진', rarity: 'R', faction: '조수', stats: { hp: 160, atk: 13, def: 13 }, imageUrl: 'https://placehold.co/300x500/805ad5/ffffff?text=독고유진', cardImageUrl: 'https://placehold.co/150x180/805ad5/ffffff?text=독고유진', dialogues: ['다음 이야기가 궁금해졌거든요.'], skills: [{ name: '복선 파악', dialogue: '이건 그때 그 사건과 이어져있어!', power: 1.4, type: 'damage' }], deathDialogue: '제가... 너무 깊이 들어왔나요...', story: '자신이 쓰던 소설보다 더 소설 같은 현실의 사건에 휘말린다. 그는 이야기의 끝을 보기 위해 탐정과 동행하기로 한다.' },
+                { name: '[무사] 독고유진', baseName: '독고유진', rarity: 'SR', faction: '조수', stats: { hp: 250, atk: 30, def: 18 }, imageUrl: 'https://placehold.co/300x500/553c9a/ffffff?text=독고유진', cardImageUrl: 'https://placehold.co/150x180/553c9a/ffffff?text=독고유진', dialogues: ['이야기를 지키기 위해서라면.'], skills: [{ name: '일필휘지(一筆揮之)', dialogue: '이 검으로, 결말을 쓰겠다!', power: 1.8, type: 'damage' }], deathDialogue: '여기까지가... 제 이야기인가 봅니다...', story: '그가 쓰는 것은 더 이상 펜이 아니다. 소중한 사람들과 자신이 만든 이야기를 지키기 위해, 그는 잊고 있던 검을 다시 잡았다.' },
+                // ==================== 양석민 ====================
+                { name: '[연구자] 양석민', baseName: '양석민', rarity: 'N', faction: '탐정', stats: { hp: 70, atk: 7, def: 5 }, imageUrl: 'https://placehold.co/300x500/38a169/ffffff?text=양석민', cardImageUrl: 'https://placehold.co/150x180/38a169/ffffff?text=양석민', dialogues: ['흐름을 읽어야 합니다.'], skills: [{ name: '촉매 작용', dialogue: '반응을 이끌어내죠.', power: 1.1, type: 'damage' }], deathDialogue: '길을... 잃었군...', story: '반응의 경로를 설계하고 예측하는 것을 전문으로 하는 연구원. 언제나 가장 효율적인 길을 찾으려 노력한다.' },
+                { name: '[탐정] 양석민', baseName: '양석민', rarity: 'R', faction: '탐정', stats: { hp: 145, atk: 15, def: 11 }, imageUrl: 'https://placehold.co/300x500/2f855a/ffffff?text=양석민', cardImageUrl: 'https://placehold.co/150x180/2f855a/ffffff?text=양석민', dialogues: ['사건의 흐름이 보입니다.'], skills: [{ name: '경로 예측', dialogue: '범인은 분명 그곳으로 향했을 겁니다.', power: 1.4, type: 'damage' }], deathDialogue: '예상치 못한... 경로였습니다...', story: '용의자의 행동 패턴과 사건의 전개 과정을 분석하여 다음 단계를 예측한다. 그의 예측은 대부분 현실이 된다.' },
+                { name: '[인도자] 양석민', baseName: '양석민', rarity: 'SR', faction: '탐정', stats: { hp: 235, atk: 27, def: 21 }, imageUrl: 'https://placehold.co/300x500/22543d/ffffff?text=양석민', cardImageUrl: 'https://placehold.co/150x180/22543d/ffffff?text=양석민', dialogues: ['제가, 길을 보여드리죠.'], skills: [{ name: '최단 경로', dialogue: '진실로 가는 가장 빠른 길입니다.', power: 1.8, type: 'damage' }], deathDialogue: '여기까지... 안내하는 것이 제 역할...', story: '복잡하게 얽힌 사건 속에서 헤매는 동료들을 위해 가장 확실하고 빠른 길을 제시하는 길잡이. 그와 함께라면 길을 잃지 않는다.' },
+                // ==================== 윤유준 ====================
+                { name: '[학생] 윤유준', baseName: '윤유준', rarity: 'N', faction: '조수', stats: { hp: 65, atk: 5, def: 8 }, imageUrl: 'https://placehold.co/300x500/e53e3e/ffffff?text=윤유준', cardImageUrl: 'https://placehold.co/150x180/e53e3e/ffffff?text=윤유준', dialogues: ['어? 저건...'], skills: [{ name: '목격', dialogue: '제가 본 게 맞다면...', power: 1.1, type: 'damage' }], deathDialogue: '못 본 척... 했어야 했는데...', story: '호기심 많고 관찰력이 뛰어난 학생. 우연히 사건의 결정적인 순간을 목격하게 된다.' },
+                { name: '[조수] 윤유준', baseName: '윤유준', rarity: 'R', faction: '조수', stats: { hp: 135, atk: 12, def: 15 }, imageUrl: 'https://placehold.co/300x500/c53030/ffffff?text=윤유준', cardImageUrl: 'https://placehold.co/150x180/c53030/ffffff?text=윤유준', dialogues: ['제가 봤어요. 확실해요.'], skills: [{ name: '증언', dialogue: '그날, 그 사람은 거기에 있었어요.', power: 1.4, type: 'damage' }], deathDialogue: '제가... 도움이 되었을까요?', story: '자신의 목격이 사건 해결에 중요한 단서가 된다는 것을 알고, 용기를 내어 탐정을 돕기 시작한다.' },
+                { name: '[방관자] 윤유준', baseName: '윤유준', rarity: 'SR', faction: '조수', stats: { hp: 225, atk: 26, def: 23 }, imageUrl: 'https://placehold.co/300x500/742a2a/ffffff?text=윤유준', cardImageUrl: 'https://placehold.co/150x180/742a2a/ffffff?text=윤유준', dialogues: ['...저는 그저, 보고 있을 뿐입니다.'], skills: [{ name: '객관적 시선', dialogue: '감정은... 배제하는 편이 좋습니다.', power: 1.8, type: 'damage' }], deathDialogue: '결국... 아무것도 하지 못했군.', story: '사건의 추악한 진실과 마주한 후, 그는 한 걸음 물러나 모든 것을 지켜보기로 결심한다. 더 이상 섣불리 개입하지 않으리라 다짐하면서.' }
+            ];
+            
+            const monsters = {
+                '슬라임 킹': { name: '슬라임 킹', stats: { hp: 300, atk: 15, def: 10 }, imageUrl: 'https://placehold.co/300x300/a0aec0/ffffff?text=Slime+King' },
+                '오크 대장': { name: '오크 대장', stats: { hp: 800, atk: 30, def: 20 }, imageUrl: 'https://placehold.co/300x300/63b3ed/ffffff?text=Orc+Chief' },
+                '레드 드래곤': { name: '레드 드래곤', stats: { hp: 2000, atk: 50, def: 35 }, imageUrl: 'https://placehold.co/300x300/f56565/000000?text=Red+Dragon' },
+                '그림자 암살자': { name: '그림자 암살자', stats: { hp: 1200, atk: 40, def: 15 }, imageUrl: 'https://placehold.co/300x300/4a5568/ffffff?text=Shadow' }
+            };
 
-        { name: '[연구자] 윤서천', baseName: '윤서천', rarity: 'N', faction: '조수', stats: { hp: 45, atk: 9, def: 4 }, imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=윤서천', cardImageUrl: 'https://placehold.co/150x180/a0aec0/ffffff?text=윤서천', dialogues: ['흥미로운 샘플이군.'], skills: [{ name: '분석', dialogue: '결과가 나왔군.', power: 1.3, type: 'damage' }], deathDialogue: '데이터가... 부족해...', story: '그의 연구 노트에는 이해할 수 없는 화학식들만 가득했다.' },
-        { name: '[범인] 윤서천', baseName: '윤서천', rarity: 'R', faction: '범인', stats: { hp: 100, atk: 17, def: 9 }, imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=윤서천', cardImageUrl: 'https://placehold.co/150x180/63b3ed/ffffff?text=윤서천', dialogues: ['계획通り...'], skills: [{ name: '독극물', dialogue: '치사량이야.', power: 1.6, type: 'damage' }], deathDialogue: '계획에 없었는데...', story: '천재적인 두뇌는 때로는 위험한 방향으로 흐르기도 한다.' },
-        { name: '[실험쥐] 윤서천', baseName: '윤서천', rarity: 'SR', faction: '조수', stats: { hp: 260, atk: 24, def: 17 }, imageUrl: 'https://placehold.co/300x500/b794f4/ffffff?text=윤서천', cardImageUrl: 'https://placehold.co/150x180/b794f4/ffffff?text=윤서천', dialogues: ['이 주사... 정말 괜찮은 건가?'], skills: [{ name: '이상 반응', dialogue: '몸이... 뜨거워...!', power: 2.0, type: 'damage' }], deathDialogue: '결과는... 실패인가...', story: '스스로를 실험체로 삼는 것. 그것은 광기인가, 아니면 위대한 희생인가.' },
-        { name: '[in vivo] 윤서천', baseName: '윤서천', rarity: 'SSR', faction: '범인', stats: { hp: 340, atk: 48, def: 24 }, imageUrl: 'https://placehold.co/300x500/f6e05e/000000?text=윤서천', cardImageUrl: 'https://placehold.co/150x180/f6e05e/000000?text=윤서천', dialogues: ['인류를 위한 희생이다.'], skills: [{ name: '임상실험', dialogue: '넌 훌륭한 샘플이야.', power: 2.5, type: 'damage' }, { name: '부작용', dialogue: '예상 밖인데!', power: 1.4, type: 'debuff_def' }], deathDialogue: '최고의... 샘플이었는데...', story: '그는 자신의 연구가 세상을 구원할 것이라 굳게 믿고 있다. 그 과정에서 발생하는 사소한 희생은 어쩔 수 없다고 생각한다.' },
+            const dungeons = [
+                { name: '초보자의 숲', monsterName: '슬라임 킹', rewards: { min: 10, max: 20 } },
+                { name: '오크 점령지', monsterName: '오크 대장', rewards: { min: 25, max: 40 } },
+                { name: '용의 둥지', monsterName: '레드 드래곤', rewards: { min: 60, max: 100 } }
+            ];
+            
+            const eventDungeons = [
+                { name: '1장', monsterName: '슬라임 킹', eventPointReward: 100 },
+                { name: '2장', monsterName: '슬라임 킹', eventPointReward: 120 },
+                { name: '3장', monsterName: '오크 대장', eventPointReward: 150 },
+                { name: '4장', monsterName: '오크 대장', eventPointReward: 180 },
+                { name: '5장', monsterName: '그림자 암살자', eventPointReward: 220 },
+                { name: '6장', monsterName: '그림자 암살자', eventPointReward: 250 },
+                { name: '7장', monsterName: '그림자 암살자', eventPointReward: 300 },
+                { name: '8장', monsterName: '레드 드래곤', eventPointReward: 350 },
+                { name: '9장', monsterName: '레드 드래곤', eventPointReward: 400 },
+                { name: '10장', monsterName: '레드 드래곤', eventPointReward: 500 }
+            ];
 
-        { name: '[서점 주인] 한 현', baseName: '한 현', rarity: 'N', faction: '조수', stats: { hp: 70, atk: 6, def: 6 }, imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=한현', cardImageUrl: 'https://placehold.co/150x180/a0aec0/ffffff?text=한현', dialogues: ['어서오세요.'], skills: [{ name: '책 추천', dialogue: '이건 어떠신지?', power: 1.1, type: 'damage' }], deathDialogue: '가게는... 누가...', story: '동네의 작은 서점을 운영하는 평범한 청년. 그가 숨겨진 과거를 가지고 있다는 사실을 아는 이는 거의 없다.' },
-        { name: '[조수] 한 현', baseName: '한 현', rarity: 'R', faction: '조수', stats: { hp: 140, atk: 14, def: 13 }, imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=한현', cardImageUrl: 'https://placehold.co/150x180/63b3ed/ffffff?text=한현', dialogues: ['제가 가보겠습니다.'], skills: [{ name: '현장 조사', dialogue: '뭔가 있군요.', power: 1.4, type: 'damage' }], deathDialogue: '제가... 너무 나섰나요...', story: '사건의 진상을 파헤치는 탐정을 보며, 그는 잊고 있던 과거의 자신을 떠올린다.' },
-        { name: '[동행인] 한 현', baseName: '한 현', rarity: 'SR', faction: '조수', stats: { hp: 230, atk: 28, def: 20 }, imageUrl: 'https://placehold.co/300x500/b794f4/ffffff?text=한현', cardImageUrl: 'https://placehold.co/150x180/b794f4/ffffff?text=한현', dialogues: ['혼자 가게 둘 순 없죠.'], skills: [{ name: '엄호', dialogue: '뒤는 맡겨주세요!', power: 1.7, type: 'damage' }], deathDialogue: '먼저... 가세요...', story: '위험한 길이라는 것을 알면서도, 그는 동료를 위해 기꺼이 그 길에 함께 오른다.' },
-        { name: '[한때는, 탐정] 한 현', baseName: '한 현', rarity: 'SSR', faction: '탐정', stats: { hp: 390, atk: 40, def: 30 }, imageUrl: 'https://placehold.co/300x500/f6e05e/000000?text=한현', cardImageUrl: 'https://placehold.co/150x180/f6e05e/000000?text=한현', dialogues: ['오랜만이군, 이 감각.'], skills: [{ name: '오래된 통찰', dialogue: '범인은... 이 안에 없어.', power: 2.2, type: 'damage' }, { name: '감싸기', dialogue: '더는 다치게 둘 수 없지!', power: 1.9, type: 'vampire' }], deathDialogue: '결국... 여기까지인가...', story: '과거의 명성을 뒤로 하고 평범한 삶을 택했던 그. 하지만 눈앞의 사건은 그를 다시 탐정의 길로 이끈다.' },
+            const eventStories = [
+                { title: '사건의 발단', content: `어느 날, 탐정 사무소에 한 통의 편지가 도착한다...` },
+                { title: '사라진 그림자', content: `편지의 발신인을 찾아간 곳은 텅 비어있었다...` },
+                { title: '첫 번째 증인', content: `사건의 유일한 목격자는 겁에 질려 있었다...` },
+                { title: '거짓된 알리바이', content: `용의자의 알리바이는 너무나도 완벽했다...` },
+                { title: '어둠 속의 계약', content: `사건의 배후에는 거대한 조직이 있었다...` },
+                { title: '두 번째 피해자', content: `범인의 경고에도 수사를 계속하자, 새로운 희생자가 발생했다...` },
+                { title: '숨겨진 단서', content: `피해자가 남긴 다잉 메시지. 그 의미는 과연...` },
+                { title: '함정', content: `모든 단서가 한 곳을 가리키고 있었다. 하지만 그것은 함정이었다...` },
+                { title: '배신자의 얼굴', content: `가장 믿었던 동료가 범인이었다니...` },
+                { title: '진실의 이면', content: `모든 사건의 배후에는 예상치 못한 인물이 있었다...` }
+            ];
 
-        { name: '[기자] 강은율', baseName: '강은율', rarity: 'SR', faction: '조수', stats: { hp: 250, atk: 25, def: 18 }, imageUrl: 'https://placehold.co/300x500/b794f4/ffffff?text=강은율', cardImageUrl: 'https://placehold.co/150x180/b794f4/ffffff?text=강은율', dialogues: ['특종의 냄새가 나는군요.'], skills: [{ name: '정보 수집', dialogue: '이건 기사화될 겁니다!', power: 1.8, type: 'damage' }], deathDialogue: '이건... 너무 큰 특종이야...', story: '진실을 위해서라면 물불 가리지 않는 열혈 기자. 그녀의 정보망은 경찰보다 빠르다는 소문이 있다.' },
-        { name: '[프로파일러] 백정문', baseName: '백정문', rarity: 'SR', faction: '탐정', stats: { hp: 180, atk: 35, def: 12 }, imageUrl: 'https://placehold.co/300x500/b794f4/ffffff?text=백정문', cardImageUrl: 'https://placehold.co/150x180/b794f4/ffffff?text=백정문', dialogues: ['범인의 심리가 보이는군.'], skills: [{ name: '심리 분석', dialogue: '당신, 지금 거짓말을 하고 있군.', power: 2.2, type: 'damage' }], deathDialogue: '생각과... 다른데...', story: '범죄자의 심리를 꿰뚫어 보는 최고의 프로파일러. 그에게 거짓말은 통하지 않는다.' },
-        { name: '[검사] 독고유진', baseName: '독고유진', rarity: 'SSR', faction: '탐정', stats: { hp: 360, atk: 44, def: 27 }, imageUrl: 'https://placehold.co/300x500/f6e05e/000000?text=독고유진', cardImageUrl: 'https://placehold.co/150x180/f6e05e/000000?text=독고유진', dialogues: ['법은 당신 편이 아닙니다.'], skills: [{ name: '기소', dialogue: '유죄를 선고합니다.', power: 2.3, type: 'damage' }, { name: '압수수색', dialogue: '모조리 찾아내!', power: 1.3, type: 'debuff_def' }], deathDialogue: '법정에서... 지다니...', story: '정의 실현을 위해서라면 어떠한 타협도 없는 냉철한 검사. 법정에서는 그 누구도 그를 이길 수 없다.' },
-        { name: '[의사] 양석민', baseName: '양석민', rarity: 'SSR', faction: '조수', stats: { hp: 420, atk: 38, def: 32 }, imageUrl: 'https://placehold.co/300x500/f6e05e/000000?text=양석민', cardImageUrl: 'https://placehold.co/150x180/f6e05e/000000?text=양석민', dialogues: ['사인은... 질식사로군요.'], skills: [{ name: '부검', dialogue: '메스를 잡을 시간이군.', power: 2.1, type: 'damage' }, { name: '긴급 처치', dialogue: '아직 살릴 수 있어!', power: 1.8, type: 'vampire' }], deathDialogue: '내가... 죽다니... 사인은...', story: '죽은 자는 말이 없지만, 그의 메스 앞에서는 모든 진실을 이야기하게 된다. 최고의 법의학자.' },
-        { name: '[이벤트] 어둠의 계약자', baseName: '계약자', rarity: 'SSR', faction: '범인', stats: { hp: 450, atk: 50, def: 22 }, imageUrl: 'https://placehold.co/300x500/ef4444/ffffff?text=계약자', cardImageUrl: 'https://placehold.co/150x180/ef4444/ffffff?text=계약자', dialogues: ['거래를 할까?'], skills: [{ name: '유혹', dialogue: '네 영혼을 원해.', power: 2.8, type: 'damage' }, { name: '파멸의 계약', dialogue: '도장은 찍혔다.', power: 1.5, type: 'debuff_def' }], deathDialogue: '계약은... 영원한 것을...', story: '오직 이벤트 상점에서만 만날 수 있는 미스터리한 인물. 그의 과거는 베일에 싸여 있다.' },
-
-    ];
-    
-    const monsters = {
-        '슬라임 킹': { name: '슬라임 킹', stats: { hp: 300, atk: 15, def: 10 }, imageUrl: 'https://placehold.co/300x300/a0aec0/ffffff?text=Slime+King' },
-        '오크 대장': { name: '오크 대장', stats: { hp: 800, atk: 30, def: 20 }, imageUrl: 'https://placehold.co/300x300/63b3ed/ffffff?text=Orc+Chief' },
-        '레드 드래곤': { name: '레드 드래곤', stats: { hp: 2000, atk: 50, def: 35 }, imageUrl: 'https://placehold.co/300x300/f56565/000000?text=Red+Dragon' },
-        '그림자 암살자': { name: '그림자 암살자', stats: { hp: 1200, atk: 40, def: 15 }, imageUrl: 'https://placehold.co/300x300/4a5568/ffffff?text=Shadow' },
-    };
-
-    const dungeons = [
-        { name: '초보자의 숲', monsterName: '슬라임 킹', rewards: { min: 10, max: 20 } },
-        { name: '오크 점령지', monsterName: '오크 대장', rewards: { min: 25, max: 40 } },
-        { name: '용의 둥지', monsterName: '레드 드래곤', rewards: { min: 60, max: 100 } },
-    ];
-    
-    const eventDungeons = [
-        { name: '1장', monsterName: '슬라임 킹', eventPointReward: 100 },
-        { name: '2장', monsterName: '슬라임 킹', eventPointReward: 120 },
-        { name: '3장', monsterName: '오크 대장', eventPointReward: 150 },
-        { name: '4장', monsterName: '오크 대장', eventPointReward: 180 },
-        { name: '5장', monsterName: '그림자 암살자', eventPointReward: 220 },
-        { name: '6장', monsterName: '그림자 암살자', eventPointReward: 250 },
-        { name: '7장', monsterName: '그림자 암살자', eventPointReward: 300 },
-        { name: '8장', monsterName: '레드 드래곤', eventPointReward: 350 },
-        { name: '9장', monsterName: '레드 드래곤', eventPointReward: 400 },
-        { name: '10장', monsterName: '레드 드래곤', eventPointReward: 500 },
-    ];
-
-    const eventStories = [
-        { title: '사건의 발단', content: `어느 날, 탐정 사무소에 한 통의 편지가 도착한다...` },
-        { title: '사라진 그림자', content: `편지의 발신인을 찾아간 곳은 텅 비어있었다...` },
-        { title: '첫 번째 증인', content: `사건의 유일한 목격자는 겁에 질려 있었다...` },
-        { title: '거짓된 알리바이', content: `용의자의 알리바이는 너무나도 완벽했다...` },
-        { title: '어둠 속의 계약', content: `사건의 배후에는 거대한 조직이 있었다...` },
-        { title: '두 번째 피해자', content: `범인의 경고에도 수사를 계속하자, 새로운 희생자가 발생했다...` },
-        { title: '숨겨진 단서', content: `피해자가 남긴 다잉 메시지. 그 의미는 과연...` },
-        { title: '함정', content: `모든 단서가 한 곳을 가리키고 있었다. 하지만 그것은 함정이었다...` },
-        { title: '배신자의 얼굴', content: `가장 믿었던 동료가 범인이었다니...` },
-        { title: '진실의 이면', content: `모든 사건의 배후에는 예상치 못한 인물이 있었다...` }
-    ];
-
-    const eventShopItems = [
-        { id: 'event_ssr_card', name: '[이벤트] 어둠의 계약자', type: 'card', cost: 10000, limit: 1, itemData: characters.find(c => c.name === '[이벤트] 어둠의 계약자') },
-        { id: 'gems_100', name: '보석 100개', type: 'currency', cost: 1000, limit: 5, itemData: 100 },
-        { id: 'gems_500', name: '보석 500개', type: 'currency', cost: 4500, limit: 2, itemData: 500 },
-    ];
+            const eventShopItems = [
+                { id: 'event_ssr_card', name: '[이벤트] 어둠의 계약자', type: 'card', cost: 10000, limit: 1, itemData: characters.find(c => c.name === '[이벤트] 어둠의 계약자') },
+                { id: 'gems_100', name: '보석 100개', type: 'currency', cost: 1000, limit: 5, itemData: 100 },
+                { id: 'gems_500', name: '보석 500개', type: 'currency', cost: 4500, limit: 2, itemData: 500 }
+            ];
 
 
-    const mainStories = [
-        { title: '프롤로그: 비 내리는 밤', dungeonToUnlock: null, content: `늦은 밤, 창밖은 세차게 비를 쏟아내고 있었다. 베스트셀러 추리 소설가, 서도진은 서재의 낡은 책상에 앉아 머리를 쥐어뜯었다. 코앞으로 다가온 마감, 하지만 마지막 챕터의 트릭이 좀처럼 떠오르지 않았다. "젠장, 이럴 때가 아닌데..." 스스로에게 짜증을 내며 펜을 고쳐 쥐는 순간이었다. 쿵, 쿵, 쿵. 낡은 현관문이 둔탁하게 울렸다. 이 시간에 찾아올 사람이 없는데. 귀찮음과 불안감이 동시에 밀려왔다. 그는 마지못해 자리에서 일어나 문으로 향했다.\n\n문을 열자, 비에 흠뻑 젖은 남자가 서 있었다. 도천영. 한때 경찰이었으나 지금은 흥신소를 운영하는, 탐정이라고 불리는 사내였다. 그의 얼굴에는 평소의 능글맞음 대신 굳은 긴장감이 서려 있었다. "서 작가, 오랜만이군. 혹시... 박민준하고 연락 닿았나?" 박민준. 서도진의 오랜 친구이자, 문단 최고의 라이벌이었다. "아니, 그 녀석은 마감 때면 동굴로 들어가는 놈이잖아. 왜?" 도천영은 무겁게 입을 열었다. "오늘 밤, 박민준이 죽었어." 서도진의 머릿속이 하얗게 비었다. 빗소리가 아득하게 멀어졌다.[PAGE_BREAK]정신을 차렸을 때, 그는 이미 도천영의 차에 타고 있었다. 와이퍼가 빗물을 밀어내는 소리만이 기계적으로 반복되었다. "경찰은... 뭐라고 하나?" 서도진이 겨우 목소리를 쥐어짰다. "자살. 작업실에서 유서와 함께 발견됐다고 하더군." 도천영의 목소리는 차분했지만, 그 안에 담긴 불신을 서도진은 느낄 수 있었다. 박민준은 자살할 위인이 아니었다. 그는 누구보다 자신의 글에 대한 자부심이 강했고, 다음 작품에 대한 열정으로 불타오르던 사람이었다. 게다가, 며칠 전 통화에서 그는 '세상을 놀라게 할 트릭을 완성했다'며 흥분을 감추지 못했다. 그런 그가... 스스로 목숨을 끊었다고?[PAGE_BREAK]작업실 앞에 도착하자, 익숙한 노란색 폴리스 라인이 그들을 맞았다. 현장을 지키던 젊은 경관이 도천영을 알아보고는 곤란한 표정을 지었다. "도 선배님, 여긴 어떻게..." "잠깐 둘러보기만 할게. 5분, 아니 3분이면 돼." 도천영의 부탁에도 경관은 요지부동이었다. 그때, 서도진이 나섰다. "제가 고인의 오랜 친구이자, 이 건물의 공동 소유주입니다. 유품을 확인해야 할 권리가 있습니다." 그의 단호한 목소리에 경관은 마지못해 길을 터주었다. 작업실에 들어선 순간, 서도진은 숨을 멈췄다. 그곳은 단순한 죽음의 현장이 아니었다. 그것은... 너무나도 정교하게 짜인, 하나의 완벽한 무대였다.` },
-        { title: '1장: 첫 번째 사건', dungeonToUnlock: '초보자의 숲', content: `박민준의 작업실은... 기묘했다. 마치 누군가 연출이라도 한 것처럼, 모든 것이 지나치게 깔끔했다. 흩어진 원고들, 쓰러진 잉크병, 심지어는 바닥에 그어진 핏자국까지도 마치 정교하게 계산된 소품처럼 보였다. "자살로 종결될 것 같군." 도천영이 씁쓸하게 말했다. "유서도 발견됐고, 외부 침입의 흔적도 없으니." 하지만 서도진은 고개를 저었다. "아니, 이건 자살이 아니야. 이건... 메시지야." 그의 눈이 작업실 한구석, 박민준이 아끼던 한정판 만년필 케이스에 멈췄다. 케이스는 비어 있었다. 박민준은 왼손잡이였다. 하지만 바닥에 떨어진 펜은 오른손잡이용이었다. 그리고 그가 마지막으로 집필하던 원고의 제목은, '완벽한 자살'.[PAGE_BREAK]서도진은 도천영에게 자신의 추리를 털어놓았다. 이것은 자살로 위장된 타살이며, 범인은 박민준의 소설을 모방하여 현장을 꾸몄다는 것. 그리고 범인은 분명, 박민준과 자신을 모두 아는 인물일 것이라고. 도천영은 서도진의 날카로운 관찰력에 혀를 내둘렀다. 경찰은 그의 주장을 묵살했지만, 도천영은 달랐다. "좋아. 경찰이 안 움직인다면, 우리가 직접 움직이면 되지. 진실을 밝혀내는 게 탐정의 일이니까. 어때, 서 작가. 나와 함께 이 소설의 결말을 확인해 보겠나?" 그렇게 소설가와 탐정의 기묘한 공조가 시작되었다.[PAGE_BREAK]그들은 가장 먼저 박민준의 주변 인물들을 탐문하기 시작했다. 출판사 편집자인 윤필규는 박민준이 최근 극심한 스트레스에 시달렸다고 증언했다. "마감 압박도 있었고... 자신의 글이 한계에 부딪혔다는 말을 자주 하셨어요." 그의 안경 너머로 걱정스러운 눈빛이 비쳤다. 반면, 신진 작가이자 박민준의 후배였던 윤서천은 조금 다른 이야기를 했다. "선배는... 누군가 자신을 위협하고 있다는 말을 했어요. 자신의 아이디어를 훔치려 한다고..." 그의 말에는 미묘한 질투심이 섞여 있는 듯했다. 두 사람의 증언은 상반되었고, 사건은 더욱 미궁 속으로 빠져들었다.` },
-        { title: '2장: 어둠 속의 조력자', dungeonToUnlock: '오크 점령지', content: `수사는 난항에 부딪혔다. 용의선상은 넓었고, 범인이 남긴 단서는 교묘하게 조작된 것들뿐이었다. 서도진과 도천영은 막다른 길에 다다른 듯했다. 그때, 의문의 전화 한 통이 걸려왔다. 자신을 '의사'라고만 밝힌 목소리는 박민준의 시신에서 일반적인 독극물과는 다른, 특수한 성분이 검출되었다는 정보를 흘렸다. 그리고 그 성분을 만들 수 있는 사람은 극소수라는 말과 함께 낡은 연구소의 주소를 남기고는 전화를 끊었다.[PAGE_BREAK]반신반의하며 찾아간 연구소는 폐허나 다름없었다. 하지만 그곳에서 두 사람은 뜻밖의 인물과 마주친다. 윤서천. 한때 촉망받는 화학자였으나, 비윤리적인 실험으로 학계에서 퇴출된 남자였다. 그는 태연하게 두 사람을 맞이하며, 박민준에게 자신이 개발한 약물을 제공한 것은 사실이지만, 그것은 신경 안정제였을 뿐이라고 주장했다. 그의 연구실에는 수많은 실험 동물과 정체불명의 약품들이 가득했다. 서도진은 그의 눈에서 진실을 갈망하는 광기를 보았다. 그는 무언가를 숨기고 있었다. '의사'는 누구이며, 윤서천은 이 사건과 어떤 관련이 있는 걸까. 미스터리는 더욱 깊어만 갔다.` },
-        { title: '3장: 마지막 퍼즐', dungeonToUnlock: '용의 둥지', content: `윤서천의 연구실에서 나온 뒤, 서도진은 계속해서 위화감을 느꼈다. 현장에서 발견된 단서들, 의사의 제보, 윤서천의 알리바이. 모든 것이 너무나도 완벽하게 맞아떨어지는 것이 오히려 부자연스러웠다. 마치 잘 짜인 각본처럼. 그는 처음부터 모든 것을 다시 되짚어보기 시작했다. 박민준의 소설, 현장의 소품들, 용의자들의 증언. 모든 조각들을 머릿속에서 재구성하던 서도진의 눈에 한 가지 가능성이 스쳤다. 만약, 범인이 한 명이 아니라면? 만약, 이 모든 것이 누군가를 범인으로 지목하기 위한 거대한 연극이라면?[PAGE_BREAK]그 순간, 도천영에게서 전화가 걸려왔다. 박민준의 유서 필적이, 그의 담당 편집자였던 윤필규의 필적과 상당 부분 일치한다는 감정 결과가 나왔다는 것이다. 윤필규. 언제나 묵묵히 서도진과 박민준의 뒤에서 그들의 작품을 도왔던 남자. 그는 언제나 조용했고, 눈에 띄지 않았다. 하지만 그랬기에, 모두를 속일 수 있었다. 서도진은 깨달았다. 이 비극적인 소설의 진정한 작가는, 바로 가장 가까이에 있었던 그였음을. 이제 남은 것은 마지막 장을 넘기는 것뿐이었다. 진실이라는 이름의, 잔혹한 결말을.` },
-    ];
+            const mainStories = [
+                { title: '프롤로그: 비 내리는 밤', dungeonToUnlock: null, content: `늦은 밤, 창밖은 세차게 비를 쏟아내고 있었다. 베스트셀러 추리 소설가, 서도진은 서재의 낡은 책상에 앉아 머리를 쥐어뜯었다. 코앞으로 다가온 마감, 하지만 마지막 챕터의 트릭이 좀처럼 떠오르지 않았다. "젠장, 이럴 때가 아닌데..." 스스로에게 짜증을 내며 펜을 고쳐 쥐는 순간이었다. 쿵, 쿵, 쿵. 낡은 현관문이 둔탁하게 울렸다. 이 시간에 찾아올 사람이 없는데. 귀찮음과 불안감이 동시에 밀려왔다. 그는 마지못해 자리에서 일어나 문으로 향했다.\n\n문을 열자, 비에 흠뻑 젖은 남자가 서 있었다. 도천영. 한때 경찰이었으나 지금은 흥신소를 운영하는, 탐정이라고 불리는 사내였다. 그의 얼굴에는 평소의 능글맞음 대신 굳은 긴장감이 서려 있었다. "서 작가, 오랜만이군. 혹시... 박민준하고 연락 닿았나?" 박민준. 서도진의 오랜 친구이자, 문단 최고의 라이벌이었다. "아니, 그 녀석은 마감 때면 동굴로 들어가는 놈이잖아. 왜?" 도천영은 무겁게 입을 열었다. "오늘 밤, 박민준이 죽었어." 서도진의 머릿속이 하얗게 비었다. 빗소리가 아득하게 멀어졌다.[PAGE_BREAK]정신을 차렸을 때, 그는 이미 도천영의 차에 타고 있었다. 와이퍼가 빗물을 밀어내는 소리만이 기계적으로 반복되었다. "경찰은... 뭐라고 하나?" 서도진이 겨우 목소리를 쥐어짰다. "자살. 작업실에서 유서와 함께 발견됐다고 하더군." 도천영의 목소리는 차분했지만, 그 안에 담긴 불신을 서도진은 느낄 수 있었다. 박민준은 자살할 위인이 아니었다. 그는 누구보다 자신의 글에 대한 자부심이 강했고, 다음 작품에 대한 열정으로 불타오르던 사람이었다. 게다가, 며칠 전 통화에서 그는 '세상을 놀라게 할 트릭을 완성했다'며 흥분을 감추지 못했다. 그런 그가... 스스로 목숨을 끊었다고?[PAGE_BREAK]작업실 앞에 도착하자, 익숙한 노란색 폴리스 라인이 그들을 맞았다. 현장을 지키던 젊은 경관이 도천영을 알아보고는 곤란한 표정을 지었다. "도 선배님, 여긴 어떻게..." "잠깐 둘러보기만 할게. 5분, 아니 3분이면 돼." 도천영의 부탁에도 경관은 요지부동이었다. 그때, 서도진이 나섰다. "제가 고인의 오랜 친구이자, 이 건물의 공동 소유주입니다. 유품을 확인해야 할 권리가 있습니다." 그의 단호한 목소리에 경관은 마지못해 길을 터주었다. 작업실에 들어선 순간, 서도진은 숨을 멈췄다. 그곳은 단순한 죽음의 현장이 아니었다. 그것은... 너무나도 정교하게 짜인, 하나의 완벽한 무대였다.` },
+                { title: '1장: 첫 번째 사건', dungeonToUnlock: '초보자의 숲', content: `박민준의 작업실은... 기묘했다. 마치 누군가 연출이라도 한 것처럼, 모든 것이 지나치게 깔끔했다. 흩어진 원고들, 쓰러진 잉크병, 심지어는 바닥에 그어진 핏자국까지도 마치 정교하게 계산된 소품처럼 보였다. "자살로 종결될 것 같군." 도천영이 씁쓸하게 말했다. "유서도 발견됐고, 외부 침입의 흔적도 없으니." 하지만 서도진은 고개를 저었다. "아니, 이건 자살이 아니야. 이건... 메시지야." 그의 눈이 작업실 한구석, 박민준이 아끼던 한정판 만년필 케이스에 멈췄다. 케이스는 비어 있었다. 박민준은 왼손잡이였다. 하지만 바닥에 떨어진 펜은 오른손잡이용이었다. 그리고 그가 마지막으로 집필하던 원고의 제목은, '완벽한 자살'.[PAGE_BREAK]서도진은 도천영에게 자신의 추리를 털어놓았다. 이것은 자살로 위장된 타살이며, 범인은 박민준의 소설을 모방하여 현장을 꾸몄다는 것. 그리고 범인은 분명, 박민준과 자신을 모두 아는 인물일 것이라고. 도천영은 서도진의 날카로운 관찰력에 혀를 내둘렀다. 경찰은 그의 주장을 묵살했지만, 도천영은 달랐다. "좋아. 경찰이 안 움직인다면, 우리가 직접 움직이면 되지. 진실을 밝혀내는 게 탐정의 일이니까. 어때, 서 작가. 나와 함께 이 소설의 결말을 확인해 보겠나?" 그렇게 소설가와 탐정의 기묘한 공조가 시작되었다.[PAGE_BREAK]그들은 가장 먼저 박민준의 주변 인물들을 탐문하기 시작했다. 출판사 편집자인 윤필규는 박민준이 최근 극심한 스트레스에 시달렸다고 증언했다. "마감 압박도 있었고... 자신의 글이 한계에 부딪혔다는 말을 자주 하셨어요." 그의 안경 너머로 걱정스러운 눈빛이 비쳤다. 반면, 신진 작가이자 박민준의 후배였던 윤서천은 조금 다른 이야기를 했다. "선배는... 누군가 자신을 위협하고 있다는 말을 했어요. 자신의 아이디어를 훔치려 한다고..." 그의 말에는 미묘한 질투심이 섞여 있는 듯했다. 두 사람의 증언은 상반되었고, 사건은 더욱 미궁 속으로 빠져들었다.` },
+                { title: '2장: 어둠 속의 조력자', dungeonToUnlock: '오크 점령지', content: `수사는 난항에 부딪혔다. 용의선상은 넓었고, 범인이 남긴 단서는 교묘하게 조작된 것들뿐이었다. 서도진과 도천영은 막다른 길에 다다른 듯했다. 그때, 의문의 전화 한 통이 걸려왔다. 자신을 '의사'라고만 밝힌 목소리는 박민준의 시신에서 일반적인 독극물과는 다른, 특수한 성분이 검출되었다는 정보를 흘렸다. 그리고 그 성분을 만들 수 있는 사람은 극소수라는 말과 함께 낡은 연구소의 주소를 남기고는 전화를 끊었다.[PAGE_BREAK]반신반의하며 찾아간 연구소는 폐허나 다름없었다. 하지만 그곳에서 두 사람은 뜻밖의 인물과 마주친다. 윤서천. 한때 촉망받는 화학자였으나, 비윤리적인 실험으로 학계에서 퇴출된 남자였다. 그는 태연하게 두 사람을 맞이하며, 박민준에게 자신이 개발한 약물을 제공한 것은 사실이지만, 그것은 신경 안정제였을 뿐이라고 주장했다. 그의 연구실에는 수많은 실험 동물과 정체불명의 약품들이 가득했다. 서도진은 그의 눈에서 진실을 갈망하는 광기를 보았다. 그는 무언가를 숨기고 있었다. '의사'는 누구이며, 윤서천은 이 사건과 어떤 관련이 있는 걸까. 미스터리는 더욱 깊어만 갔다.` },
+                { title: '3장: 마지막 퍼즐', dungeonToUnlock: '용의 둥지', content: `윤서천의 연구실에서 나온 뒤, 서도진은 계속해서 위화감을 느꼈다. 현장에서 발견된 단서들, 의사의 제보, 윤서천의 알리바이. 모든 것이 너무나도 완벽하게 맞아떨어지는 것이 오히려 부자연스러웠다. 마치 잘 짜인 각본처럼. 그는 처음부터 모든 것을 다시 되짚어보기 시작했다. 박민준의 소설, 현장의 소품들, 용의자들의 증언. 모든 조각들을 머릿속에서 재구성하던 서도진의 눈에 한 가지 가능성이 스쳤다. 만약, 범인이 한 명이 아니라면? 만약, 이 모든 것이 누군가를 범인으로 지목하기 위한 거대한 연극이라면?[PAGE_BREAK]그 순간, 도천영에게서 전화가 걸려왔다. 박민준의 유서 필적이, 그의 담당 편집자였던 윤필규의 필적과 상당 부분 일치한다는 감정 결과가 나왔다는 것이다. 윤필규. 언제나 묵묵히 서도진과 박민준의 뒤에서 그들의 작품을 도왔던 남자. 그는 언제나 조용했고, 눈에 띄지 않았다. 하지만 그랬기에, 모두를 속일 수 있었다. 서도진은 깨달았다. 이 비극적인 소설의 진정한 작가는, 바로 가장 가까이에 있었던 그였음을. 이제 남은 것은 마지막 장을 넘기는 것뿐이었다. 진실이라는 이름의, 잔혹한 결말을.` }
+            ];
 
-    const rarityProbabilities = { 'SSR': 3, 'SR': 12, 'R': 35, 'N': 50 };
-    const eventRarityProbabilities = { 'SSR': 6, 'SR': 14, 'R': 30, 'N': 50 };
-    const EVENT_CHARACTER_NAME = '[핏빛 욕조] 서도진';
-    const EVENT_START_DATE = new Date('2025-10-14T00:00:00');
-    const EVENT_END_DATE = new Date('2025-10-24T23:59:59');
+            const rarityProbabilities = { 'SSR': 3, 'SR': 12, 'R': 35, 'N': 50 };
+            const eventRarityProbabilities = { 'SSR': 6, 'SR': 14, 'R': 30, 'N': 50 };
+            const EVENT_CHARACTER_NAME = '[핏빛 욕조] 서도진';
+            const EVENT_START_DATE = new Date('2025-10-14T00:00:00');
+            const EVENT_END_DATE = new Date('2025-10-24T23:59:59');
 
-    // --- 게임 상태 ---
-    let playerCurrency = 100;
-    let playerInventory = [];
-    let playerDeck = [];
-    let inventoryCapacity = 100;
-    let representativeCharacter = null;
-    let isCombatRunning = false;
-    let combatSpeedMultiplier = 1;
-    let clearedDungeons = [];
-    let clearedEventDungeons = [];
-    let playerEventPoints = 0;
-    let purchasedEventItems = {};
-    let currentStoryPages = [];
-    let currentStoryPageIndex = 0;
-    const DECK_CAPACITY = 5;
-    const PULL_ONE_COST = 10;
-    const PULL_TEN_COST = 100;
-    const EXPAND_COST = 50;
-    const EXPAND_AMOUNT = 10;
-    const SAVE_DATA_KEY = 'gachaGameSaveData_v7';
+            // --- 게임 상태 ---
+            let playerCurrency = 100;
+            let playerInventory = [];
+            let playerDeck = [];
+            let inventoryCapacity = 100;
+            let representativeCharacter = null;
+            let isCombatRunning = false;
+            let combatSpeedMultiplier = 1;
+            let lastCombatType = 'main'; // 마지막 전투 유형을 저장합니다.
+            let clearedDungeons = [];
+            let clearedEventDungeons = [];
+            let playerEventPoints = 0;
+            let purchasedEventItems = {};
+            let currentStoryPages = [];
+            let currentStoryPageIndex = 0;
+            let playerBookmarks = 10;
+            const MAX_BOOKMARKS = 10;
+            let lastBookmarkUpdateTime = Date.now();
+            const BOOKMARK_REGEN_TIME = 5 * 60 * 1000; // 5 minutes
 
-    // --- HTML 요소 가져오기 ---
-    const currencyDisplay = document.getElementById('currency-display');
-    const messageArea = document.getElementById('message-area');
-    const allTabs = document.querySelectorAll('.tab-button');
-    const allViews = document.querySelectorAll('main > div:not(#combat-result-modal):not(#card-detail-modal):not(#main-story-modal)');
-    const pullOneButton = document.getElementById('pull-one');
-    const pullTenButton = document.getElementById('pull-ten');
-    const pullOneEventButton = document.getElementById('pull-one-event');
-    const pullTenEventButton = document.getElementById('pull-ten-event');
-    const resultsContainer = document.getElementById('results-container');
-    const inventoryContainer = document.getElementById('inventory-container');
-    const inventoryStatus = document.getElementById('inventory-status');
-    const expandInventoryButton = document.getElementById('expand-inventory');
-    const deckStatus = document.getElementById('deck-status');
-    const deckSlotsContainer = document.getElementById('deck-slots-container');
-    const deckInventoryContainer = document.getElementById('deck-inventory-container');
-    const autoFillDeckButton = document.getElementById('auto-fill-deck');
-    const deckPowerDisplay = document.getElementById('deck-power-display');
-    const combatMessageArea = document.getElementById('combat-message-area');
-    const dungeonListContainer = document.getElementById('dungeon-list-container');
-    const homeCharacterContainer = document.getElementById('home-character-container');
-    const homeCharacterImage = document.getElementById('home-character-image');
-    const homeDialogueContainer = document.getElementById('home-dialogue-container');
-    const homeDefaultMessage = document.getElementById('home-default-message');
-    const homeCharacterName = document.getElementById('home-character-name');
-    const homeCharacterDialogue = document.getElementById('home-character-dialogue');
-    const eventBanner = document.getElementById('event-banner');
-    const eventBannerText = document.getElementById('event-banner-text');
-    const gachaTabNormal = document.getElementById('gacha-tab-normal');
-    const gachaTabEvent = document.getElementById('gacha-tab-event');
-    const normalGachaView = document.getElementById('normal-gacha-view');
-    const eventGachaView = document.getElementById('event-gacha-view');
-    const eventGachaInfo = document.getElementById('event-gacha-info');
-    const resetButton = document.getElementById('reset-game');
-    const storageWarning = document.getElementById('storage-warning');
-    const combatInProgressView = document.getElementById('combat-in-progress-view');
-    const combatPlayerDeck = document.getElementById('combat-player-deck');
-    const combatMonsterArea = document.getElementById('combat-monster-area');
-    const combatLogContainer = document.getElementById('combat-log-container');
-    const combatLog = document.getElementById('combat-log');
-    const combatResultModal = document.getElementById('combat-result-modal');
-    const combatResultTitle = document.getElementById('combat-result-title');
-    const combatResultMessage = document.getElementById('combat-result-message');
-    const closeCombatResultButton = document.getElementById('close-combat-result');
-    const cardDetailModal = document.getElementById('card-detail-modal');
-    const closeCardDetailButton = document.getElementById('close-card-detail');
-    const speed1xButton = document.getElementById('speed-1x');
-    const speed2xButton = document.getElementById('speed-2x');
-    const speed4xButton = document.getElementById('speed-4x');
-    const collectionContainer = document.getElementById('collection-container');
-    const mainStoryContainer = document.getElementById('main-story-container');
-    const mainStoryModal = document.getElementById('main-story-modal');
-    const closeMainStoryButton = document.getElementById('close-main-story');
-    const detailStoryPrevButton = document.getElementById('detail-story-prev');
-    const detailStoryNextButton = document.getElementById('detail-story-next');
-    const mainStoryPrevButton = document.getElementById('main-story-prev');
-    const mainStoryNextButton = document.getElementById('main-story-next');
-    const eventTab = document.getElementById('tab-event');
-    const eventPointDisplay = document.getElementById('event-point-display');
-    const eventPointsSpan = document.getElementById('event-points');
-    const eventSubTabBattle = document.getElementById('event-sub-tab-battle');
-    const eventSubTabStory = document.getElementById('event-sub-tab-story');
-    const eventSubTabShop = document.getElementById('event-sub-tab-shop');
-    const eventBattleView = document.getElementById('event-battle-view');
-    const eventStoryView = document.getElementById('event-story-view');
-    const eventShopView = document.getElementById('event-shop-view');
-    const eventDungeonListContainer = document.getElementById('event-dungeon-list-container');
-    const eventStoryContainer = document.getElementById('event-story-container');
-    const eventShopContainer = document.getElementById('event-shop-container');
+            const DECK_CAPACITY = 5;
+            const PULL_ONE_COST = 10;
+            const PULL_TEN_COST = 100;
+            const EXPAND_COST = 50;
+            const EXPAND_AMOUNT = 10;
+            const SAVE_DATA_KEY = 'gachaGameSaveData_v8';
 
-    
-    // --- 데이터 저장/불러오기 함수 ---
-    function isStorageAvailable() {
-        try {
-            const key = "__test_localstorage__";
-            localStorage.setItem(key, key);
-            localStorage.removeItem(key);
-            return true;
-        } catch (e) {
-            return false;
-        }
-    }
+            // --- HTML 요소 가져오기 ---
+            const currencyDisplay = document.getElementById('currency-display');
+            const messageArea = document.getElementById('message-area');
+            const allTabs = document.querySelectorAll('.tab-button');
+            const allViews = document.querySelectorAll('main > div:not(#combat-result-modal):not(#card-detail-modal):not(#main-story-modal)');
+            const pullOneButton = document.getElementById('pull-one');
+            const pullTenButton = document.getElementById('pull-ten');
+            const pullOneEventButton = document.getElementById('pull-one-event');
+            const pullTenEventButton = document.getElementById('pull-ten-event');
+            const resultsContainer = document.getElementById('results-container');
+            const inventoryContainer = document.getElementById('inventory-container');
+            const inventoryStatus = document.getElementById('inventory-status');
+            const expandInventoryButton = document.getElementById('expand-inventory');
+            const deckStatus = document.getElementById('deck-status');
+            const deckSlotsContainer = document.getElementById('deck-slots-container');
+            const deckInventoryContainer = document.getElementById('deck-inventory-container');
+            const autoFillDeckButton = document.getElementById('auto-fill-deck');
+            const deckPowerDisplay = document.getElementById('deck-power-display');
+            const combatMessageArea = document.getElementById('combat-message-area');
+            const dungeonListContainer = document.getElementById('dungeon-list-container');
+            const homeCharacterContainer = document.getElementById('home-character-container');
+            const homeCharacterImage = document.getElementById('home-character-image');
+            const homeDialogueContainer = document.getElementById('home-dialogue-container');
+            const homeDefaultMessage = document.getElementById('home-default-message');
+            const homeCharacterName = document.getElementById('home-character-name');
+            const homeCharacterDialogue = document.getElementById('home-character-dialogue');
+            const eventBanner = document.getElementById('event-banner');
+            const eventBannerText = document.getElementById('event-banner-text');
+            const gachaTabNormal = document.getElementById('gacha-tab-normal');
+            const gachaTabEvent = document.getElementById('gacha-tab-event');
+            const normalGachaView = document.getElementById('normal-gacha-view');
+            const eventGachaView = document.getElementById('event-gacha-view');
+            const eventGachaInfo = document.getElementById('event-gacha-info');
+            const resetButton = document.getElementById('reset-game');
+            const storageWarning = document.getElementById('storage-warning');
+            const combatInProgressView = document.getElementById('combat-in-progress-view');
+            const combatPlayerDeck = document.getElementById('combat-player-deck');
+            const combatMonsterArea = document.getElementById('combat-monster-area');
+            const combatLogContainer = document.getElementById('combat-log-container');
+            const combatLog = document.getElementById('combat-log');
+            const combatResultModal = document.getElementById('combat-result-modal');
+            const combatResultTitle = document.getElementById('combat-result-title');
+            const combatResultMessage = document.getElementById('combat-result-message');
+            const closeCombatResultButton = document.getElementById('close-combat-result');
+            const cardDetailModal = document.getElementById('card-detail-modal');
+            const closeCardDetailButton = document.getElementById('close-card-detail');
+            const speed1xButton = document.getElementById('speed-1x');
+            const speed2xButton = document.getElementById('speed-2x');
+            const speed4xButton = document.getElementById('speed-4x');
+            const collectionContainer = document.getElementById('collection-container');
+            const mainStoryContainer = document.getElementById('main-story-container');
+            const mainStoryModal = document.getElementById('main-story-modal');
+            const closeMainStoryButton = document.getElementById('close-main-story');
+            const detailStoryPrevButton = document.getElementById('detail-story-prev');
+            const detailStoryNextButton = document.getElementById('detail-story-next');
+            const mainStoryPrevButton = document.getElementById('main-story-prev');
+            const mainStoryNextButton = document.getElementById('main-story-next');
+            const eventTab = document.getElementById('tab-event');
+            const eventPointDisplay = document.getElementById('event-point-display');
+            const eventPointsSpan = document.getElementById('event-points');
+            const eventSubTabBattle = document.getElementById('event-sub-tab-battle');
+            const eventSubTabStory = document.getElementById('event-sub-tab-story');
+            const eventSubTabShop = document.getElementById('event-sub-tab-shop');
+            const eventBattleView = document.getElementById('event-battle-view');
+            const eventStoryView = document.getElementById('event-story-view');
+            const eventShopView = document.getElementById('event-shop-view');
+            const eventDungeonListContainer = document.getElementById('event-dungeon-list-container');
+            const eventStoryContainer = document.getElementById('event-story-container');
+            const eventShopContainer = document.getElementById('event-shop-container');
+            const bookmarkDisplay = document.getElementById('bookmark-display');
+            const maxBookmarkDisplay = document.getElementById('max-bookmark-display');
 
-    function saveGame() {
-        if (!isStorageAvailable()) return;
-        const saveData = {
-            currency: playerCurrency,
-            inventory: playerInventory.map(card => card ? card.name : null).filter(Boolean),
-            deck: playerDeck.map(card => card ? card.name : null).filter(Boolean),
-            capacity: inventoryCapacity,
-            representative: representativeCharacter ? representativeCharacter.name : null,
-            clearedDungeons: clearedDungeons,
-            eventPoints: playerEventPoints,
-            clearedEventDungeons: clearedEventDungeons,
-            purchasedEventItems: purchasedEventItems
-        };
-        localStorage.setItem(SAVE_DATA_KEY, JSON.stringify(saveData));
-    }
-
-    function loadGame() {
-        if (!isStorageAvailable()) {
-            storageWarning.classList.remove('hidden');
-            resetButton.disabled = true;
-            playerInventory.push(findCharacter('[편집자] 윤필규'));
-            playerInventory.push(findCharacter('[조수] 한 현'));
-        } else {
-            const savedDataString = localStorage.getItem(SAVE_DATA_KEY);
-            if (savedDataString) {
+            
+            // --- 데이터 저장/불러오기 함수 ---
+            function isStorageAvailable() {
                 try {
-                    const savedData = JSON.parse(savedDataString);
-                    playerCurrency = savedData.currency ?? 100;
-                    playerInventory = (savedData.inventory || []).map(name => findCharacter(name)).filter(Boolean);
-                    playerDeck = (savedData.deck || []).map(name => findCharacter(name)).filter(Boolean);
-                    inventoryCapacity = savedData.capacity ?? 100;
-                    clearedDungeons = savedData.clearedDungeons || [];
-                    playerEventPoints = savedData.eventPoints ?? 0;
-                    clearedEventDungeons = savedData.clearedEventDungeons || [];
-                    purchasedEventItems = savedData.purchasedEventItems || {};
-                    if (savedData.representative) {
-                        representativeCharacter = findCharacter(savedData.representative) || null;
-                    }
+                    const key = "__test_localstorage__";
+                    localStorage.setItem(key, key);
+                    localStorage.removeItem(key);
+                    return true;
                 } catch (e) {
-                    console.error("저장된 데이터 파싱 오류:", e);
+                    return false;
+                }
+            }
+
+            function saveGame() {
+                if (!isStorageAvailable()) return;
+                const saveData = {
+                    currency: playerCurrency,
+                    inventory: playerInventory.map(card => card ? card.name : null).filter(Boolean),
+                    deck: playerDeck.map(card => card ? card.name : null).filter(Boolean),
+                    capacity: inventoryCapacity,
+                    representative: representativeCharacter ? representativeCharacter.name : null,
+                    clearedDungeons: clearedDungeons,
+                    eventPoints: playerEventPoints,
+                    clearedEventDungeons: clearedEventDungeons,
+                    purchasedEventItems: purchasedEventItems,
+                    bookmarks: playerBookmarks,
+                    lastBookmarkUpdate: lastBookmarkUpdateTime,
+                };
+                localStorage.setItem(SAVE_DATA_KEY, JSON.stringify(saveData));
+            }
+
+            function loadGame() {
+                if (!isStorageAvailable()) {
+                    storageWarning.classList.remove('hidden');
+                    resetButton.disabled = true;
                     playerInventory.push(findCharacter('[편집자] 윤필규'));
                     playerInventory.push(findCharacter('[조수] 한 현'));
+                } else {
+                    const savedDataString = localStorage.getItem(SAVE_DATA_KEY);
+                    if (savedDataString) {
+                        try {
+                            const savedData = JSON.parse(savedDataString);
+                            playerCurrency = savedData.currency ?? 100;
+                            playerInventory = (savedData.inventory || []).map(name => findCharacter(name)).filter(Boolean);
+                            playerDeck = (savedData.deck || []).map(name => findCharacter(name)).filter(Boolean);
+                            inventoryCapacity = savedData.capacity ?? 100;
+                            clearedDungeons = savedData.clearedDungeons || [];
+                            playerEventPoints = savedData.eventPoints ?? 0;
+                            clearedEventDungeons = savedData.clearedEventDungeons || [];
+                            purchasedEventItems = savedData.purchasedEventItems || {};
+                            playerBookmarks = savedData.bookmarks ?? MAX_BOOKMARKS;
+                            lastBookmarkUpdateTime = savedData.lastBookmarkUpdate ?? Date.now();
+                            if (savedData.representative) {
+                                representativeCharacter = findCharacter(savedData.representative) || null;
+                            }
+                        } catch (e) {
+                            console.error("저장된 데이터 파싱 오류:", e);
+                            initializeNewGameData();
+                        }
+                    } else {
+                        initializeNewGameData();
+                        saveGame();
+                    }
                 }
-            } else {
+                calculateOfflineRegen();
+                updateUI();
+                checkEventStatus();
+                switchTab('home');
+            }
+
+            function initializeNewGameData() {
                 playerInventory.push(findCharacter('[편집자] 윤필규'));
                 playerInventory.push(findCharacter('[조수] 한 현'));
+                playerBookmarks = MAX_BOOKMARKS;
+                lastBookmarkUpdateTime = Date.now();
+            }
+
+
+            function resetGame() {
+                if (!isStorageAvailable()) return;
+                if (resetButton.dataset.confirming === 'true') {
+                    localStorage.removeItem(SAVE_DATA_KEY);
+                    location.reload();
+                } else {
+                    resetButton.textContent = '확인?';
+                    resetButton.dataset.confirming = 'true';
+                    resetButton.classList.remove('bg-red-600', 'hover:bg-red-700');
+                    resetButton.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
+                    setTimeout(() => {
+                        resetButton.textContent = '초기화';
+                        resetButton.dataset.confirming = 'false';
+                        resetButton.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
+                        resetButton.classList.add('bg-red-600', 'hover:bg-red-700');
+                    }, 3000);
+                }
+            }
+
+
+            // --- 핵심 게임 로직 함수 ---
+            function switchTab(tabName) {
+                if (isCombatRunning) return;
+                allViews.forEach(view => view.classList.add('hidden'));
+                allTabs.forEach(tab => tab.classList.remove('active'));
+                document.getElementById(`${tabName}-view`).classList.remove('hidden');
+                document.getElementById(`tab-${tabName}`).classList.add('active');
+                if (tabName === 'home') displayHomeView();
+                else if (tabName === 'inventory') displayInventory(); 
+                else if (tabName === 'deck') displayDeckManagement();
+                else if (tabName === 'combat') displayCombatView();
+                else if (tabName === 'collection') displayCollection();
+                else if (tabName === 'story') displayStoryView();
+                else if (tabName === 'event') displayEventView();
+            }
+            
+            function switchSubTab(viewContainer, button) {
+                Array.from(viewContainer.children).forEach(view => {
+                    if(view.id.endsWith('-view')) view.classList.add('hidden');
+                });
+                Array.from(button.parentElement.children).forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                const viewId = button.id.replace('sub-tab-', '') + '-view';
+                const viewElement = document.getElementById(viewId);
+                if (viewElement) {
+                    viewElement.classList.remove('hidden');
+                }
+            }
+
+            function switchGachaTab(tabName) {
+                if (tabName === 'normal') {
+                    normalGachaView.classList.remove('hidden');
+                    eventGachaView.classList.add('hidden');
+                    gachaTabNormal.classList.add('active');
+                    gachaTabEvent.classList.remove('active');
+                } else {
+                    normalGachaView.classList.add('hidden');
+                    eventGachaView.classList.remove('hidden');
+                    gachaTabNormal.classList.remove('active');
+                    gachaTabEvent.classList.add('active');
+                }
+            }
+
+            function checkEventStatus() {
+                const now = new Date();
+                const isEventActive = true; // For testing: now >= EVENT_START_DATE && now <= EVENT_END_DATE;
+                if (isEventActive) {
+                    eventBanner.classList.remove('hidden');
+                    eventBannerText.textContent = `${EVENT_CHARACTER_NAME} 확률 UP!`;
+                    eventGachaInfo.querySelector('p').textContent = `[${EVENT_CHARACTER_NAME}] 등장 확률 UP!`;
+                    gachaTabEvent.classList.remove('hidden');
+                    eventTab.classList.remove('hidden');
+                    eventPointDisplay.classList.remove('hidden');
+                } else {
+                    eventBanner.classList.add('hidden');
+                    gachaTabEvent.classList.add('hidden');
+                    eventTab.classList.add('hidden');
+                    eventPointDisplay.classList.add('hidden');
+                    if(gachaTabEvent.classList.contains('active')) {
+                        switchGachaTab('normal');
+                    }
+                }
+            }
+
+            function displayHomeView(cycleDialogue = false) {
+                if (representativeCharacter) {
+                    homeCharacterContainer.classList.remove('hidden');
+                    homeDialogueContainer.classList.remove('hidden');
+                    homeDefaultMessage.classList.add('hidden');
+                    homeCharacterImage.src = representativeCharacter.imageUrl;
+                    homeCharacterName.textContent = representativeCharacter.name;
+                    if (cycleDialogue) {
+                        const currentDialogue = homeCharacterDialogue.textContent;
+                        let newDialogue;
+                        do {
+                            newDialogue = representativeCharacter.dialogues[Math.floor(Math.random() * representativeCharacter.dialogues.length)];
+                        } while (representativeCharacter.dialogues.length > 1 && newDialogue === currentDialogue);
+                        homeCharacterDialogue.textContent = newDialogue;
+                    } else {
+                         homeCharacterDialogue.textContent = representativeCharacter.dialogues[0];
+                    }
+                } else {
+                    homeCharacterContainer.classList.add('hidden');
+                    homeDialogueContainer.classList.add('hidden');
+                    homeDefaultMessage.classList.remove('hidden');
+                }
+            }
+            
+            function displayEventView() {
+                displayEventBattleView();
+                displayEventStoryView();
+                displayEventShopView();
+                switchSubTab(document.getElementById('event-view'), eventSubTabBattle);
+            }
+
+            function displayEventBattleView() {
+                eventDungeonListContainer.innerHTML = '';
+                eventDungeons.forEach((dungeon, index) => {
+                    const isUnlocked = index === 0 || clearedEventDungeons.includes(eventDungeons[index - 1].name);
+                    const isCleared = clearedEventDungeons.includes(dungeon.name);
+                    const dungeonEl = document.createElement('button');
+                    dungeonEl.className = `p-4 rounded-lg transition-colors duration-300 text-center ${isUnlocked ? 'bg-white/20 hover:bg-white/30 cursor-pointer' : 'bg-black/30 text-gray-500 cursor-not-allowed'}`;
+                    dungeonEl.disabled = !isUnlocked;
+                    
+                    dungeonEl.innerHTML = `
+                        <h3 class="text-xl font-bold ${isUnlocked ? 'text-yellow-300' : ''}">${dungeon.name}</h3>
+                        <p class="text-sm">보상: ${dungeon.eventPointReward} P ${isCleared ? '<span class="text-green-400">(클리어)</span>' : ''}</p>
+                    `;
+                    if(isUnlocked){
+                        dungeonEl.onclick = () => challengeDungeon(index, 'event');
+                    }
+                    eventDungeonListContainer.appendChild(dungeonEl);
+                });
+            }
+
+            function displayEventStoryView() {
+                eventStoryContainer.innerHTML = '';
+                eventStories.forEach((story, index) => {
+                    const isUnlocked = index === 0 || clearedEventDungeons.includes(eventDungeons[index - 1].name);
+                    const storyEl = document.createElement('div');
+                    storyEl.className = `p-4 rounded-lg transition-colors duration-300 ${isUnlocked ? 'bg-white/20 hover:bg-white/30 cursor-pointer' : 'bg-black/30 text-gray-500'}`;
+                    if (isUnlocked) {
+                        storyEl.dataset.storyIndex = index;
+                        storyEl.dataset.storyType = 'event';
+                    }
+
+                    storyEl.innerHTML = `
+                        <h3 class="text-xl font-bold ${isUnlocked ? 'text-yellow-300' : ''}">${story.title}</h3>
+                        <p class="text-sm">${isUnlocked ? '클릭하여 스토리 읽기' : `${eventDungeons[index-1].name} 클리어 시 해금`}</p>
+                    `;
+                    eventStoryContainer.appendChild(storyEl);
+                });
+            }
+            
+            function displayEventShopView() {
+                eventPointsSpan.textContent = playerEventPoints;
+                eventShopContainer.innerHTML = '';
+                eventShopItems.forEach(item => {
+                    const purchasedCount = purchasedEventItems[item.id] || 0;
+                    const isSoldOut = purchasedCount >= item.limit;
+                    const canAfford = playerEventPoints >= item.cost;
+
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'bg-black/20 p-4 rounded-lg flex justify-between items-center';
+                    itemEl.innerHTML = `
+                        <div>
+                            <h3 class="text-lg font-bold text-yellow-300">${item.name}</h3>
+                            <p class="text-sm text-gray-300">가격: ${item.cost} P</p>
+                            <p class="text-xs text-gray-400">남은 횟수: ${item.limit - purchasedCount} / ${item.limit}</p>
+                        </div>
+                        <button data-item-id="${item.id}" class="gacha-button bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-full" ${isSoldOut || !canAfford ? 'disabled' : ''}>
+                            ${isSoldOut ? '품절' : '구매'}
+                        </button>
+                    `;
+                    eventShopContainer.appendChild(itemEl);
+                });
+            }
+            
+            function purchaseEventItem(itemId) {
+                const item = eventShopItems.find(i => i.id === itemId);
+                if (!item) return;
+
+                const purchasedCount = purchasedEventItems[item.id] || 0;
+                if (purchasedCount >= item.limit) {
+                    showMessage('이미 최대 수량을 구매했습니다.', 'text-red-400', messageArea);
+                    return;
+                }
+                if (playerEventPoints < item.cost) {
+                    showMessage('이벤트 포인트가 부족합니다.', 'text-red-400', messageArea);
+                    return;
+                }
+
+                playerEventPoints -= item.cost;
+                purchasedEventItems[item.id] = purchasedCount + 1;
+
+                if (item.type === 'card') {
+                    playerInventory.push(item.itemData);
+                    showMessage(`[${item.name}] 획득!`, 'text-green-300', messageArea);
+                } else if (item.type === 'currency') {
+                    playerCurrency += item.itemData;
+                    showMessage(`보석 ${item.itemData}개 획득!`, 'text-green-300', messageArea);
+                }
+
+                updateUI();
+                displayEventShopView();
                 saveGame();
             }
-        }
-        updateUI();
-        checkEventStatus();
-        switchTab('home');
-    }
 
-    function resetGame() {
-        if (!isStorageAvailable()) return;
-        if (resetButton.dataset.confirming === 'true') {
-            localStorage.removeItem(SAVE_DATA_KEY);
-            location.reload();
-        } else {
-            resetButton.textContent = '확인?';
-            resetButton.dataset.confirming = 'true';
-            resetButton.classList.remove('bg-red-600', 'hover:bg-red-700');
-            resetButton.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
-            setTimeout(() => {
-                resetButton.textContent = '초기화';
-                resetButton.dataset.confirming = 'false';
-                resetButton.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
-                resetButton.classList.add('bg-red-600', 'hover:bg-red-700');
-            }, 3000);
-        }
-    }
+            function calculateOfflineRegen() {
+                if (playerBookmarks >= MAX_BOOKMARKS) {
+                    lastBookmarkUpdateTime = Date.now();
+                    return;
+                }
+                const now = Date.now();
+                const timeDiff = now - lastBookmarkUpdateTime;
+                const bookmarksToRegen = Math.floor(timeDiff / BOOKMARK_REGEN_TIME);
 
-
-    // --- 핵심 게임 로직 함수 ---
-    function switchTab(tabName) {
-        if (isCombatRunning) return;
-        allViews.forEach(view => view.classList.add('hidden'));
-        allTabs.forEach(tab => tab.classList.remove('active'));
-        document.getElementById(`${tabName}-view`).classList.remove('hidden');
-        document.getElementById(`tab-${tabName}`).classList.add('active');
-        if (tabName === 'home') displayHomeView();
-        else if (tabName === 'inventory') displayInventory(); 
-        else if (tabName === 'deck') displayDeckManagement();
-        else if (tabName === 'combat') displayCombatView();
-        else if (tabName === 'collection') displayCollection();
-        else if (tabName === 'story') displayStoryView();
-        else if (tabName === 'event') displayEventView();
-    }
-    
-    function switchSubTab(viewContainer, button) {
-        Array.from(viewContainer.children).forEach(view => {
-            if(view.id.endsWith('-view')) view.classList.add('hidden');
-        });
-        Array.from(button.parentElement.children).forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-        document.getElementById(button.id.replace('sub-tab-', '') + '-view').classList.remove('hidden');
-    }
-
-    function switchGachaTab(tabName) {
-        if (tabName === 'normal') {
-            normalGachaView.classList.remove('hidden');
-            eventGachaView.classList.add('hidden');
-            gachaTabNormal.classList.add('active');
-            gachaTabEvent.classList.remove('active');
-        } else {
-            normalGachaView.classList.add('hidden');
-            eventGachaView.classList.remove('hidden');
-            gachaTabNormal.classList.remove('active');
-            gachaTabEvent.classList.add('active');
-        }
-    }
-
-    function checkEventStatus() {
-        const now = new Date();
-        const isEventActive = true; // For testing: now >= EVENT_START_DATE && now <= EVENT_END_DATE;
-        if (isEventActive) {
-            eventBanner.classList.remove('hidden');
-            eventBannerText.textContent = `${EVENT_CHARACTER_NAME} 확률 UP!`;
-            eventGachaInfo.querySelector('p').textContent = `[${EVENT_CHARACTER_NAME}] 등장 확률 UP!`;
-            gachaTabEvent.classList.remove('hidden');
-            eventTab.classList.remove('hidden');
-            eventPointDisplay.classList.remove('hidden');
-        } else {
-            eventBanner.classList.add('hidden');
-            gachaTabEvent.classList.add('hidden');
-            eventTab.classList.add('hidden');
-            eventPointDisplay.classList.add('hidden');
-            if(gachaTabEvent.classList.contains('active')) {
-                switchGachaTab('normal');
+                if (bookmarksToRegen > 0) {
+                    playerBookmarks = Math.min(MAX_BOOKMARKS, playerBookmarks + bookmarksToRegen);
+                    lastBookmarkUpdateTime = lastBookmarkUpdateTime + bookmarksToRegen * BOOKMARK_REGEN_TIME;
+                    saveGame();
+                }
             }
-        }
-    }
 
-    function displayHomeView(cycleDialogue = false) {
-        if (representativeCharacter) {
-            homeCharacterContainer.classList.remove('hidden');
-            homeDialogueContainer.classList.remove('hidden');
-            homeDefaultMessage.classList.add('hidden');
-            homeCharacterImage.src = representativeCharacter.imageUrl;
-            homeCharacterName.textContent = representativeCharacter.name;
-            if (cycleDialogue) {
-                const currentDialogue = homeCharacterDialogue.textContent;
-                let newDialogue;
-                do {
-                    newDialogue = representativeCharacter.dialogues[Math.floor(Math.random() * representativeCharacter.dialogues.length)];
-                } while (representativeCharacter.dialogues.length > 1 && newDialogue === currentDialogue);
-                homeCharacterDialogue.textContent = newDialogue;
-            } else {
-                 homeCharacterDialogue.textContent = representativeCharacter.dialogues[0];
+            function startBookmarkRegenTimer() {
+                setInterval(() => {
+                    if (playerBookmarks < MAX_BOOKMARKS) {
+                        const now = Date.now();
+                        if (now - lastBookmarkUpdateTime >= BOOKMARK_REGEN_TIME) {
+                            playerBookmarks++;
+                            lastBookmarkUpdateTime = now; // Update time to now
+                            updateUI();
+                            saveGame();
+                        }
+                    }
+                }, 1000); // Check every second
             }
-        } else {
-            homeCharacterContainer.classList.add('hidden');
-            homeDialogueContainer.classList.add('hidden');
-            homeDefaultMessage.classList.remove('hidden');
-        }
-    }
-    
-    function displayEventView() {
-        displayEventBattleView();
-        displayEventStoryView();
-        displayEventShopView();
-        switchSubTab(document.getElementById('event-view'), eventSubTabBattle);
-    }
 
-    function displayEventBattleView() {
-        eventDungeonListContainer.innerHTML = '';
-        eventDungeons.forEach((dungeon, index) => {
-            const isUnlocked = index === 0 || clearedEventDungeons.includes(eventDungeons[index - 1].name);
-            const isCleared = clearedEventDungeons.includes(dungeon.name);
-            const dungeonEl = document.createElement('button');
-            dungeonEl.className = `p-4 rounded-lg transition-colors duration-300 text-center ${isUnlocked ? 'bg-white/20 hover:bg-white/30 cursor-pointer' : 'bg-black/30 text-gray-500 cursor-not-allowed'}`;
-            dungeonEl.disabled = !isUnlocked;
+
+            function setRepresentative(cardName) {
+                const cardData = findCharacter(cardName);
+                if (cardData) {
+                    representativeCharacter = cardData;
+                    showMessage(`${cardData.name}(을)를 대표로 설정했습니다!`, 'text-blue-300', messageArea);
+                    displayInventory();
+                    saveGame();
+                }
+            }
             
-            dungeonEl.innerHTML = `
-                <h3 class="text-xl font-bold ${isUnlocked ? 'text-yellow-300' : ''}">${dungeon.name}</h3>
-                <p class="text-sm">보상: ${dungeon.eventPointReward} P ${isCleared ? '<span class="text-green-400">(클리어)</span>' : ''}</p>
-            `;
-            if(isUnlocked){
-                dungeonEl.onclick = () => challengeDungeon(index, 'event');
+            function handlePull(count, cost, gachaType = 'normal') {
+                if (playerInventory.length + count > inventoryCapacity) {
+                    showMessage('보관함 공간이 부족합니다!', 'text-yellow-400', messageArea); return;
+                }
+                if (playerCurrency >= cost) {
+                    playerCurrency -= cost;
+                    showMessage(`-💎${cost}`, 'text-red-400', messageArea);
+                    performPulls(count, gachaType);
+                } else {
+                    showMessage('재화가 부족합니다!', 'text-red-400', messageArea);
+                }
             }
-            eventDungeonListContainer.appendChild(dungeonEl);
-        });
-    }
-
-    function displayEventStoryView() {
-        eventStoryContainer.innerHTML = '';
-        eventStories.forEach((story, index) => {
-            const isUnlocked = index === 0 || clearedEventDungeons.includes(eventDungeons[index - 1].name);
-            const storyEl = document.createElement('div');
-            storyEl.className = `p-4 rounded-lg transition-colors duration-300 ${isUnlocked ? 'bg-white/20 hover:bg-white/30 cursor-pointer' : 'bg-black/30 text-gray-500'}`;
-            if (isUnlocked) {
-                storyEl.dataset.storyIndex = index;
-                storyEl.dataset.storyType = 'event';
+            
+            function expandInventory() {
+                if (playerCurrency >= EXPAND_COST) {
+                    playerCurrency -= EXPAND_COST; inventoryCapacity += EXPAND_AMOUNT;
+                    showMessage(`보관함이 ${inventoryCapacity}칸으로 확장되었습니다!`, 'text-green-300', messageArea);
+                    updateUI(); displayInventory(); saveGame();
+                } else {
+                    showMessage('보석이 부족하여 확장할 수 없습니다.', 'text-red-400', messageArea);
+                }
             }
 
-            storyEl.innerHTML = `
-                <h3 class="text-xl font-bold ${isUnlocked ? 'text-yellow-300' : ''}">${story.title}</h3>
-                <p class="text-sm">${isUnlocked ? '클릭하여 스토리 읽기' : `${eventDungeons[index-1].name} 클리어 시 해금`}</p>
-            `;
-            eventStoryContainer.appendChild(storyEl);
-        });
-    }
-    
-    function displayEventShopView() {
-        eventPointsSpan.textContent = playerEventPoints;
-        eventShopContainer.innerHTML = '';
-        eventShopItems.forEach(item => {
-            const purchasedCount = purchasedEventItems[item.id] || 0;
-            const isSoldOut = purchasedCount >= item.limit;
-            const canAfford = playerEventPoints >= item.cost;
+            function updateUI() {
+                currencyDisplay.textContent = playerCurrency;
+                eventPointsSpan.textContent = playerEventPoints;
+                bookmarkDisplay.textContent = playerBookmarks;
+                maxBookmarkDisplay.textContent = MAX_BOOKMARKS;
 
-            const itemEl = document.createElement('div');
-            itemEl.className = 'bg-black/20 p-4 rounded-lg flex justify-between items-center';
-            itemEl.innerHTML = `
-                <div>
-                    <h3 class="text-lg font-bold text-yellow-300">${item.name}</h3>
-                    <p class="text-sm text-gray-300">가격: ${item.cost} P</p>
-                    <p class="text-xs text-gray-400">남은 횟수: ${item.limit - purchasedCount} / ${item.limit}</p>
-                </div>
-                <button data-item-id="${item.id}" class="gacha-button bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-full" ${isSoldOut || !canAfford ? 'disabled' : ''}>
-                    ${isSoldOut ? '품절' : '구매'}
-                </button>
-            `;
-            eventShopContainer.appendChild(itemEl);
-        });
-    }
-    
-    function purchaseEventItem(itemId) {
-        const item = eventShopItems.find(i => i.id === itemId);
-        if (!item) return;
-
-        const purchasedCount = purchasedEventItems[item.id] || 0;
-        if (purchasedCount >= item.limit) {
-            showMessage('이미 최대 수량을 구매했습니다.', 'text-red-400', messageArea);
-            return;
-        }
-        if (playerEventPoints < item.cost) {
-            showMessage('이벤트 포인트가 부족합니다.', 'text-red-400', messageArea);
-            return;
-        }
-
-        playerEventPoints -= item.cost;
-        purchasedEventItems[item.id] = purchasedCount + 1;
-
-        if (item.type === 'card') {
-            playerInventory.push(item.itemData);
-            showMessage(`[${item.name}] 획득!`, 'text-green-300', messageArea);
-        } else if (item.type === 'currency') {
-            playerCurrency += item.itemData;
-            showMessage(`보석 ${item.itemData}개 획득!`, 'text-green-300', messageArea);
-        }
-
-        updateUI();
-        displayEventShopView();
-        saveGame();
-    }
-
-
-    function setRepresentative(cardName) {
-        const cardData = findCharacter(cardName);
-        if (cardData) {
-            representativeCharacter = cardData;
-            showMessage(`${cardData.name}(을)를 대표로 설정했습니다!`, 'text-blue-300', messageArea);
-            displayInventory();
-            saveGame();
-        }
-    }
-    
-    function handlePull(count, cost, gachaType = 'normal') {
-        if (playerInventory.length + count > inventoryCapacity) {
-            showMessage('보관함 공간이 부족합니다!', 'text-yellow-400', messageArea); return;
-        }
-        if (playerCurrency >= cost) {
-            playerCurrency -= cost;
-            showMessage(`-💎${cost}`, 'text-red-400', messageArea);
-            performPulls(count, gachaType);
-        } else {
-            showMessage('재화가 부족합니다!', 'text-red-400', messageArea);
-        }
-    }
-    
-    function expandInventory() {
-        if (playerCurrency >= EXPAND_COST) {
-            playerCurrency -= EXPAND_COST; inventoryCapacity += EXPAND_AMOUNT;
-            showMessage(`보관함이 ${inventoryCapacity}칸으로 확장되었습니다!`, 'text-green-300', messageArea);
-            updateUI(); displayInventory(); saveGame();
-        } else {
-            showMessage('보석이 부족하여 확장할 수 없습니다.', 'text-red-400', messageArea);
-        }
-    }
-
-    function updateUI() {
-        currencyDisplay.textContent = playerCurrency;
-        eventPointsSpan.textContent = playerEventPoints;
-        const buttons = [pullOneButton, pullTenButton, pullOneEventButton, pullTenEventButton];
-        buttons.forEach(btn => {
-            if (btn.id.includes('ten')) btn.disabled = playerCurrency < PULL_TEN_COST;
-            else btn.disabled = playerCurrency < PULL_ONE_COST;
-        });
-        expandInventoryButton.disabled = playerCurrency < EXPAND_COST;
-    }
-
-    function showMessage(message, colorClass, element) {
-        element.textContent = message;
-        element.className = `text-center text-lg h-8 mb-4 transition-opacity duration-300 ${colorClass}`;
-        setTimeout(() => { element.textContent = ''; }, 2000);
-    }
-
-    function performPulls(count, gachaType = 'normal') {
-        const results = [];
-        let guaranteedSR = (count === 10);
-        for (let i = 0; i < count; i++) {
-            let pulledChar;
-            if (guaranteedSR && i === count - 1 && !results.some(c => c.rarity === 'SR' || c.rarity === 'SSR')) {
-                pulledChar = pullCharacter(['SR', 'SSR'], gachaType);
-            } else {
-                pulledChar = pullCharacter(null, gachaType);
+                const buttons = [pullOneButton, pullTenButton, pullOneEventButton, pullTenEventButton];
+                buttons.forEach(btn => {
+                    if (btn.id.includes('ten')) btn.disabled = playerCurrency < PULL_TEN_COST;
+                    else btn.disabled = playerCurrency < PULL_ONE_COST;
+                });
+                expandInventoryButton.disabled = playerCurrency < EXPAND_COST;
             }
-            results.push(pulledChar);
-            playerInventory.push(pulledChar); 
-        }
-        displayResults(results); updateUI(); saveGame();
-    }
 
-    function pullCharacter(allowedRarities = null, gachaType = 'normal') {
-        const now = new Date();
-        const isEventActive = true; // For testing
-        const useEventRates = gachaType === 'event' && isEventActive;
-        const probabilities = useEventRates ? eventRarityProbabilities : rarityProbabilities;
-        
-        let selectedRarity = '';
-        if (allowedRarities) {
-            const highTierProb = { 'SSR': probabilities['SSR'], 'SR': probabilities['SR'] };
-            const totalProb = highTierProb.SSR + highTierProb.SR;
-            selectedRarity = (Math.random() * totalProb < highTierProb.SSR) ? 'SSR' : 'SR';
-        } else {
-            const rand = Math.random() * 100; let cumulativeProb = 0;
-            for (const rarity in probabilities) {
-                cumulativeProb += probabilities[rarity];
-                if (rand < cumulativeProb) { selectedRarity = rarity; break; }
+            function showMessage(message, colorClass, element) {
+                element.textContent = message;
+                element.className = `text-center text-lg h-8 mb-4 transition-opacity duration-300 ${colorClass}`;
+                setTimeout(() => { element.textContent = ''; }, 2000);
             }
-        }
 
-        if (useEventRates && (selectedRarity === 'SSR' || selectedRarity === 'SR')) {
-            if (Math.random() < 0.5) { // 50% chance for event character
-                return characters.find(c => c.name === EVENT_CHARACTER_NAME);
-            } else {
-                const otherChars = characters.filter(c => c.rarity === selectedRarity && c.name !== EVENT_CHARACTER_NAME);
-                if (otherChars.length > 0) return otherChars[Math.floor(Math.random() * otherChars.length)];
-                return characters.find(c => c.name === EVENT_CHARACTER_NAME); // Fallback
-            }
-        }
-
-        const possibleCharacters = characters.filter(char => char.rarity === selectedRarity);
-        return possibleCharacters[Math.floor(Math.random() * possibleCharacters.length)];
-    }
-
-    function displayResults(pulledCharacters) {
-        resultsContainer.innerHTML = '';
-        pulledCharacters.forEach((character, index) => {
-            resultsContainer.appendChild(createCard(character, { animationIndex: index, mode: 'gachaResult' }));
-        });
-    }
-    
-    function getUniqueInventory() {
-        const cardCounts = playerInventory.reduce((acc, card) => {
-            if (card && card.name) {
-                if (!acc[card.name]) { acc[card.name] = { ...card, count: 0 }; }
-                acc[card.name].count++;
-            }
-            return acc;
-        }, {});
-        const rarityOrder = { 'SSR': 4, 'SR': 3, 'R': 2, 'N': 1 };
-        return Object.values(cardCounts).sort((a, b) => (rarityOrder[b.rarity] - rarityOrder[a.rarity]) || a.name.localeCompare(b.name));
-    }
-
-    function displayInventory() {
-        inventoryStatus.textContent = `${playerInventory.length} / ${inventoryCapacity}`;
-        inventoryContainer.innerHTML = '';
-        const uniqueCards = getUniqueInventory();
-        if (uniqueCards.length === 0) {
-            inventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">아직 수집한 동료가 없습니다.</p>`; return;
-        }
-        uniqueCards.forEach((character, index) => {
-            inventoryContainer.appendChild(createCard(character, { animationIndex: index, mode: 'inventory' }));
-        });
-    }
-
-    function displayCollection() {
-        collectionContainer.innerHTML = '';
-        const collectedCardNames = new Set(playerInventory.map(card => card.name));
-
-        characters.forEach((character, index) => {
-            const isCollected = collectedCardNames.has(character.name);
-            collectionContainer.appendChild(createCard(character, {
-                animationIndex: index,
-                mode: 'collection',
-                isCollected: isCollected
-            }));
-        });
-    }
-
-
-    function displayDeckManagement() {
-        deckStatus.textContent = `현재 덱: ${playerDeck.length} / ${DECK_CAPACITY}`;
-        deckStatus.classList.toggle('text-green-400', playerDeck.length === DECK_CAPACITY);
-        deckSlotsContainer.innerHTML = '';
-        for (let i = 0; i < DECK_CAPACITY; i++) {
-            if (playerDeck[i]) {
-                deckSlotsContainer.appendChild(createCard(playerDeck[i], { mode: 'deckSlot' }));
-            } else {
-                const emptySlot = document.createElement('div');
-                emptySlot.className = 'deck-slot rounded-lg'; emptySlot.textContent = '비어있음';
-                deckSlotsContainer.appendChild(emptySlot);
-            }
-        }
-        deckInventoryContainer.innerHTML = '';
-        const uniqueCards = getUniqueInventory();
-         if (uniqueCards.length === 0) {
-            deckInventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">덱에 추가할 카드가 없습니다.</p>`; return;
-        }
-        uniqueCards.forEach((character, index) => {
-            const isCardInDeck = playerDeck.some(deckCard => deckCard.name === character.name);
-            const isDeckFull = playerDeck.length >= DECK_CAPACITY;
-            deckInventoryContainer.appendChild(createCard(character, { animationIndex: index, mode: 'deckBuilder', isCardInDeck, isDeckFull }));
-        });
-    }
-    
-    function autoFillDeck() {
-        const uniqueCards = getUniqueInventory();
-        const sortedByPower = uniqueCards.sort((a, b) => (b.stats.atk + b.stats.def) - (a.stats.atk + a.stats.def));
-        playerDeck = sortedByPower.slice(0, DECK_CAPACITY);
-        displayDeckManagement();
-        showMessage('가장 강력한 카드로 덱을 자동 편성했습니다!', 'text-blue-300', messageArea);
-        saveGame();
-    }
-
-    function addToDeck(cardName) {
-        if (playerDeck.length >= DECK_CAPACITY || playerDeck.some(card => card.name === cardName)) return;
-        const cardToAdd = findCharacter(cardName);
-        if (cardToAdd) { playerDeck.push(cardToAdd); displayDeckManagement(); saveGame(); }
-    }
-    
-    function removeFromDeck(cardName) {
-        const indexToRemove = playerDeck.findIndex(card => card.name === cardName);
-        if(indexToRemove > -1) {
-            playerDeck.splice(indexToRemove, 1);
-        }
-        displayDeckManagement();
-        saveGame();
-    }
-    
-    function calculateDeckPower() {
-        return playerDeck.reduce((total, card) => total + (card.stats.atk + card.stats.def + Math.floor(card.stats.hp / 10)), 0);
-    }
-
-    function displayCombatView() {
-        deckPowerDisplay.textContent = calculateDeckPower();
-        dungeonListContainer.innerHTML = '';
-        dungeons.forEach((dungeon, index) => {
-            const monster = monsters[dungeon.monsterName];
-            const recommendedPower = monster.stats.atk*5 + monster.stats.def*5 + Math.floor(monster.stats.hp / 5);
-            const dungeonEl = document.createElement('div');
-            dungeonEl.className = 'bg-black/20 p-4 rounded-lg text-center';
-            dungeonEl.innerHTML = `
-                <h3 class="text-xl font-bold text-yellow-300">${dungeon.name}</h3>
-                <p class="text-gray-300">권장 전투력: ${recommendedPower}</p>
-                <p class="text-gray-300">예상 보상: 💎${dungeon.rewards.min} ~ ${dungeon.rewards.max}</p>
-                <button data-action="challenge-dungeon" data-dungeon-index="${index}" class="gacha-button bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-full mt-4">도전</button>
-            `;
-            dungeonListContainer.appendChild(dungeonEl);
-        });
-    }
-    
-    function challengeDungeon(dungeonIndex, type = 'main') {
-        if (playerDeck.length < DECK_CAPACITY) {
-            const msgArea = type === 'event' ? document.getElementById('message-area') : (document.getElementById('combat-message-area') || messageArea);
-            showMessage('덱을 5장으로 모두 채워야 합니다!', 'text-yellow-400', msgArea);
-            return;
-        }
-        startCombat(dungeonIndex, type);
-    }
-
-    function setCombatSpeed(speed) {
-        combatSpeedMultiplier = speed;
-        const allSpeedButtons = document.querySelectorAll('.speed-button');
-        allSpeedButtons.forEach(btn => {
-            btn.classList.remove('active');
-            btn.classList.add('bg-gray-600');
-            btn.classList.remove('bg-blue-500');
-        });
-        document.getElementById(`speed-${speed}x`).classList.add('active', 'bg-blue-500');
-        document.getElementById(`speed-${speed}x`).classList.remove('bg-gray-600');
-    }
-
-    async function startCombat(dungeonIndex, type) {
-        isCombatRunning = true;
-        setCombatSpeed(1); // 전투 시작 시 1배속으로 초기화
-        const dungeonList = type === 'event' ? eventDungeons : dungeons;
-        const dungeon = dungeonList[dungeonIndex];
-        const monsterData = JSON.parse(JSON.stringify(monsters[dungeon.monsterName]));
-        const combatDeck = JSON.parse(JSON.stringify(playerDeck));
-
-        allViews.forEach(view => view.classList.add('hidden'));
-        combatInProgressView.classList.remove('hidden');
-        combatLog.innerHTML = '';
-        combatPlayerDeck.innerHTML = '';
-        combatDeck.forEach((card, index) => {
-            const cardEl = document.createElement('div');
-            cardEl.className = 'bg-gray-700 p-2 rounded';
-            cardEl.innerHTML = `
-                <p class="font-bold text-sm truncate" title="${card.name}">${card.name}</p>
-                <div class="hp-bar-background rounded-full h-2.5 mt-1">
-                    <div id="player-hp-bar-${index}" class="hp-bar-foreground h-2.5 rounded-full" style="width: 100%"></div>
-                </div>
-                <p id="player-hp-text-${index}" class="text-xs text-center mt-0.5">${card.stats.hp} / ${card.stats.hp}</p>
-            `;
-            combatPlayerDeck.appendChild(cardEl);
-        });
-
-        combatMonsterArea.innerHTML = `
-            <h3 class="text-2xl font-bold">${monsterData.name}</h3>
-            <img id="combat-monster-image" src="${monsterData.imageUrl}" alt="${monsterData.name}" class="my-4 h-48 w-48 object-contain">
-            <div class="w-full hp-bar-background rounded-full h-4">
-                <div id="monster-hp-bar" class="hp-bar-foreground h-4 rounded-full" style="width: 100%"></div>
-            </div>
-            <p id="monster-hp-text" class="text-sm mt-1">${monsterData.stats.hp} / ${monsterData.stats.hp}</p>
-        `;
-        
-        await runCombatLoop(combatDeck, monsterData, dungeon, type);
-    }
-
-    const delay = ms => new Promise(res => setTimeout(res, ms / combatSpeedMultiplier));
-
-    async function runCombatLoop(combatDeck, monsterData, dungeon, type) {
-        const originalMonsterDef = monsterData.stats.def;
-
-        while (monsterData.stats.hp > 0 && combatDeck.some(c => c.stats.hp > 0)) {
-            for (let i = 0; i < combatDeck.length; i++) {
-                const card = combatDeck[i];
-                if (card.stats.hp > 0) {
-                    await delay(800);
-                    const monsterImage = document.getElementById('combat-monster-image');
-                    
-                    const useUltimate = card.rarity === 'SSR' && Math.random() < 0.25;
-                    const useSkill = Math.random() < 0.4;
-                    let skillToUse = null;
-
-                    if (useUltimate && card.skills.length > 1) skillToUse = card.skills[1];
-                    else if (useSkill) skillToUse = card.skills[0];
-
-                    let damage = 0;
-                    if (skillToUse) {
-                        logCombat(`<strong>${card.name}</strong>의 스킬! <span class="text-yellow-300">"${skillToUse.name}"</span>`);
-                        await delay(400);
-                        logCombat(`<em>"${skillToUse.dialogue}"</em>`);
-                        
-                        damage = Math.max(1, Math.floor(card.stats.atk * skillToUse.power) - monsterData.stats.def);
-                        
-                        if (skillToUse.type === 'vampire') {
-                            const healedAmount = Math.floor(damage * 0.5);
-                            const originalCardData = playerDeck[i];
-                            card.stats.hp = Math.min(originalCardData.stats.hp, card.stats.hp + healedAmount);
-                            logCombat(`<strong>${card.name}</strong>이(가) ${healedAmount}의 체력을 회복했다!`);
-                        }
-                        if (skillToUse.type === 'debuff_def') {
-                            monsterData.stats.def = Math.max(0, Math.floor(monsterData.stats.def * 0.8));
-                            logCombat(`<strong>${monsterData.name}</strong>의 방어력이 감소했다!`);
-                        }
-
+            function performPulls(count, gachaType = 'normal') {
+                const results = [];
+                let guaranteedSR = (count === 10);
+                for (let i = 0; i < count; i++) {
+                    let pulledChar;
+                    if (guaranteedSR && i === count - 1 && !results.some(c => c.rarity === 'SR' || c.rarity === 'SSR')) {
+                        pulledChar = pullCharacter(['SR', 'SSR'], gachaType);
                     } else {
-                        logCombat(`<strong>${card.name}</strong>의 일반 공격!`);
-                        damage = Math.max(1, card.stats.atk - monsterData.stats.def);
+                        pulledChar = pullCharacter(null, gachaType);
                     }
-                    
-                    monsterData.stats.hp = Math.max(0, monsterData.stats.hp - damage);
-                    logCombat(`<strong>${monsterData.name}</strong>에게 ${damage}의 데미지!`);
-                    monsterImage.classList.add('shake-animation');
-                    updateCombatUI(combatDeck, monsterData);
-                    setTimeout(() => monsterImage.classList.remove('shake-animation'), 300 / combatSpeedMultiplier);
-
-                    if (monsterData.stats.hp <= 0) break;
+                    results.push(pulledChar);
+                    playerInventory.push(pulledChar); 
                 }
+                displayResults(results); updateUI(); saveGame();
             }
-            if (monsterData.stats.hp <= 0) break;
 
-            await delay(1000);
-            const alivePlayers = combatDeck.filter(c => c.stats.hp > 0);
-            if (alivePlayers.length > 0) {
-                const targetCard = alivePlayers[Math.floor(Math.random() * alivePlayers.length)];
-                logCombat(`<strong>${monsterData.name}</strong>의 공격!`);
-                const damage = Math.max(1, monsterData.stats.atk - targetCard.stats.def);
-                const hpBeforeAttack = targetCard.stats.hp;
-                targetCard.stats.hp = Math.max(0, targetCard.stats.hp - damage);
-                logCombat(`<strong>${targetCard.name}</strong>에게 ${damage}의 데미지!`);
+            function pullCharacter(allowedRarities = null, gachaType = 'normal') {
+                const now = new Date();
+                const isEventActive = true; // For testing
+                const useEventRates = gachaType === 'event' && isEventActive;
+                const probabilities = useEventRates ? eventRarityProbabilities : rarityProbabilities;
                 
-                if (targetCard.stats.hp <= 0 && hpBeforeAttack > 0) {
-                    await delay(400);
-                    logCombat(`<strong>${targetCard.name}</strong>: <em>"${targetCard.deathDialogue}"</em>`);
-                }
-
-                updateCombatUI(combatDeck, monsterData);
-            }
-        }
-        
-        await delay(1000);
-        monsterData.stats.def = originalMonsterDef;
-        endCombat(monsterData.stats.hp <= 0, dungeon, type);
-    }
-
-    function logCombat(message) {
-        combatLog.innerHTML += `<p>${message}</p>`;
-        combatLogContainer.scrollTop = combatLogContainer.scrollHeight;
-    }
-
-    function updateCombatUI(deck, monster) {
-        deck.forEach((card, index) => {
-            const originalCard = playerDeck.find(c => c.name === card.name);
-            if(!originalCard) return;
-            const maxHp = originalCard.stats.hp;
-            const currentHp = card.stats.hp;
-            const hpPercent = (currentHp / maxHp) * 100;
-            document.getElementById(`player-hp-bar-${index}`).style.width = `${hpPercent}%`;
-            document.getElementById(`player-hp-text-${index}`).textContent = `${currentHp} / ${maxHp}`;
-        });
-
-        const monsterMaxHp = monsters[monster.name].stats.hp;
-        const monsterHpPercent = (monster.stats.hp / monsterMaxHp) * 100;
-        document.getElementById('monster-hp-bar').style.width = `${monsterHpPercent}%`;
-        document.getElementById('monster-hp-text').textContent = `${monster.stats.hp} / ${monsterMaxHp}`;
-    }
-    
-    function endCombat(isVictory, dungeon, type) {
-        if (isVictory) {
-            let rewardMsg = '';
-            if(type === 'event') {
-                const reward = dungeon.eventPointReward;
-                playerEventPoints += reward;
-                if (!clearedEventDungeons.includes(dungeon.name)) {
-                    clearedEventDungeons.push(dungeon.name);
-                }
-                rewardMsg = `이벤트 스테이지 클리어! ${reward} P를 획득했습니다.`;
-            } else {
-                if (!clearedDungeons.includes(dungeon.name)) {
-                    clearedDungeons.push(dungeon.name);
-                }
-                const earnedReward = dungeon.rewards.min + Math.floor(Math.random() * (dungeon.rewards.max - dungeon.rewards.min + 1));
-                playerCurrency += earnedReward;
-                rewardMsg = `던전 클리어! 💎${earnedReward}를 획득했습니다.`;
-            }
-            combatResultTitle.textContent = "승리!";
-            combatResultTitle.className = "text-4xl font-bold mb-4 text-green-400";
-            combatResultMessage.textContent = rewardMsg;
-        } else {
-            combatResultTitle.textContent = "패배...";
-            combatResultTitle.className = "text-4xl font-bold mb-4 text-red-400";
-            combatResultMessage.textContent = `전투에서 패배했습니다...`;
-        }
-        
-        updateUI();
-        saveGame();
-        combatResultModal.classList.remove('hidden');
-        isCombatRunning = false;
-    }
-
-    function createCard(character, options = {}) {
-        const { animationIndex, mode = 'default', isCardInDeck, isDeckFull, isCollected } = options;
-        const card = document.createElement('div');
-        card.className = `rarity-${character.rarity} relative text-center rounded-lg shadow-md p-2 transform transition-transform duration-300 hover:scale-105 cursor-pointer`;
-        card.dataset.cardName = character.name;
-        card.title = character.name;
-        const rarityColor = { 'N': 'text-gray-600', 'R': 'text-blue-800', 'SR': 'text-white', 'SSR': 'text-black' }[character.rarity];
-        const factionColors = {
-            '탐정': 'bg-blue-500 text-white',
-            '조수': 'bg-green-500 text-white',
-            '범인': 'bg-red-500 text-white'
-        };
-        
-        let badgeHTML = '';
-        if(mode === 'inventory' && character.count > 1) {
-            badgeHTML = `<div class="count-badge">x${character.count}</div>`;
-        }
-
-        let actionButtonsHTML = '';
-        if (mode === 'deckBuilder') {
-            const disabled = isDeckFull || isCardInDeck;
-            const buttonText = isCardInDeck ? '추가됨' : '추가';
-            const buttonColor = disabled ? 'bg-gray-500' : 'bg-green-500 hover:bg-green-600';
-            actionButtonsHTML = `<button data-action="add-to-deck" data-card-name="${character.name}" class="w-full mt-2 py-1 rounded-md text-white font-bold text-sm ${buttonColor}" ${disabled ? 'disabled' : ''}>${buttonText}</button>`;
-        } else if (mode === 'inventory') {
-            const isRepresentative = representativeCharacter && representativeCharacter.name === character.name;
-            const repButtonText = isRepresentative ? '대표' : '대표 설정';
-            const repButtonColor = isRepresentative ? 'bg-yellow-500' : 'bg-gray-600 hover:bg-gray-700';
-            actionButtonsHTML = `<button data-action="set-representative" data-card-name="${character.name}" class="w-full mt-2 py-1 rounded-md text-white font-bold text-sm ${repButtonColor}" ${isRepresentative ? 'disabled' : ''}>${repButtonText}</button>`;
-        }
-        
-        let deckSlotButton = '';
-        if(mode === 'deckSlot') {
-            deckSlotButton = `<button data-action="remove-from-deck" data-card-name="${character.name}" class="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 text-sm font-bold flex items-center justify-center z-10">X</button>`;
-        }
-
-        const factionBadge = `<span class="absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full ${factionColors[character.faction]} z-10">${character.faction}</span>`;
-
-        card.innerHTML = `
-            ${badgeHTML} ${deckSlotButton} ${factionBadge}
-            <div class="relative pointer-events-none">
-                <img src="${character.cardImageUrl}" alt="${character.name}" class="w-full h-auto rounded-md mb-2 border-2 border-white/50">
-                <p class="font-bold text-sm ${rarityColor} truncate">${character.name}</p>
-                <p class="font-black text-lg ${rarityColor}" style="text-shadow: 1px 1px 2px rgba(255,255,255,0.5);">${character.rarity}</p>
-            </div>
-             ${actionButtonsHTML}
-        `;
-        if (typeof animationIndex === 'number') {
-            card.style.opacity = '0';
-            card.style.animationDelay = `${animationIndex * 0.05}s`;
-            card.classList.add('card-animation');
-        }
-        if(mode === 'deckBuilder' && isCardInDeck) {
-            card.classList.add('opacity-50');
-        }
-        if (mode === 'collection') {
-            if (isCollected) {
-                card.dataset.isCollected = "true";
-            } else {
-                card.dataset.isCollected = "false";
-                card.classList.add('grayscale', 'opacity-75');
-                card.classList.remove('hover:scale-105', 'cursor-pointer');
-            }
-        }
-        return card;
-    }
-
-    function getSkillDescription(skill) {
-        switch(skill.type) {
-            case 'damage': return `공격력의 ${skill.power * 100}% 만큼 피해를 줍니다.`;
-            case 'debuff_def': return `적의 방어력을 일시적으로 감소시킵니다.`;
-            case 'vampire': return `가한 피해의 50% 만큼 체력을 회복합니다.`;
-            default: return '특별한 효과를 가진 스킬입니다.';
-        }
-    }
-
-    function showCardDetails(cardName) {
-        const character = findCharacter(cardName);
-        if (!character) return;
-
-        document.getElementById('detail-card-image').src = character.imageUrl;
-        document.getElementById('detail-card-name').textContent = character.name;
-        const rarityEl = document.getElementById('detail-card-rarity');
-        rarityEl.textContent = character.rarity;
-        const rarityColor = { 'N': 'text-gray-400', 'R': 'text-blue-400', 'SR': 'text-purple-400', 'SSR': 'text-yellow-400' }[character.rarity];
-        rarityEl.className = `font-bold text-2xl ${rarityColor}`;
-
-        const factionEl = document.getElementById('detail-card-faction');
-        factionEl.textContent = character.faction;
-        const factionColors = {
-            '탐정': 'bg-blue-500 text-white',
-            '조수': 'bg-green-500 text-white',
-            '범인': 'bg-red-500 text-white'
-        };
-        factionEl.className = `font-bold text-lg px-3 py-1 rounded-full ${factionColors[character.faction]}`;
-
-
-        document.getElementById('detail-stat-hp').textContent = character.stats.hp;
-        document.getElementById('detail-stat-atk').textContent = character.stats.atk;
-        document.getElementById('detail-stat-def').textContent = character.stats.def;
-
-        const skillsContainer = document.getElementById('detail-skills-container');
-        skillsContainer.innerHTML = '';
-        character.skills.forEach((skill, index) => {
-            const isUltimate = character.rarity === 'SSR' && index === 1;
-            const skillEl = document.createElement('div');
-            skillEl.className = 'bg-black/20 p-3 rounded-lg';
-            skillEl.innerHTML = `
-                <h4 class="font-bold ${isUltimate ? 'text-yellow-300' : 'text-white'}">${isUltimate ? '궁극기' : '일반 스킬'}: ${skill.name}</h4>
-                <p class="text-gray-300 italic">"${skill.dialogue}"</p>
-                <p class="text-sm mt-1">${getSkillDescription(skill)}</p>
-            `;
-            skillsContainer.appendChild(skillEl);
-        });
-        
-        currentStoryPages = character.story.split('[PAGE_BREAK]');
-        currentStoryPageIndex = 0;
-        displayCardStoryPage();
-        
-        cardDetailModal.classList.remove('hidden');
-    }
-    
-    function displayCardStoryPage() {
-        const storyContent = document.getElementById('detail-card-story');
-        const pageIndicator = document.getElementById('detail-story-page-indicator');
-        
-        storyContent.textContent = currentStoryPages[currentStoryPageIndex];
-        pageIndicator.textContent = `${currentStoryPageIndex + 1} / ${currentStoryPages.length}`;
-        
-        detailStoryPrevButton.disabled = currentStoryPageIndex === 0;
-        detailStoryNextButton.disabled = currentStoryPageIndex === currentStoryPages.length - 1;
-    }
-
-    function hideCardDetails() {
-        cardDetailModal.classList.add('hidden');
-    }
-    
-    function findCharacter(name) {
-        return characters.find(c => c.name === name);
-    }
-
-    function displayStoryView() {
-        mainStoryContainer.innerHTML = '';
-        mainStories.forEach((story, index) => {
-            const isUnlocked = story.dungeonToUnlock === null || clearedDungeons.includes(story.dungeonToUnlock);
-            const storyEl = document.createElement('div');
-            storyEl.className = `p-4 rounded-lg transition-colors duration-300 ${isUnlocked ? 'bg-white/20 hover:bg-white/30 cursor-pointer' : 'bg-black/30 text-gray-500'}`;
-            if (isUnlocked) {
-                storyEl.dataset.storyIndex = index;
-                storyEl.dataset.storyType = 'main';
-            }
-
-            storyEl.innerHTML = `
-                <h3 class="text-xl font-bold ${isUnlocked ? 'text-yellow-300' : ''}">${story.title}</h3>
-                <p class="text-sm">${isUnlocked ? '클릭하여 스토리 읽기' : `${story.dungeonToUnlock} 클리어 시 해금`}</p>
-            `;
-            mainStoryContainer.appendChild(storyEl);
-        });
-    }
-
-    function showMainStory(index, type) {
-        const storyList = type === 'main' ? mainStories : eventStories;
-        const story = storyList[index];
-        document.getElementById('main-story-title').textContent = story.title;
-        
-        currentStoryPages = story.content.split('[PAGE_BREAK]');
-        currentStoryPageIndex = 0;
-        displayMainStoryPage();
-
-        mainStoryModal.classList.remove('hidden');
-    }
-
-    function displayMainStoryPage() {
-        const storyContent = document.getElementById('main-story-content');
-        const pageIndicator = document.getElementById('main-story-page-indicator');
-        
-        storyContent.textContent = currentStoryPages[currentStoryPageIndex];
-        pageIndicator.textContent = `${currentStoryPageIndex + 1} / ${currentStoryPages.length}`;
-        
-        mainStoryPrevButton.disabled = currentStoryPageIndex === 0;
-        mainStoryNextButton.disabled = currentStoryPageIndex === currentStoryPages.length - 1;
-    }
-
-    function hideMainStory() {
-        mainStoryModal.classList.add('hidden');
-    }
-    
-    // --- 이벤트 리스너 ---
-    allTabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.id.split('-')[1])));
-    pullOneButton.addEventListener('click', () => handlePull(1, PULL_ONE_COST, 'normal'));
-    pullTenButton.addEventListener('click', () => handlePull(10, PULL_TEN_COST, 'normal'));
-    pullOneEventButton.addEventListener('click', () => handlePull(1, PULL_ONE_COST, 'event'));
-    pullTenEventButton.addEventListener('click', () => handlePull(10, PULL_TEN_COST, 'event'));
-    expandInventoryButton.addEventListener('click', expandInventory);
-    autoFillDeckButton.addEventListener('click', autoFillDeck);
-    gachaTabNormal.addEventListener('click', () => switchGachaTab('normal'));
-    gachaTabEvent.addEventListener('click', () => switchGachaTab('event'));
-    
-    const cardClickableContainers = [inventoryContainer, deckInventoryContainer, deckSlotsContainer, collectionContainer];
-    cardClickableContainers.forEach(container => {
-        container.addEventListener('click', (e) => {
-            const actionButton = e.target.closest('[data-action]');
-            if (actionButton) {
-                e.stopPropagation(); // Prevent card detail from opening when a button is clicked
-                const action = actionButton.dataset.action;
-                const cardName = actionButton.dataset.cardName;
-                if (action === 'set-representative') setRepresentative(cardName);
-                else if (action === 'add-to-deck') addToDeck(cardName);
-                else if (action === 'remove-from-deck') removeFromDeck(cardName);
-            } else {
-                const cardElement = e.target.closest('[data-card-name]');
-                if (cardElement) {
-                     if (container === collectionContainer && cardElement.dataset.isCollected === 'false') {
-                        return;
+                let selectedRarity = '';
+                if (allowedRarities) {
+                    const highTierProb = { 'SSR': probabilities['SSR'], 'SR': probabilities['SR'] };
+                    const totalProb = highTierProb.SSR + highTierProb.SR;
+                    selectedRarity = (Math.random() * totalProb < highTierProb.SSR) ? 'SSR' : 'SR';
+                } else {
+                    const rand = Math.random() * 100; let cumulativeProb = 0;
+                    for (const rarity in probabilities) {
+                        cumulativeProb += probabilities[rarity];
+                        if (rand < cumulativeProb) { selectedRarity = rarity; break; }
                     }
-                    showCardDetails(cardElement.dataset.cardName);
+                }
+
+                if (useEventRates && (selectedRarity === 'SSR' || selectedRarity === 'SR')) {
+                    if (Math.random() < 0.5) { // 50% chance for event character
+                        return characters.find(c => c.name === EVENT_CHARACTER_NAME);
+                    } else {
+                        const otherChars = characters.filter(c => c.rarity === selectedRarity && c.name !== EVENT_CHARACTER_NAME);
+                        if (otherChars.length > 0) return otherChars[Math.floor(Math.random() * otherChars.length)];
+                        return characters.find(c => c.name === EVENT_CHARACTER_NAME); // Fallback
+                    }
+                }
+
+                const possibleCharacters = characters.filter(char => char.rarity === selectedRarity);
+                return possibleCharacters[Math.floor(Math.random() * possibleCharacters.length)];
+            }
+
+            function displayResults(pulledCharacters) {
+                resultsContainer.innerHTML = '';
+                pulledCharacters.forEach((character, index) => {
+                    resultsContainer.appendChild(createCard(character, { animationIndex: index, mode: 'gachaResult' }));
+                });
+            }
+            
+            function getUniqueInventory() {
+                const cardCounts = playerInventory.reduce((acc, card) => {
+                    if (card && card.name) {
+                        if (!acc[card.name]) { acc[card.name] = { ...card, count: 0 }; }
+                        acc[card.name].count++;
+                    }
+                    return acc;
+                }, {});
+                const rarityOrder = { 'SSR': 4, 'SR': 3, 'R': 2, 'N': 1 };
+                return Object.values(cardCounts).sort((a, b) => (rarityOrder[b.rarity] - rarityOrder[a.rarity]) || a.name.localeCompare(b.name));
+            }
+
+            function displayInventory() {
+                inventoryStatus.textContent = `${playerInventory.length} / ${inventoryCapacity}`;
+                inventoryContainer.innerHTML = '';
+                const uniqueCards = getUniqueInventory();
+                if (uniqueCards.length === 0) {
+                    inventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">아직 수집한 동료가 없습니다.</p>`; return;
+                }
+                uniqueCards.forEach((character, index) => {
+                    inventoryContainer.appendChild(createCard(character, { animationIndex: index, mode: 'inventory' }));
+                });
+            }
+
+            function displayCollection() {
+                collectionContainer.innerHTML = '';
+                const collectedCardNames = new Set(playerInventory.map(card => card.name));
+
+                characters.forEach((character, index) => {
+                    const isCollected = collectedCardNames.has(character.name);
+                    collectionContainer.appendChild(createCard(character, {
+                        animationIndex: index,
+                        mode: 'collection',
+                        isCollected: isCollected
+                    }));
+                });
+            }
+
+
+            function displayDeckManagement() {
+                deckStatus.textContent = `현재 덱: ${playerDeck.length} / ${DECK_CAPACITY}`;
+                deckStatus.classList.toggle('text-green-400', playerDeck.length === DECK_CAPACITY);
+                deckSlotsContainer.innerHTML = '';
+                for (let i = 0; i < DECK_CAPACITY; i++) {
+                    if (playerDeck[i]) {
+                        deckSlotsContainer.appendChild(createCard(playerDeck[i], { mode: 'deckSlot' }));
+                    } else {
+                        const emptySlot = document.createElement('div');
+                        emptySlot.className = 'deck-slot rounded-lg'; emptySlot.textContent = '비어있음';
+                        deckSlotsContainer.appendChild(emptySlot);
+                    }
+                }
+                deckInventoryContainer.innerHTML = '';
+                const uniqueCards = getUniqueInventory();
+                 if (uniqueCards.length === 0) {
+                    deckInventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">덱에 추가할 카드가 없습니다.</p>`; return;
+                }
+                uniqueCards.forEach((character, index) => {
+                    const isCardInDeck = playerDeck.some(deckCard => deckCard.name === character.name);
+                    const isDeckFull = playerDeck.length >= DECK_CAPACITY;
+                    deckInventoryContainer.appendChild(createCard(character, { animationIndex: index, mode: 'deckBuilder', isCardInDeck, isDeckFull }));
+                });
+            }
+            
+            function autoFillDeck() {
+                const uniqueCards = getUniqueInventory();
+                const sortedByPower = uniqueCards.sort((a, b) => (b.stats.atk + b.stats.def) - (a.stats.atk + a.stats.def));
+                playerDeck = sortedByPower.slice(0, DECK_CAPACITY);
+                displayDeckManagement();
+                showMessage('가장 강력한 카드로 덱을 자동 편성했습니다!', 'text-blue-300', messageArea);
+                saveGame();
+            }
+
+            function addToDeck(cardName) {
+                if (playerDeck.length >= DECK_CAPACITY || playerDeck.some(card => card.name === cardName)) return;
+                const cardToAdd = findCharacter(cardName);
+                if (cardToAdd) { playerDeck.push(cardToAdd); displayDeckManagement(); saveGame(); }
+            }
+            
+            function removeFromDeck(cardName) {
+                const indexToRemove = playerDeck.findIndex(card => card.name === cardName);
+                if(indexToRemove > -1) {
+                    playerDeck.splice(indexToRemove, 1);
+                }
+                displayDeckManagement();
+                saveGame();
+            }
+            
+            function calculateDeckPower() {
+                return playerDeck.reduce((total, card) => total + (card.stats.atk + card.stats.def + Math.floor(card.stats.hp / 10)), 0);
+            }
+
+            function displayCombatView() {
+                deckPowerDisplay.textContent = calculateDeckPower();
+                dungeonListContainer.innerHTML = '';
+                dungeons.forEach((dungeon, index) => {
+                    const monster = monsters[dungeon.monsterName];
+                    const recommendedPower = monster.stats.atk*5 + monster.stats.def*5 + Math.floor(monster.stats.hp / 5);
+                    const dungeonEl = document.createElement('div');
+                    dungeonEl.className = 'bg-black/20 p-4 rounded-lg text-center';
+                    dungeonEl.innerHTML = `
+                        <h3 class="text-xl font-bold text-yellow-300">${dungeon.name}</h3>
+                        <p class="text-gray-300">권장 전투력: ${recommendedPower}</p>
+                        <p class="text-gray-300">예상 보상: 💎${dungeon.rewards.min} ~ ${dungeon.rewards.max}</p>
+                        <button data-action="challenge-dungeon" data-dungeon-index="${index}" class="gacha-button bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-full mt-4">도전</button>
+                    `;
+                    dungeonListContainer.appendChild(dungeonEl);
+                });
+            }
+            
+            function challengeDungeon(dungeonIndex, type = 'main') {
+                if (playerBookmarks < 1) {
+                    const msgArea = type === 'event' ? document.getElementById('message-area') : (document.getElementById('combat-message-area') || messageArea);
+                    showMessage('책갈피가 부족합니다!', 'text-yellow-400', msgArea);
+                    return;
+                }
+                if (playerDeck.length < DECK_CAPACITY) {
+                    const msgArea = type === 'event' ? document.getElementById('message-area') : (document.getElementById('combat-message-area') || messageArea);
+                    showMessage('덱을 5장으로 모두 채워야 합니다!', 'text-yellow-400', msgArea);
+                    return;
+                }
+                
+                playerBookmarks--;
+                if (playerBookmarks === MAX_BOOKMARKS - 1) {
+                     lastBookmarkUpdateTime = Date.now();
+                }
+                updateUI();
+                // saveGame(); // 전투 시작 전에 저장하지 않고, 전투 종료 후에 저장.
+
+                startCombat(dungeonIndex, type);
+            }
+
+            function setCombatSpeed(speed) {
+                combatSpeedMultiplier = speed;
+                const allSpeedButtons = document.querySelectorAll('.speed-button');
+                allSpeedButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.classList.add('bg-gray-600');
+                    btn.classList.remove('bg-blue-500');
+                });
+                document.getElementById(`speed-${speed}x`).classList.add('active', 'bg-blue-500');
+                document.getElementById(`speed-${speed}x`).classList.remove('bg-gray-600');
+            }
+
+            async function startCombat(dungeonIndex, type) {
+                isCombatRunning = true;
+                setCombatSpeed(1); // 전투 시작 시 1배속으로 초기화
+                const dungeonList = type === 'event' ? eventDungeons : dungeons;
+                const dungeon = dungeonList[dungeonIndex];
+                const monsterData = JSON.parse(JSON.stringify(monsters[dungeon.monsterName]));
+                const combatDeck = JSON.parse(JSON.stringify(playerDeck));
+
+                allViews.forEach(view => view.classList.add('hidden'));
+                combatInProgressView.classList.remove('hidden');
+                combatLog.innerHTML = '';
+                combatPlayerDeck.innerHTML = '';
+                combatDeck.forEach((card, index) => {
+                    const cardEl = document.createElement('div');
+                    cardEl.className = 'bg-gray-700 p-2 rounded';
+                    cardEl.innerHTML = `
+                        <p class="font-bold text-sm truncate" title="${card.name}">${card.name}</p>
+                        <div class="hp-bar-background rounded-full h-2.5 mt-1">
+                            <div id="player-hp-bar-${index}" class="hp-bar-foreground h-2.5 rounded-full" style="width: 100%"></div>
+                        </div>
+                        <p id="player-hp-text-${index}" class="text-xs text-center mt-0.5">${card.stats.hp} / ${card.stats.hp}</p>
+                    `;
+                    combatPlayerDeck.appendChild(cardEl);
+                });
+
+                combatMonsterArea.innerHTML = `
+                    <h3 class="text-2xl font-bold">${monsterData.name}</h3>
+                    <img id="combat-monster-image" src="${monsterData.imageUrl}" alt="${monsterData.name}" class="my-4 h-48 w-48 object-contain">
+                    <div class="w-full hp-bar-background rounded-full h-4">
+                        <div id="monster-hp-bar" class="hp-bar-foreground h-4 rounded-full" style="width: 100%"></div>
+                    </div>
+                    <p id="monster-hp-text" class="text-sm mt-1">${monsterData.stats.hp} / ${monsterData.stats.hp}</p>
+                `;
+                
+                await runCombatLoop(combatDeck, monsterData, dungeon, type);
+            }
+
+            const delay = ms => new Promise(res => setTimeout(res, ms / combatSpeedMultiplier));
+
+            async function runCombatLoop(combatDeck, monsterData, dungeon, type) {
+                const originalMonsterDef = monsterData.stats.def;
+
+                while (monsterData.stats.hp > 0 && combatDeck.some(c => c.stats.hp > 0)) {
+                    for (let i = 0; i < combatDeck.length; i++) {
+                        const card = combatDeck[i];
+                        if (card.stats.hp > 0) {
+                            await delay(800);
+                            const monsterImage = document.getElementById('combat-monster-image');
+                            
+                            const useUltimate = card.rarity === 'SSR' && Math.random() < 0.25;
+                            const useSkill = Math.random() < 0.4;
+                            let skillToUse = null;
+
+                            if (useUltimate && card.skills.length > 1) skillToUse = card.skills[1];
+                            else if (useSkill) skillToUse = card.skills[0];
+
+                            let damage = 0;
+                            if (skillToUse) {
+                                logCombat(`<strong>${card.name}</strong>의 스킬! <span class="text-yellow-300">"${skillToUse.name}"</span>`);
+                                await delay(400);
+                                logCombat(`<em>"${skillToUse.dialogue}"</em>`);
+                                
+                                damage = Math.max(1, Math.floor(card.stats.atk * skillToUse.power) - monsterData.stats.def);
+                                
+                                if (skillToUse.type === 'vampire') {
+                                    const healedAmount = Math.floor(damage * 0.5);
+                                    const originalCardData = playerDeck[i];
+                                    card.stats.hp = Math.min(originalCardData.stats.hp, card.stats.hp + healedAmount);
+                                    logCombat(`<strong>${card.name}</strong>이(가) ${healedAmount}의 체력을 회복했다!`);
+                                }
+                                if (skillToUse.type === 'debuff_def') {
+                                    monsterData.stats.def = Math.max(0, Math.floor(monsterData.stats.def * 0.8));
+                                    logCombat(`<strong>${monsterData.name}</strong>의 방어력이 감소했다!`);
+                                }
+
+                            } else {
+                                logCombat(`<strong>${card.name}</strong>의 일반 공격!`);
+                                damage = Math.max(1, card.stats.atk - monsterData.stats.def);
+                            }
+                            
+                            monsterData.stats.hp = Math.max(0, monsterData.stats.hp - damage);
+                            logCombat(`<strong>${monsterData.name}</strong>에게 ${damage}의 데미지!`);
+                            monsterImage.classList.add('shake-animation');
+                            updateCombatUI(combatDeck, monsterData);
+                            setTimeout(() => monsterImage.classList.remove('shake-animation'), 300 / combatSpeedMultiplier);
+
+                            if (monsterData.stats.hp <= 0) break;
+                        }
+                    }
+                    if (monsterData.stats.hp <= 0) break;
+
+                    await delay(1000);
+                    const alivePlayers = combatDeck.filter(c => c.stats.hp > 0);
+                    if (alivePlayers.length > 0) {
+                        const targetCard = alivePlayers[Math.floor(Math.random() * alivePlayers.length)];
+                        logCombat(`<strong>${monsterData.name}</strong>의 공격!`);
+                        const damage = Math.max(1, monsterData.stats.atk - targetCard.stats.def);
+                        const hpBeforeAttack = targetCard.stats.hp;
+                        targetCard.stats.hp = Math.max(0, targetCard.stats.hp - damage);
+                        logCombat(`<strong>${targetCard.name}</strong>에게 ${damage}의 데미지!`);
+                        
+                        if (targetCard.stats.hp <= 0 && hpBeforeAttack > 0) {
+                            await delay(400);
+                            logCombat(`<strong>${targetCard.name}</strong>: <em>"${targetCard.deathDialogue}"</em>`);
+                        }
+
+                        updateCombatUI(combatDeck, monsterData);
+                    }
+                }
+                
+                await delay(1000);
+                monsterData.stats.def = originalMonsterDef;
+                endCombat(monsterData.stats.hp <= 0, dungeon, type);
+            }
+
+            function logCombat(message) {
+                combatLog.innerHTML += `<p>${message}</p>`;
+                combatLogContainer.scrollTop = combatLogContainer.scrollHeight;
+            }
+
+            function updateCombatUI(deck, monster) {
+                deck.forEach((card, index) => {
+                    const originalCard = playerDeck.find(c => c.name === card.name);
+                    if(!originalCard) return;
+                    const maxHp = originalCard.stats.hp;
+                    const currentHp = card.stats.hp;
+                    const hpPercent = (currentHp / maxHp) * 100;
+                    document.getElementById(`player-hp-bar-${index}`).style.width = `${hpPercent}%`;
+                    document.getElementById(`player-hp-text-${index}`).textContent = `${currentHp} / ${maxHp}`;
+                });
+
+                const monsterMaxHp = monsters[monster.name].stats.hp;
+                const monsterHpPercent = (monster.stats.hp / monsterMaxHp) * 100;
+                document.getElementById('monster-hp-bar').style.width = `${monsterHpPercent}%`;
+                document.getElementById('monster-hp-text').textContent = `${monster.stats.hp} / ${monsterMaxHp}`;
+            }
+            
+            function endCombat(isVictory, dungeon, type) {
+                lastCombatType = type; // 현재 종료된 전투 유형을 저장합니다.
+                if (isVictory) {
+                    let rewardMsg = '';
+                    if(type === 'event') {
+                        const reward = dungeon.eventPointReward;
+                        playerEventPoints += reward;
+                        if (!clearedEventDungeons.includes(dungeon.name)) {
+                            clearedEventDungeons.push(dungeon.name);
+                        }
+                        rewardMsg = `이벤트 스테이지 클리어! ${reward} P를 획득했습니다.`;
+                    } else {
+                        if (!clearedDungeons.includes(dungeon.name)) {
+                            clearedDungeons.push(dungeon.name);
+                        }
+                        const earnedReward = dungeon.rewards.min + Math.floor(Math.random() * (dungeon.rewards.max - dungeon.rewards.min + 1));
+                        playerCurrency += earnedReward;
+                        rewardMsg = `던전 클리어! 💎${earnedReward}를 획득했습니다.`;
+                    }
+                    combatResultTitle.textContent = "승리!";
+                    combatResultTitle.className = "text-4xl font-bold mb-4 text-green-400";
+                    combatResultMessage.textContent = rewardMsg;
+                } else {
+                    combatResultTitle.textContent = "패배...";
+                    combatResultTitle.className = "text-4xl font-bold mb-4 text-red-400";
+                    combatResultMessage.textContent = `전투에서 패배했습니다...`;
+                }
+                
+                updateUI();
+                saveGame();
+                combatResultModal.classList.remove('hidden');
+                isCombatRunning = false;
+            }
+
+            function createCard(character, options = {}) {
+                const { animationIndex, mode = 'default', isCardInDeck, isDeckFull, isCollected } = options;
+                const card = document.createElement('div');
+                card.className = `rarity-${character.rarity} relative text-center rounded-lg shadow-md p-2 transform transition-transform duration-300 hover:scale-105 cursor-pointer`;
+                card.dataset.cardName = character.name;
+                card.title = character.name;
+                const rarityColor = { 'N': 'text-gray-600', 'R': 'text-blue-800', 'SR': 'text-white', 'SSR': 'text-black' }[character.rarity];
+                const factionColors = {
+                    '탐정': 'bg-blue-500 text-white',
+                    '조수': 'bg-green-500 text-white',
+                    '범인': 'bg-red-500 text-white'
+                };
+                
+                let badgeHTML = '';
+                if(mode === 'inventory' && character.count > 1) {
+                    badgeHTML = `<div class="count-badge">x${character.count}</div>`;
+                }
+
+                let actionButtonsHTML = '';
+                if (mode === 'deckBuilder') {
+                    const disabled = isDeckFull || isCardInDeck;
+                    const buttonText = isCardInDeck ? '추가됨' : '추가';
+                    const buttonColor = disabled ? 'bg-gray-500' : 'bg-green-500 hover:bg-green-600';
+                    actionButtonsHTML = `<button data-action="add-to-deck" data-card-name="${character.name}" class="w-full mt-2 py-1 rounded-md text-white font-bold text-sm ${buttonColor}" ${disabled ? 'disabled' : ''}>${buttonText}</button>`;
+                } else if (mode === 'inventory') {
+                    const isRepresentative = representativeCharacter && representativeCharacter.name === character.name;
+                    const repButtonText = isRepresentative ? '대표' : '대표 설정';
+                    const repButtonColor = isRepresentative ? 'bg-yellow-500' : 'bg-gray-600 hover:bg-gray-700';
+                    actionButtonsHTML = `<button data-action="set-representative" data-card-name="${character.name}" class="w-full mt-2 py-1 rounded-md text-white font-bold text-sm ${repButtonColor}" ${isRepresentative ? 'disabled' : ''}>${repButtonText}</button>`;
+                }
+                
+                let deckSlotButton = '';
+                if(mode === 'deckSlot') {
+                    deckSlotButton = `<button data-action="remove-from-deck" data-card-name="${character.name}" class="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 text-sm font-bold flex items-center justify-center z-10">X</button>`;
+                }
+
+                const factionBadge = `<span class="absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full ${factionColors[character.faction]} z-10">${character.faction}</span>`;
+
+                card.innerHTML = `
+                    ${badgeHTML} ${deckSlotButton} ${factionBadge}
+                    <div class="relative pointer-events-none">
+                        <img src="${character.cardImageUrl}" alt="${character.name}" class="w-full h-auto rounded-md mb-2 border-2 border-white/50">
+                        <p class="font-bold text-sm ${rarityColor} truncate">${character.name}</p>
+                        <p class="font-black text-lg ${rarityColor}" style="text-shadow: 1px 1px 2px rgba(255,255,255,0.5);">${character.rarity}</p>
+                    </div>
+                     ${actionButtonsHTML}
+                `;
+                if (typeof animationIndex === 'number') {
+                    card.style.opacity = '0';
+                    card.style.animationDelay = `${animationIndex * 0.05}s`;
+                    card.classList.add('card-animation');
+                }
+                if(mode === 'deckBuilder' && isCardInDeck) {
+                    card.classList.add('opacity-50');
+                }
+                if (mode === 'collection') {
+                    if (isCollected) {
+                        card.dataset.isCollected = "true";
+                    } else {
+                        card.dataset.isCollected = "false";
+                        card.classList.add('grayscale', 'opacity-75');
+                        card.classList.remove('hover:scale-105', 'cursor-pointer');
+                    }
+                }
+                return card;
+            }
+
+            function getSkillDescription(skill) {
+                switch(skill.type) {
+                    case 'damage': return `공격력의 ${skill.power * 100}% 만큼 피해를 줍니다.`;
+                    case 'debuff_def': return `적의 방어력을 일시적으로 감소시킵니다.`;
+                    case 'vampire': return `가한 피해의 50% 만큼 체력을 회복합니다.`;
+                    default: return '특별한 효과를 가진 스킬입니다.';
                 }
             }
+
+            function showCardDetails(cardName) {
+                const character = findCharacter(cardName);
+                if (!character) return;
+
+                document.getElementById('detail-card-image').src = character.imageUrl;
+                document.getElementById('detail-card-name').textContent = character.name;
+                const rarityEl = document.getElementById('detail-card-rarity');
+                rarityEl.textContent = character.rarity;
+                const rarityColor = { 'N': 'text-gray-400', 'R': 'text-blue-400', 'SR': 'text-purple-400', 'SSR': 'text-yellow-400' }[character.rarity];
+                rarityEl.className = `font-bold text-2xl ${rarityColor}`;
+
+                const factionEl = document.getElementById('detail-card-faction');
+                factionEl.textContent = character.faction;
+                const factionColors = {
+                    '탐정': 'bg-blue-500 text-white',
+                    '조수': 'bg-green-500 text-white',
+                    '범인': 'bg-red-500 text-white'
+                };
+                factionEl.className = `font-bold text-lg px-3 py-1 rounded-full ${factionColors[character.faction]}`;
+
+
+                document.getElementById('detail-stat-hp').textContent = character.stats.hp;
+                document.getElementById('detail-stat-atk').textContent = character.stats.atk;
+                document.getElementById('detail-stat-def').textContent = character.stats.def;
+
+                const skillsContainer = document.getElementById('detail-skills-container');
+                skillsContainer.innerHTML = '';
+                character.skills.forEach((skill, index) => {
+                    const isUltimate = character.rarity === 'SSR' && index === 1;
+                    const skillEl = document.createElement('div');
+                    skillEl.className = 'bg-black/20 p-3 rounded-lg';
+                    skillEl.innerHTML = `
+                        <h4 class="font-bold ${isUltimate ? 'text-yellow-300' : 'text-white'}">${isUltimate ? '궁극기' : '일반 스킬'}: ${skill.name}</h4>
+                        <p class="text-gray-300 italic">"${skill.dialogue}"</p>
+                        <p class="text-sm mt-1">${getSkillDescription(skill)}</p>
+                    `;
+                    skillsContainer.appendChild(skillEl);
+                });
+                
+                currentStoryPages = character.story.split('[PAGE_BREAK]');
+                currentStoryPageIndex = 0;
+                displayCardStoryPage();
+                
+                cardDetailModal.classList.remove('hidden');
+            }
+            
+            function displayCardStoryPage() {
+                const storyContent = document.getElementById('detail-card-story');
+                const pageIndicator = document.getElementById('detail-story-page-indicator');
+                
+                storyContent.textContent = currentStoryPages[currentStoryPageIndex];
+                pageIndicator.textContent = `${currentStoryPageIndex + 1} / ${currentStoryPages.length}`;
+                
+                detailStoryPrevButton.disabled = currentStoryPageIndex === 0;
+                detailStoryNextButton.disabled = currentStoryPageIndex === currentStoryPages.length - 1;
+            }
+
+            function hideCardDetails() {
+                cardDetailModal.classList.add('hidden');
+            }
+            
+            function findCharacter(name) {
+                return characters.find(c => c.name === name);
+            }
+
+            function displayStoryView() {
+                mainStoryContainer.innerHTML = '';
+                mainStories.forEach((story, index) => {
+                    const isUnlocked = story.dungeonToUnlock === null || clearedDungeons.includes(story.dungeonToUnlock);
+                    const storyEl = document.createElement('div');
+                    storyEl.className = `p-4 rounded-lg transition-colors duration-300 ${isUnlocked ? 'bg-white/20 hover:bg-white/30 cursor-pointer' : 'bg-black/30 text-gray-500'}`;
+                    if (isUnlocked) {
+                        storyEl.dataset.storyIndex = index;
+                        storyEl.dataset.storyType = 'main';
+                    }
+
+                    storyEl.innerHTML = `
+                        <h3 class="text-xl font-bold ${isUnlocked ? 'text-yellow-300' : ''}">${story.title}</h3>
+                        <p class="text-sm">${isUnlocked ? '클릭하여 스토리 읽기' : `${story.dungeonToUnlock} 클리어 시 해금`}</p>
+                    `;
+                    mainStoryContainer.appendChild(storyEl);
+                });
+            }
+
+            function showMainStory(index, type) {
+                const storyList = type === 'main' ? mainStories : eventStories;
+                const story = storyList[index];
+                document.getElementById('main-story-title').textContent = story.title;
+                
+                currentStoryPages = story.content.split('[PAGE_BREAK]');
+                currentStoryPageIndex = 0;
+                displayMainStoryPage();
+
+                mainStoryModal.classList.remove('hidden');
+            }
+
+            function displayMainStoryPage() {
+                const storyContent = document.getElementById('main-story-content');
+                const pageIndicator = document.getElementById('main-story-page-indicator');
+                
+                storyContent.textContent = currentStoryPages[currentStoryPageIndex];
+                pageIndicator.textContent = `${currentStoryPageIndex + 1} / ${currentStoryPages.length}`;
+                
+                mainStoryPrevButton.disabled = currentStoryPageIndex === 0;
+                mainStoryNextButton.disabled = currentStoryPageIndex === currentStoryPages.length - 1;
+            }
+
+            function hideMainStory() {
+                mainStoryModal.classList.add('hidden');
+            }
+            
+            // --- 이벤트 리스너 ---
+            allTabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.id.split('-')[1])));
+            pullOneButton.addEventListener('click', () => handlePull(1, PULL_ONE_COST, 'normal'));
+            pullTenButton.addEventListener('click', () => handlePull(10, PULL_TEN_COST, 'normal'));
+            pullOneEventButton.addEventListener('click', () => handlePull(1, PULL_ONE_COST, 'event'));
+            pullTenEventButton.addEventListener('click', () => handlePull(10, PULL_TEN_COST, 'event'));
+            expandInventoryButton.addEventListener('click', expandInventory);
+            autoFillDeckButton.addEventListener('click', autoFillDeck);
+            gachaTabNormal.addEventListener('click', () => switchGachaTab('normal'));
+            gachaTabEvent.addEventListener('click', () => switchGachaTab('event'));
+            
+            const cardClickableContainers = [inventoryContainer, deckInventoryContainer, deckSlotsContainer, collectionContainer];
+            cardClickableContainers.forEach(container => {
+                container.addEventListener('click', (e) => {
+                    const actionButton = e.target.closest('[data-action]');
+                    if (actionButton) {
+                        e.stopPropagation(); // Prevent card detail from opening when a button is clicked
+                        const action = actionButton.dataset.action;
+                        const cardName = actionButton.dataset.cardName;
+                        if (action === 'set-representative') setRepresentative(cardName);
+                        else if (action === 'add-to-deck') addToDeck(cardName);
+                        else if (action === 'remove-from-deck') removeFromDeck(cardName);
+                    } else {
+                        const cardElement = e.target.closest('[data-card-name]');
+                        if (cardElement) {
+                             if (container === collectionContainer && cardElement.dataset.isCollected === 'false') {
+                                return;
+                            }
+                            showCardDetails(cardElement.dataset.cardName);
+                        }
+                    }
+                });
+            });
+
+            dungeonListContainer.addEventListener('click', (e) => { 
+                const button = e.target.closest('[data-action="challenge-dungeon"]');
+                if(button) challengeDungeon(parseInt(button.dataset.dungeonIndex), 'main'); 
+            });
+            homeCharacterContainer.addEventListener('click', () => { if (representativeCharacter) displayHomeView(true); });
+            eventBanner.addEventListener('click', () => {
+                showMessage(`[${EVENT_CHARACTER_NAME}] 확률 UP 이벤트 진행 중!`, 'text-blue-300', messageArea);
+                switchTab('gacha');
+            });
+            resetButton.addEventListener('click', resetGame);
+            closeCombatResultButton.addEventListener('click', () => {
+                combatResultModal.classList.add('hidden');
+                combatInProgressView.classList.add('hidden');
+
+                if (lastCombatType === 'event') {
+                    switchTab('event');
+                    displayEventView();
+                    switchSubTab(document.getElementById('event-view'), eventSubTabBattle);
+                } else { // 'main'
+                    switchTab('combat');
+                }
+            });
+            closeCardDetailButton.addEventListener('click', hideCardDetails);
+            cardDetailModal.addEventListener('click', (e) => {
+                if (e.target === cardDetailModal) hideCardDetails();
+            });
+
+            mainStoryContainer.addEventListener('click', (e) => {
+                const storyEl = e.target.closest('[data-story-index]');
+                if (storyEl) {
+                    showMainStory(parseInt(storyEl.dataset.storyIndex), 'main');
+                }
+            });
+
+            eventStoryContainer.addEventListener('click', (e) => {
+                const storyEl = e.target.closest('[data-story-index]');
+                if (storyEl) {
+                    showMainStory(parseInt(storyEl.dataset.storyIndex), 'event');
+                }
+            });
+
+            eventShopContainer.addEventListener('click', (e) => {
+                const button = e.target.closest('button');
+                if (button && button.dataset.itemId) {
+                    purchaseEventItem(button.dataset.itemId);
+                }
+            });
+
+            closeMainStoryButton.addEventListener('click', hideMainStory);
+            mainStoryModal.addEventListener('click', (e) => {
+                if (e.target === mainStoryModal) hideMainStory();
+            });
+
+            detailStoryPrevButton.addEventListener('click', () => {
+                if (currentStoryPageIndex > 0) {
+                    currentStoryPageIndex--;
+                    displayCardStoryPage();
+                }
+            });
+            detailStoryNextButton.addEventListener('click', () => {
+                if (currentStoryPageIndex < currentStoryPages.length - 1) {
+                    currentStoryPageIndex++;
+                    displayCardStoryPage();
+                }
+            });
+            mainStoryPrevButton.addEventListener('click', () => {
+                if (currentStoryPageIndex > 0) {
+                    currentStoryPageIndex--;
+                    displayMainStoryPage();
+                }
+            });
+            mainStoryNextButton.addEventListener('click', () => {
+                if (currentStoryPageIndex < currentStoryPages.length - 1) {
+                    currentStoryPageIndex++;
+                    displayMainStoryPage();
+                }
+            });
+
+
+            speed1xButton.addEventListener('click', () => setCombatSpeed(1));
+            speed2xButton.addEventListener('click', () => setCombatSpeed(2));
+            speed4xButton.addEventListener('click', () => setCombatSpeed(4));
+
+            eventSubTabBattle.addEventListener('click', () => switchSubTab(document.getElementById('event-view'), eventSubTabBattle));
+            eventSubTabStory.addEventListener('click', () => switchSubTab(document.getElementById('event-view'), eventSubTabStory));
+            eventSubTabShop.addEventListener('click', () => switchSubTab(document.getElementById('event-view'), eventSubTabShop));
+            
+            // --- 게임 시작 ---
+            loadGame();
+            startBookmarkRegenTimer();
         });
-    });
-
-    dungeonListContainer.addEventListener('click', (e) => { 
-        const button = e.target.closest('[data-action="challenge-dungeon"]');
-        if(button) challengeDungeon(parseInt(button.dataset.dungeonIndex), 'main'); 
-    });
-    homeCharacterContainer.addEventListener('click', () => { if (representativeCharacter) displayHomeView(true); });
-    eventBanner.addEventListener('click', () => {
-        showMessage(`[${EVENT_CHARACTER_NAME}] 확률 UP 이벤트 진행 중!`, 'text-blue-300', messageArea);
-        switchTab('gacha');
-    });
-    resetButton.addEventListener('click', resetGame);
-    closeCombatResultButton.addEventListener('click', () => {
-        combatResultModal.classList.add('hidden');
-        combatInProgressView.classList.add('hidden');
-        const isEventActive = true; // Simplified check
-        if (isCombatRunning === false && isEventActive) {
-            switchTab('event');
-            displayEventView();
-            switchSubTab(document.getElementById('event-view'), eventSubTabBattle);
-        } else {
-            switchTab('combat');
-        }
-    });
-    closeCardDetailButton.addEventListener('click', hideCardDetails);
-    cardDetailModal.addEventListener('click', (e) => {
-        if (e.target === cardDetailModal) hideCardDetails();
-    });
-
-    mainStoryContainer.addEventListener('click', (e) => {
-        const storyEl = e.target.closest('[data-story-index]');
-        if (storyEl) {
-            showMainStory(parseInt(storyEl.dataset.storyIndex), 'main');
-        }
-    });
-
-    eventStoryContainer.addEventListener('click', (e) => {
-        const storyEl = e.target.closest('[data-story-index]');
-        if (storyEl) {
-            showMainStory(parseInt(storyEl.dataset.storyIndex), 'event');
-        }
-    });
-
-    eventShopContainer.addEventListener('click', (e) => {
-        const button = e.target.closest('button');
-        if (button && button.dataset.itemId) {
-            purchaseEventItem(button.dataset.itemId);
-        }
-    });
-
-    closeMainStoryButton.addEventListener('click', hideMainStory);
-    mainStoryModal.addEventListener('click', (e) => {
-        if (e.target === mainStoryModal) hideMainStory();
-    });
-
-    detailStoryPrevButton.addEventListener('click', () => {
-        if (currentStoryPageIndex > 0) {
-            currentStoryPageIndex--;
-            displayCardStoryPage();
-        }
-    });
-    detailStoryNextButton.addEventListener('click', () => {
-        if (currentStoryPageIndex < currentStoryPages.length - 1) {
-            currentStoryPageIndex++;
-            displayCardStoryPage();
-        }
-    });
-    mainStoryPrevButton.addEventListener('click', () => {
-        if (currentStoryPageIndex > 0) {
-            currentStoryPageIndex--;
-            displayMainStoryPage();
-        }
-    });
-    mainStoryNextButton.addEventListener('click', () => {
-        if (currentStoryPageIndex < currentStoryPages.length - 1) {
-            currentStoryPageIndex++;
-            displayMainStoryPage();
-        }
-    });
-
-
-    speed1xButton.addEventListener('click', () => setCombatSpeed(1));
-    speed2xButton.addEventListener('click', () => setCombatSpeed(2));
-    speed4xButton.addEventListener('click', () => setCombatSpeed(4));
-
-    eventSubTabBattle.addEventListener('click', () => switchSubTab(document.getElementById('event-view'), eventSubTabBattle));
-    eventSubTabStory.addEventListener('click', () => switchSubTab(document.getElementById('event-view'), eventSubTabStory));
-    eventSubTabShop.addEventListener('click', () => switchSubTab(document.getElementById('event-view'), eventSubTabShop));
-    
-    // --- 게임 시작 ---
-    loadGame();
-});
-
-
     </script>
 </body>
 </html>
+
 
