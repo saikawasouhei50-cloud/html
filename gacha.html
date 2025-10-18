@@ -688,12 +688,6 @@
             const speed4xButton = document.getElementById('speed-4x');
             const collectionContainer = document.getElementById('collection-container');
             const mainStoryContainer = document.getElementById('main-story-container');
-            const mainStoryModal = document.getElementById('main-story-modal');
-            const closeMainStoryButton = document.getElementById('close-main-story');
-            const detailStoryPrevButton = document.getElementById('detail-story-prev');
-            const detailStoryNextButton = document.getElementById('detail-story-next');
-            const mainStoryPrevButton = document.getElementById('main-story-prev');
-            const mainStoryNextButton = document.getElementById('main-story-next');
             const eventTab = document.getElementById('tab-event');
             const eventPointDisplay = document.getElementById('event-point-display');
             const eventPointsSpan = document.getElementById('event-points');
@@ -719,6 +713,8 @@
 			const dialogueText = document.getElementById('dialogue-text');
 			const storyNextButton = document.getElementById('story-next-button');
 			const storySkipButton = document.getElementById('story-skip-button');
+			const detailStoryPrevButton = document.getElementById('detail-story-prev');
+            const detailStoryNextButton = document.getElementById('detail-story-next');
             
             // --- 데이터 저장/불러오기 함수 ---
             function isStorageAvailable() {
@@ -1819,33 +1815,6 @@
                 storyCharRight.src = '';
                 currentInteractiveStory = null;
             }
-
-            function showMainStory(index, type) {
-                const storyList = type === 'main' ? mainStories : eventStories;
-                const story = storyList[index];
-                document.getElementById('main-story-title').textContent = story.title;
-                
-                currentStoryPages = story.content.split('[PAGE_BREAK]');
-                currentStoryPageIndex = 0;
-                displayMainStoryPage();
-
-                mainStoryModal.classList.remove('hidden');
-            }
-
-            function displayMainStoryPage() {
-                const storyContent = document.getElementById('main-story-content');
-                const pageIndicator = document.getElementById('main-story-page-indicator');
-                
-                storyContent.textContent = currentStoryPages[currentStoryPageIndex];
-                pageIndicator.textContent = `${currentStoryPageIndex + 1} / ${currentStoryPages.length}`;
-                
-                mainStoryPrevButton.disabled = currentStoryPageIndex === 0;
-                mainStoryNextButton.disabled = currentStoryPageIndex === currentStoryPages.length - 1;
-            }
-
-            function hideMainStory() {
-                mainStoryModal.classList.add('hidden');
-            }
             
             // --- 이벤트 리스너 ---
             allTabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.id.split('-')[1])));
@@ -1924,10 +1893,10 @@
             eventStoryContainer.addEventListener('click', (e) => {
                 const storyEl = e.target.closest('[data-story-index]');
                 if (storyEl) {
-                    startInteractiveStory(parseInt(storyEl.dataset.storyIndex), 'event');
-				}
-			});
-
+                    // 이벤트 스토리는 아직 준비되지 않았으므로 임시 알림창을 띄웁니다.
+                    alert('이벤트 스토리는 현재 준비 중입니다.');
+                }
+            });
             eventShopContainer.addEventListener('click', (e) => {
                 const button = e.target.closest('button');
                 if (button && button.dataset.itemId) {
@@ -1949,18 +1918,6 @@
                 if (currentStoryPageIndex < currentStoryPages.length - 1) {
                     currentStoryPageIndex++;
                     displayCardStoryPage();
-                }
-            });
-            mainStoryPrevButton.addEventListener('click', () => {
-                if (currentStoryPageIndex > 0) {
-                    currentStoryPageIndex--;
-                    displayMainStoryPage();
-                }
-            });
-            mainStoryNextButton.addEventListener('click', () => {
-                if (currentStoryPageIndex < currentStoryPages.length - 1) {
-                    currentStoryPageIndex++;
-                    displayMainStoryPage();
                 }
             });
 
