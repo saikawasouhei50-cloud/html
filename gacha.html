@@ -562,6 +562,7 @@
                     capacity: inventoryCapacity,
                     representative: representativeCharacter ? representativeCharacter.name : null,
                     clearedDungeons: clearedDungeons,
+					clearedStages: clearedStages,
                     eventPoints: playerEventPoints,
                     clearedEventDungeons: clearedEventDungeons,
                     purchasedEventItems: purchasedEventItems,
@@ -594,6 +595,7 @@
                             playerDeck = (savedData.deck || []).filter(item => findCharacter(item.name));
                             inventoryCapacity = savedData.capacity ?? 100;
                             clearedDungeons = savedData.clearedDungeons || [];
+							clearedStages = savedData.clearedStages || {};
                             playerEventPoints = savedData.eventPoints ?? 0;
                             clearedEventDungeons = savedData.clearedEventDungeons || [];
                             purchasedEventItems = savedData.purchasedEventItems || {};
@@ -660,6 +662,7 @@
                     inventory: playerInventory,
                     stats: playerStats,
                     clearedDungeons: clearedDungeons,
+					clearedStages: clearedStages, 
                     capacity: inventoryCapacity,
                 };
                 let newAchievementUnlocked = false;
