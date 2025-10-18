@@ -124,7 +124,6 @@
             </div>
             <div class="flex items-center gap-4">
                 <div class="text-xl font-bold text-cyan-300 bg-black/20 py-2 px-4 rounded-full inline-block">🔖 <span id="bookmark-display">10</span> / <span id="max-bookmark-display">10</span><span id="bookmark-timer-container" class="text-sm ml-2"></span></div>
-				<div class="text-xl font-bold text-gray-300 bg-black/20 py-2 px-4 rounded-full inline-block">🖊️ <span id="pen-display">0</span></div>
                 <div class="text-2xl font-bold text-yellow-300 bg-black/20 py-2 px-6 rounded-full inline-block">💎 <span id="currency-display">100</span></div>
                 <button id="reset-game" class="gacha-button bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full text-sm">초기화</button>
             </div>
@@ -194,15 +193,6 @@
                     <button id="gacha-tab-event" class="sub-tab-button w-1/2 font-bold py-2 px-6 rounded-full hidden">이벤트 뽑기</button>
                 </div>
                 <div id="normal-gacha-view">
-					<div class="bg-black/20 p-3 rounded-lg text-center mb-4 max-w-md mx-auto">
-                        <p class="font-bold text-yellow-300 mb-2">등급별 등장 확률</p>
-                        <div class="flex justify-center gap-4">
-                            <p class="text-sm">SSR: <span class="font-bold">3%</span></p>
-                            <p class="text-sm">SR: <span class="font-bold">12%</span></p>
-                            <p class="text-sm">R: <span class="font-bold">35%</span></p>
-                            <p class="text-sm">N: <span class="font-bold">50%</span></p>
-                        </div>
-					</div>
                     <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mb-4">
                         <button id="pull-one" class="gacha-button w-full sm:w-auto bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-8 rounded-full shadow-lg">💎 1회 뽑기 (10)</button>
                         <button id="pull-ten" class="gacha-button w-full sm:w-auto bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-8 rounded-full shadow-lg">💎💎 10회 뽑기 (100)</button>
@@ -211,15 +201,6 @@
                 <div id="event-gacha-view" class="hidden">
                     <div id="event-gacha-info" class="text-center p-2 mb-2 rounded-lg bg-yellow-500/20">
                         <p class="font-bold text-yellow-300"></p>
-                    </div>
-					<div class="bg-black/20 p-3 rounded-lg text-center mb-4 max-w-md mx-auto">
-                        <p class="font-bold text-yellow-300 mb-2">등급별 등장 확률</p>
-                        <div class="flex justify-center gap-4">
-                            <p class="text-sm">SSR: <span class="font-bold">6%</span></p>
-                            <p class="text-sm">SR: <span class="font-bold">14%</span></p>
-                            <p class="text-sm">R: <span class="font-bold">30%</span></p>
-                            <p class="text-sm">N: <span class="font-bold">50%</span></p>
-                        </div>
                     </div>
                     <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mb-4">
                         <button id="pull-one-event" class="gacha-button w-full sm:w-auto bg-gradient-to-r from-red-500 to-yellow-500 hover:from-red-600 hover:to-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-8 rounded-full shadow-lg">🔥 1회 뽑기 (10)</button>
@@ -266,14 +247,7 @@
                     <p class="text-gray-200">편찬한 책으로 독서에 도전하여 보상을 획득하세요!</p>
                     <p class="text-xl font-bold">현재 책 전투력: <span id="deck-power-display" class="text-yellow-300">0</span></p>
                 </div>
-				
-            <div id="dungeon-volume-selection">
-                </div>
-            <div id="dungeon-stage-selection" class="hidden">
-                <button id="back-to-volume-selection" class="gacha-button bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full mb-4">← 뒤로가기</button>
-                <h3 id="current-volume-title" class="text-2xl font-bold text-center mb-4"></h3>
-                <div id="stage-list-container" class="grid grid-cols-2 md:grid-cols-5 gap-4"></div>
-            </div>
+                <div id="dungeon-list-container" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
             </div>
 
             <!-- 전투 진행 화면 -->
@@ -356,19 +330,6 @@
                                     <div><p class="text-sm text-gray-400">DEF</p><p id="detail-stat-def" class="font-bold text-lg"></p></div>
                                 </div>
                             </div>
-							
-							<div class="bg-black/20 p-3 rounded-lg mb-4">
-								<h3 class="font-bold text-lg mb-2 text-yellow-300">강화</h3>
-								<div id="enhancement-ui" class="flex items-center justify-between">
-									<div>
-										<p>현재: <span id="detail-enhancement-level" class="font-bold text-xl"></span></p>
-										<p class="text-sm">비용: 🖊️ <span id="detail-enhancement-cost"></span></p>
-									</div>
-									<button id="detail-enhancement-button" class="gacha-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full disabled:opacity-50 disabled:bg-gray-600">강화</button>
-								</div>
-								<p id="max-enhancement-text" class="hidden text-center font-bold text-green-400 mt-2">최대 레벨에 도달했습니다!</p>
-							</div>
-						
                              <div class="bg-black/20 p-3 rounded-lg">
                                 <h3 class="font-bold text-lg mb-2 text-yellow-300">스킬</h3>
                                 <div id="detail-skills-container" class="space-y-3"></div>
@@ -401,16 +362,7 @@
                 </div>
                  <button id="story-skip-button" class="absolute top-5 right-5 bg-black/50 text-white py-2 px-4 rounded-full z-20">스킵</button>
             </div>
-		 </div> <div id="enhancement-success-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-            <div class="bg-gray-800 p-8 rounded-lg text-center max-w-md w-full mx-4">
-                <h2 class="text-3xl font-bold mb-4 text-yellow-300">🎉 강화 성공! 🎉</h2>
-                <p id="enhancement-success-card-name" class="text-xl mb-4"></p>
-                <div class="bg-black/30 p-4 rounded-lg">
-                    <p id="enhancement-success-dialogue" class="text-lg italic"></p>
-                </div>
-                <button id="close-enhancement-success" class="gacha-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-full mt-6">확인</button>
-            </div>
-        </div>
+
         </main>
     </div>
 
@@ -442,8 +394,6 @@
             const BOOKMARK_REGEN_TIME = 5 * 60 * 1000; // 5 minutes
             let playerAchievements = {}; // { ach_001: 'unlocked' | 'claimed' }
             let playerStats = { totalPulls: 0 };
-			let clearedStages = {}; // { '초보자의 숲': [0, 1, 2], ... } 형식 <-- 이 줄 추가
-			let playerPens = 0;
 			let currentInteractiveStory = null; // 이 줄 추가
 			let currentSceneIndex = 0; // 이 줄 추가
 
@@ -532,14 +482,6 @@
 			const storySkipButton = document.getElementById('story-skip-button');
 			const detailStoryPrevButton = document.getElementById('detail-story-prev');
             const detailStoryNextButton = document.getElementById('detail-story-next');
-			const penDisplay = document.getElementById('pen-display');
-			const dungeonVolumeSelection = document.getElementById('dungeon-volume-selection');
-			const dungeonStageSelection = document.getElementById('dungeon-stage-selection');
-			const backToVolumeSelectionButton = document.getElementById('back-to-volume-selection');
-			const currentVolumeTitle = document.getElementById('current-volume-title');
-			const stageListContainer = document.getElementById('stage-list-container');
-			const enhancementSuccessModal = document.getElementById('enhancement-success-modal');
-			const closeEnhancementSuccessButton = document.getElementById('close-enhancement-success');
             
             // --- 데이터 저장/불러오기 함수 ---
             function isStorageAvailable() {
@@ -557,12 +499,11 @@
                 if (!isStorageAvailable()) return;
                 const saveData = {
                     currency: playerCurrency,
-                    inventory: playerInventory,
-                    deck: playerDeck,
+                    inventory: playerInventory.map(card => card ? card.name : null).filter(Boolean),
+                    deck: playerDeck.map(card => card ? card.name : null).filter(Boolean),
                     capacity: inventoryCapacity,
                     representative: representativeCharacter ? representativeCharacter.name : null,
                     clearedDungeons: clearedDungeons,
-					clearedStages: clearedStages,
                     eventPoints: playerEventPoints,
                     clearedEventDungeons: clearedEventDungeons,
                     purchasedEventItems: purchasedEventItems,
@@ -586,16 +527,10 @@
                         try {
                             const savedData = JSON.parse(savedDataString);
                             playerCurrency = savedData.currency ?? 100;
-                            playerInventory = (savedData.inventory || []).map(item => {
-								if (typeof item === 'string') { // 옛날 버전 데이터(문자열) 처리
-									return { id: Date.now() + Math.random(), name: item, enhancementLevel: 0 };
-								}
-								return item; // 새로운 버전 데이터(객체)
-							}).filter(item => findCharacter(item.name));
-                            playerDeck = (savedData.deck || []).filter(item => findCharacter(item.name));
+                            playerInventory = (savedData.inventory || []).map(name => findCharacter(name)).filter(Boolean);
+                            playerDeck = (savedData.deck || []).map(name => findCharacter(name)).filter(Boolean);
                             inventoryCapacity = savedData.capacity ?? 100;
                             clearedDungeons = savedData.clearedDungeons || [];
-							clearedStages = savedData.clearedStages || {};
                             playerEventPoints = savedData.eventPoints ?? 0;
                             clearedEventDungeons = savedData.clearedEventDungeons || [];
                             purchasedEventItems = savedData.purchasedEventItems || {};
@@ -623,13 +558,8 @@
             }
 
             function initializeNewGameData() {
-                // 정상적인 보관함 데이터 형태로 지급하도록 수정
-                const char1 = findCharacter('[편집자] 윤필규');
-                if (char1) playerInventory.push({ id: Date.now() + Math.random(), name: char1.name, enhancementLevel: 0 });
-                
-                const char2 = findCharacter('[조수] 한 현');
-                if (char2) playerInventory.push({ id: Date.now() + Math.random(), name: char2.name, enhancementLevel: 0 });
-
+                playerInventory.push(findCharacter('[편집자] 윤필규'));
+                playerInventory.push(findCharacter('[조수] 한 현'));
                 playerBookmarks = MAX_BOOKMARKS;
                 lastBookmarkUpdateTime = Date.now();
             }
@@ -667,7 +597,6 @@
                     inventory: playerInventory,
                     stats: playerStats,
                     clearedDungeons: clearedDungeons,
-					clearedStages: clearedStages, 
                     capacity: inventoryCapacity,
                 };
                 let newAchievementUnlocked = false;
@@ -761,39 +690,6 @@
                 });
                 return bonusDeck;
             }
-			
-			 function enhanceCard(cardId) {
-            const cardInstance = playerInventory.find(c => c.id === cardId);
-            const characterData = findCharacter(cardInstance.name);
-            if (!cardInstance || cardInstance.enhancementLevel >= 9) return;
-
-            const cost = enhancementCosts[cardInstance.enhancementLevel];
-            if (playerPens < cost) {
-                showMessage('만년필이 부족합니다.', 'text-red-400', messageArea);
-                return;
-            }
-
-            playerPens -= cost;
-            cardInstance.enhancementLevel++;
-
-            // 강화 시 스탯 상승 (예: 기본 스탯의 5%씩 상승)
-            characterData.stats.hp = Math.round(characterData.stats.hp * 1.05);
-            characterData.stats.atk = Math.round(characterData.stats.atk * 1.05);
-            characterData.stats.def = Math.round(characterData.stats.def * 1.05);
-
-            showMessage(`${characterData.name} +${cardInstance.enhancementLevel} 강화 성공!`, 'text-green-300', messageArea);
-
-            if (cardInstance.enhancementLevel === 9) {
-                // 9강 성공 시 특별 모달 표시
-                document.getElementById('enhancement-success-card-name').textContent = `${characterData.name} [+9]`;
-                document.getElementById('enhancement-success-dialogue').textContent = characterData.enhancementSuccessDialogue || "최고의 경지에 도달했다!";
-                enhancementSuccessModal.classList.remove('hidden');
-            }
-
-            updateUI();
-            showCardDetails(cardId); // UI 갱신
-            saveGame();
-        }
 
             // --- 핵심 게임 로직 함수 ---
             function switchTab(tabName) {
@@ -971,11 +867,13 @@
                 playerEventPoints -= item.cost;
                 purchasedEventItems[item.id] = purchasedCount + 1;
 
-                if (item.type === 'card' && item.itemData) {
-                    // 정상적인 보관함 데이터 형태로 지급하도록 수정
-                    playerInventory.push({ id: Date.now() + Math.random(), name: item.itemData.name, enhancementLevel: 0 });
-                    showMessage(`[${item.itemData.name}] 획득!`, 'text-green-300', messageArea);
+                if (item.type === 'card') {
+                    playerInventory.push(item.itemData);
+                    showMessage(`[${item.name}] 획득!`, 'text-green-300', messageArea);
                 } else if (item.type === 'currency') {
+                    playerCurrency += item.itemData;
+                    showMessage(`보석 ${item.itemData}개 획득!`, 'text-green-300', messageArea);
+                }
 
                 updateUI();
                 displayEventShopView();
@@ -1093,11 +991,7 @@
                         pulledChar = pullCharacter(null, gachaType);
                     }
                     results.push(pulledChar);
-                    playerInventory.push({ 
-						id: Date.now() + Math.random(), // 각 카드에 고유 ID 부여
-						name: pulledChar.name, 
-						enhancementLevel: 0 
-					});
+                    playerInventory.push(pulledChar); 
                     playerStats.totalPulls++; // 이 줄 추가
                 }
                 displayResults(results); updateUI(); saveGame();
@@ -1144,11 +1038,94 @@
                 });
             }
             
-           
+            function getUniqueInventory() {
+                const cardCounts = playerInventory.reduce((acc, card) => {
+                    if (card && card.name) {
+                        if (!acc[card.name]) { acc[card.name] = { ...card, count: 0 }; }
+                        acc[card.name].count++;
+                    }
+                    return acc;
+                }, {});
+                const rarityOrder = { 'SSR': 4, 'SR': 3, 'R': 2, 'N': 1 };
+                return Object.values(cardCounts).sort((a, b) => (rarityOrder[b.rarity] - rarityOrder[a.rarity]) || a.name.localeCompare(b.name));
+            }
 
-            
+            function displayInventory() {
+                inventoryStatus.textContent = `${playerInventory.length} / ${inventoryCapacity}`;
+                inventoryContainer.innerHTML = '';
+                const uniqueCards = getUniqueInventory();
+                if (uniqueCards.length === 0) {
+                    inventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">아직 수집한 동료가 없습니다.</p>`; return;
+                }
+                uniqueCards.forEach((character, index) => {
+                    inventoryContainer.appendChild(createCard(character, { animationIndex: index, mode: 'inventory' }));
+                });
+            }
 
+            function displayCollection() {
+                collectionContainer.innerHTML = '';
+                const collectedCardNames = new Set(playerInventory.map(card => card.name));
+
+                characters.forEach((character, index) => {
+                    const isCollected = collectedCardNames.has(character.name);
+                    collectionContainer.appendChild(createCard(character, {
+                        animationIndex: index,
+                        mode: 'collection',
+                        isCollected: isCollected
+                    }));
+                });
+            }
+
+
+            function displayDeckManagement() {
+                deckStatus.textContent = `현재 덱: ${playerDeck.length} / ${DECK_CAPACITY}`;
+                deckStatus.classList.toggle('text-green-400', playerDeck.length === DECK_CAPACITY);
+                deckSlotsContainer.innerHTML = '';
+                for (let i = 0; i < DECK_CAPACITY; i++) {
+                    if (playerDeck[i]) {
+                        deckSlotsContainer.appendChild(createCard(playerDeck[i], { mode: 'deckSlot' }));
+                    } else {
+                        const emptySlot = document.createElement('div');
+                        emptySlot.className = 'deck-slot rounded-lg'; emptySlot.textContent = '비어있음';
+                        deckSlotsContainer.appendChild(emptySlot);
+                    }
+                }
+                deckInventoryContainer.innerHTML = '';
+                const uniqueCards = getUniqueInventory();
+                 if (uniqueCards.length === 0) {
+                    deckInventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">덱에 추가할 카드가 없습니다.</p>`; return;
+                }
+                uniqueCards.forEach((character, index) => {
+                    const isCardInDeck = playerDeck.some(deckCard => deckCard.name === character.name);
+                    const isDeckFull = playerDeck.length >= DECK_CAPACITY;
+                    deckInventoryContainer.appendChild(createCard(character, { animationIndex: index, mode: 'deckBuilder', isCardInDeck, isDeckFull }));
+                });
+				displaySynergies();
+            }
             
+            function autoFillDeck() {
+                const uniqueCards = getUniqueInventory();
+                const sortedByPower = uniqueCards.sort((a, b) => (b.stats.atk + b.stats.def) - (a.stats.atk + a.stats.def));
+                playerDeck = sortedByPower.slice(0, DECK_CAPACITY);
+                displayDeckManagement();
+                showMessage('가장 강력한 카드로 덱을 자동 편성했습니다!', 'text-blue-300', messageArea);
+                saveGame();
+            }
+
+            function addToDeck(cardName) {
+                if (playerDeck.length >= DECK_CAPACITY || playerDeck.some(card => card.name === cardName)) return;
+                const cardToAdd = findCharacter(cardName);
+                if (cardToAdd) { playerDeck.push(cardToAdd); displayDeckManagement(); saveGame(); }
+            }
+            
+            function removeFromDeck(cardName) {
+                const indexToRemove = playerDeck.findIndex(card => card.name === cardName);
+                if(indexToRemove > -1) {
+                    playerDeck.splice(indexToRemove, 1);
+                }
+                displayDeckManagement();
+                saveGame();
+            }
             
 				// 위치: gacha1.html, 약 1129번째 줄
 			function calculateDeckPower() {
@@ -1158,48 +1135,31 @@
 			}
 
             function displayCombatView() {
-            deckPowerDisplay.textContent = calculateDeckPower();
-            dungeonVolumeSelection.innerHTML = '';
-            dungeonStageSelection.classList.add('hidden');
-            dungeonVolumeSelection.classList.remove('hidden');
-
-            dungeons.forEach((volume, index) => {
-                const volumeEl = document.createElement('div');
-                volumeEl.className = 'bg-black/20 p-6 rounded-lg text-center cursor-pointer hover:bg-black/30';
-                volumeEl.innerHTML = `<h3 class="text-2xl font-bold text-yellow-300">${volume.name}</h3>`;
-                volumeEl.onclick = () => displayDungeonStages(index);
-                dungeonVolumeSelection.appendChild(volumeEl);
-            });
-        }
-
-        function displayDungeonStages(volumeIndex) {
-            const volume = dungeons[volumeIndex];
-            dungeonVolumeSelection.classList.add('hidden');
-            dungeonStageSelection.classList.remove('hidden');
-            currentVolumeTitle.textContent = volume.name;
-            stageListContainer.innerHTML = '';
-
-            volume.stages.forEach((stage, stageIndex) => {
-                const isCleared = clearedStages[volume.name]?.includes(stageIndex);
-                const stageEl = document.createElement('button');
-                stageEl.className = 'p-4 rounded-lg transition-colors duration-300 text-center bg-white/20 hover:bg-white/30';
-                stageEl.innerHTML = `
-                    <h4 class="text-lg font-bold">${stage.name}</h4>
-                    <p class="text-sm">보상: 🖊️ ${stage.reward.pens} ${isCleared ? '<span class="text-green-400">(클리어)</span>' : ''}</p>
-                `;
-                stageEl.onclick = () => challengeDungeon(volumeIndex, stageIndex, 'main');
-                stageListContainer.appendChild(stageEl);
-            });
-        }
+                deckPowerDisplay.textContent = calculateDeckPower();
+                dungeonListContainer.innerHTML = '';
+                dungeons.forEach((dungeon, index) => {
+                    const monster = monsters[dungeon.monsterName];
+                    const recommendedPower = monster.stats.atk*5 + monster.stats.def*5 + Math.floor(monster.stats.hp / 5);
+                    const dungeonEl = document.createElement('div');
+                    dungeonEl.className = 'bg-black/20 p-4 rounded-lg text-center';
+                    dungeonEl.innerHTML = `
+                        <h3 class="text-xl font-bold text-yellow-300">${dungeon.name}</h3>
+                        <p class="text-gray-300">권장 전투력: ${recommendedPower}</p>
+                        <p class="text-gray-300">예상 보상: 💎${dungeon.rewards.min} ~ ${dungeon.rewards.max}</p>
+                        <button data-action="challenge-dungeon" data-dungeon-index="${index}" class="gacha-button bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-full mt-4">도전</button>
+                    `;
+                    dungeonListContainer.appendChild(dungeonEl);
+                });
+            }
             
-            function challengeDungeon(volumeIndex, stageIndex, type = 'main') {
+            function challengeDungeon(dungeonIndex, type = 'main') {
                 if (playerBookmarks < 1) {
-                    const msgArea = type === 'event' ? messageArea : (document.getElementById('combat-message-area') || messageArea);
+                    const msgArea = type === 'event' ? document.getElementById('message-area') : (document.getElementById('combat-message-area') || messageArea);
                     showMessage('책갈피가 부족합니다!', 'text-yellow-400', msgArea);
                     return;
                 }
                 if (playerDeck.length < DECK_CAPACITY) {
-                    const msgArea = type === 'event' ? messageArea : (document.getElementById('combat-message-area') || messageArea);
+                    const msgArea = type === 'event' ? document.getElementById('message-area') : (document.getElementById('combat-message-area') || messageArea);
                     showMessage('덱을 5장으로 모두 채워야 합니다!', 'text-yellow-400', msgArea);
                     return;
                 }
@@ -1209,50 +1169,31 @@
                      lastBookmarkUpdateTime = Date.now();
                 }
                 updateUI();
-                
-                // 이벤트 전투일 경우 volumeIndex는 stageIndex가 되고, stageIndex는 null로 처리
-                startCombat(
-                    type === 'event' ? null : volumeIndex,
-                    type === 'event' ? volumeIndex : stageIndex, // 이벤트에서는 volumeIndex가 실제 던전 index
-                    type
-                );
+                // saveGame(); // 전투 시작 전에 저장하지 않고, 전투 종료 후에 저장.
+
+                startCombat(dungeonIndex, type);
             }
 
             function setCombatSpeed(speed) {
                 combatSpeedMultiplier = speed;
                 const allSpeedButtons = document.querySelectorAll('.speed-button');
                 allSpeedButtons.forEach(btn => {
-                    btn.classList.remove('active', 'bg-blue-500');
+                    btn.classList.remove('active');
                     btn.classList.add('bg-gray-600');
+                    btn.classList.remove('bg-blue-500');
                 });
                 document.getElementById(`speed-${speed}x`).classList.add('active', 'bg-blue-500');
                 document.getElementById(`speed-${speed}x`).classList.remove('bg-gray-600');
             }
 
-            async function startCombat(volumeIndex, stageIndex, type) {
+            async function startCombat(dungeonIndex, type) {
                 isCombatRunning = true;
-                setCombatSpeed(1);
-
-                let dungeon;
-                let volumeName = null;
-
-                if (type === 'event') {
-                    dungeon = eventDungeons[stageIndex]; // 이벤트는 stageIndex를 사용
-                } else { // 'main'
-                    const volume = dungeons[volumeIndex];
-                    dungeon = volume.stages[stageIndex];
-                    volumeName = volume.name;
-                }
-
-                if (!dungeon) {
-                    console.error("던전 정보를 찾을 수 없습니다:", { volumeIndex, stageIndex, type });
-                    isCombatRunning = false;
-                    return;
-                }
-
+                setCombatSpeed(1); // 전투 시작 시 1배속으로 초기화
+                const dungeonList = type === 'event' ? eventDungeons : dungeons;
+                const dungeon = dungeonList[dungeonIndex];
                 const monsterData = JSON.parse(JSON.stringify(monsters[dungeon.monsterName]));
-                const combatDeck = applySynergyBonusesToDeck(playerDeck);
-				const originalBonusDeck = JSON.parse(JSON.stringify(combatDeck));
+                const combatDeck = applySynergyBonusesToDeck(playerDeck); // 보너스가 적용된 덱
+				const originalBonusDeck = JSON.parse(JSON.stringify(combatDeck)); // 보너스 적용된 덱의 원본 (최대 HP 계산용)
 
                 allViews.forEach(view => view.classList.add('hidden'));
                 combatInProgressView.classList.remove('hidden');
@@ -1280,11 +1221,113 @@
                     <p id="monster-hp-text" class="text-sm mt-1">${monsterData.stats.hp} / ${monsterData.stats.hp}</p>
                 `;
                 
-                await runCombatLoop(combatDeck, originalBonusDeck, monsterData, volumeName, stageIndex, dungeon, type);
+                await runCombatLoop(combatDeck, originalBonusDeck, monsterData, dungeon, type);
+            }
+
+            const delay = ms => new Promise(res => setTimeout(res, ms / combatSpeedMultiplier));
+
+            async function runCombatLoop(combatDeck, originalBonusDeck, monsterData, dungeon, type) { // originalBonusDeck 인자 추가
+				const originalMonsterDef = monsterData.stats.def;
+
+				while (monsterData.stats.hp > 0 && combatDeck.some(c => c.stats.hp > 0)) {
+					for (let i = 0; i < combatDeck.length; i++) {
+						const card = combatDeck[i];
+						if (card.stats.hp > 0) {
+                            await delay(800);
+                            const monsterImage = document.getElementById('combat-monster-image');
+                            
+                            const useUltimate = card.rarity === 'SSR' && Math.random() < 0.25;
+                            const useSkill = Math.random() < 0.4;
+                            let skillToUse = null;
+
+                            if (useUltimate && card.skills.length > 1) skillToUse = card.skills[1];
+                            else if (useSkill) skillToUse = card.skills[0];
+
+                            let damage = 0;
+                            if (skillToUse) {
+                                logCombat(`<strong>${card.name}</strong>의 스킬! <span class="text-yellow-300">"${skillToUse.name}"</span>`);
+                                await delay(400);
+                                logCombat(`<em>"${skillToUse.dialogue}"</em>`);
+                                
+                                damage = Math.max(1, Math.floor(card.stats.atk * skillToUse.power) - monsterData.stats.def);
+                                
+                                if (skillToUse.type === 'vampire') {
+                                    const healedAmount = Math.floor(damage * 0.5);
+                                    const maxHpForThisCard = originalBonusDeck[i].stats.hp; // 전투 시작 시점의 최대 HP
+									card.stats.hp = Math.min(maxHpForThisCard, card.stats.hp + healedAmount);
+									logCombat(`<strong>${card.name}</strong>이(가) ${healedAmount}의 체력을 회복했다!`);
+                                }
+                                if (skillToUse.type === 'debuff_def') {
+                                    monsterData.stats.def = Math.max(0, Math.floor(monsterData.stats.def * 0.8));
+                                    logCombat(`<strong>${monsterData.name}</strong>의 방어력이 감소했다!`);
+                                }
+
+                            } else {
+                                logCombat(`<strong>${card.name}</strong>의 일반 공격!`);
+                                damage = Math.max(1, card.stats.atk - monsterData.stats.def);
+                            }
+                            
+                            monsterData.stats.hp = Math.max(0, monsterData.stats.hp - damage);
+                            logCombat(`<strong>${monsterData.name}</strong>에게 ${damage}의 데미지!`);
+                            monsterImage.classList.add('shake-animation');
+                            updateCombatUI(combatDeck, originalBonusDeck, monsterData);
+                            setTimeout(() => monsterImage.classList.remove('shake-animation'), 300 / combatSpeedMultiplier);
+
+                            if (monsterData.stats.hp <= 0) break;
+                        }
+                    }
+                    if (monsterData.stats.hp <= 0) break;
+
+                    await delay(1000);
+                    const alivePlayers = combatDeck.filter(c => c.stats.hp > 0);
+                    if (alivePlayers.length > 0) {
+                        const targetCard = alivePlayers[Math.floor(Math.random() * alivePlayers.length)];
+                        logCombat(`<strong>${monsterData.name}</strong>의 공격!`);
+                        const damage = Math.max(1, monsterData.stats.atk - targetCard.stats.def);
+                        const hpBeforeAttack = targetCard.stats.hp;
+                        targetCard.stats.hp = Math.max(0, targetCard.stats.hp - damage);
+                        logCombat(`<strong>${targetCard.name}</strong>에게 ${damage}의 데미지!`);
+                        
+                        if (targetCard.stats.hp <= 0 && hpBeforeAttack > 0) {
+                            await delay(400);
+                            logCombat(`<strong>${targetCard.name}</strong>: <em>"${targetCard.deathDialogue}"</em>`);
+                        }
+
+                        updateCombatUI(combatDeck, originalBonusDeck, monsterData);
+                    }
+                }
+                
+                await delay(1000);
+                monsterData.stats.def = originalMonsterDef;
+                endCombat(monsterData.stats.hp <= 0, dungeon, type);
+            }
+
+            function logCombat(message) {
+                combatLog.innerHTML += `<p>${message}</p>`;
+                combatLogContainer.scrollTop = combatLogContainer.scrollHeight;
+            }
+
+             function updateCombatUI(deck, originalBonusDeck, monster) {
+				deck.forEach((card, index) => {
+					const originalCardWithBonus = originalBonusDeck[index];
+					if(!originalCardWithBonus) return;
+
+					const maxHp = originalCardWithBonus.stats.hp; // 전투 시작 시점의 최대 HP
+					const currentHp = card.stats.hp;
+
+					const hpPercent = maxHp > 0 ? (currentHp / maxHp) * 100 : 0;
+					document.getElementById(`player-hp-bar-${index}`).style.width = `${hpPercent}%`;
+					document.getElementById(`player-hp-text-${index}`).textContent = `${currentHp} / ${maxHp}`;
+				});
+
+				const monsterMaxHp = monsters[monster.name].stats.hp;
+				const monsterHpPercent = (monster.stats.hp / monsterMaxHp) * 100;
+				document.getElementById('monster-hp-bar').style.width = `${monsterHpPercent}%`;
+				document.getElementById('monster-hp-text').textContent = `${monster.stats.hp} / ${monsterMaxHp}`;
 			}
-            
-            function endCombat(isVictory, volumeName, stageIndex, dungeon, type) {
-                lastCombatType = type;
+			
+            function endCombat(isVictory, dungeon, type) {
+                lastCombatType = type; // 현재 종료된 전투 유형을 저장합니다.
                 if (isVictory) {
                     let rewardMsg = '';
                     if(type === 'event') {
@@ -1294,23 +1337,13 @@
                             clearedEventDungeons.push(dungeon.name);
                         }
                         rewardMsg = `이벤트 스테이지 클리어! ${reward} P를 획득했습니다.`;
-                    } else { // 'main'
-                        if (volumeName) {
-                            if (!clearedStages[volumeName]) clearedStages[volumeName] = [];
-                            if (!clearedStages[volumeName].includes(stageIndex)) {
-                                clearedStages[volumeName].push(stageIndex);
-                            }
+                    } else {
+                        if (!clearedDungeons.includes(dungeon.name)) {
+                            clearedDungeons.push(dungeon.name);
                         }
-
-                        const earnedReward = dungeon.reward.currency || 0;
+                        const earnedReward = dungeon.rewards.min + Math.floor(Math.random() * (dungeon.rewards.max - dungeon.rewards.min + 1));
                         playerCurrency += earnedReward;
-                        const penReward = dungeon.reward.pens || 0;
-                        playerPens += penReward;
-
-                        rewardMsg = `스테이지 클리어!`;
-                        if(earnedReward > 0) rewardMsg += ` 💎${earnedReward}`;
-                        if(penReward > 0) rewardMsg += ` 🖊️${penReward}`;
-                        rewardMsg += `를 획득했습니다.`;
+                        rewardMsg = `던전 클리어! 💎${earnedReward}를 획득했습니다.`;
                     }
                     combatResultTitle.textContent = "승리!";
                     combatResultTitle.className = "text-4xl font-bold mb-4 text-green-400";
@@ -1320,7 +1353,7 @@
                     combatResultTitle.className = "text-4xl font-bold mb-4 text-red-400";
                     combatResultMessage.textContent = `전투에서 패배했습니다...`;
                 }
-
+                
                 updateUI();
                 saveGame();
                 checkAchievements();
@@ -1332,8 +1365,7 @@
                 const { animationIndex, mode = 'default', isCardInDeck, isDeckFull, isCollected } = options;
                 const card = document.createElement('div');
                 card.className = `rarity-${character.rarity} relative text-center rounded-lg shadow-md p-2 transform transition-transform duration-300 hover:scale-105 cursor-pointer`;
-                card.dataset.cardId = character.id; // 고유 ID로 변경
-				card.dataset.cardName = character.name;
+                card.dataset.cardName = character.name;
                 card.title = character.name;
                 const rarityColor = { 'N': 'text-gray-600', 'R': 'text-blue-800', 'SR': 'text-white', 'SSR': 'text-black' }[character.rarity];
                 const factionColors = {
@@ -1346,11 +1378,6 @@
                 if(mode === 'inventory' && character.count > 1) {
                     badgeHTML = `<div class="count-badge">x${character.count}</div>`;
                 }
-				
-				let enhancementHTML = '';
-				if (character.enhancementLevel > 0) {
-				enhancementHTML = `<div class="absolute top-1 left-1 bg-yellow-400 text-black font-bold text-xs px-2 py-0.5 rounded-full z-10">+${character.enhancementLevel}</div>`;
-				}
 
                 let actionButtonsHTML = '';
                 if (mode === 'deckBuilder') {
@@ -1410,10 +1437,9 @@
                 }
             }
 
-            function showCardDetails(cardId) {
-            const cardInstance = playerInventory.find(c => c.id === cardId);
-            const character = findCharacter(cardInstance.name);
-            if (!character) return;
+            function showCardDetails(cardName) {
+                const character = findCharacter(cardName);
+                if (!character) return;
 
                 document.getElementById('detail-card-image').src = character.imageUrl;
                 document.getElementById('detail-card-name').textContent = character.name;
@@ -1436,23 +1462,6 @@
                 document.getElementById('detail-stat-atk').textContent = character.stats.atk;
                 document.getElementById('detail-stat-def').textContent = character.stats.def;
 
-				// 강화 UI 업데이트
-            const enhancementUI = document.getElementById('enhancement-ui');
-            const maxEnhancementText = document.getElementById('max-enhancement-text');
-            if (cardInstance.enhancementLevel < 9) {
-                enhancementUI.classList.remove('hidden');
-                maxEnhancementText.classList.add('hidden');
-                document.getElementById('detail-enhancement-level').textContent = `+${cardInstance.enhancementLevel}`;
-                const cost = enhancementCosts[cardInstance.enhancementLevel];
-                document.getElementById('detail-enhancement-cost').textContent = cost;
-                const enhanceButton = document.getElementById('detail-enhancement-button');
-                enhanceButton.disabled = playerPens < cost;
-                enhanceButton.onclick = () => enhanceCard(cardId);
-            } else {
-                enhancementUI.classList.add('hidden');
-                maxEnhancementText.classList.remove('hidden');
-            }
-				
                 const skillsContainer = document.getElementById('detail-skills-container');
                 skillsContainer.innerHTML = '';
                 character.skills.forEach((skill, index) => {
@@ -1496,10 +1505,7 @@
             function displayStoryView() {
                 mainStoryContainer.innerHTML = '';
                 mainStories.forEach((story, index) => {
-                    // 잠금 해제 조건 수정
-                    const volumeToClear = dungeons.find(d => d.name === story.dungeonToUnlock);
-                    const isUnlocked = story.dungeonToUnlock === null || 
-                                       (volumeToClear && clearedStages[volumeToClear.name]?.length === volumeToClear.stages.length);
+                    const isUnlocked = story.dungeonToUnlock === null || clearedDungeons.includes(story.dungeonToUnlock);
                     const storyEl = document.createElement('div');
                     storyEl.className = `p-4 rounded-lg transition-colors duration-300 ${isUnlocked ? 'bg-white/20 hover:bg-white/30 cursor-pointer' : 'bg-black/30 text-gray-500'}`;
                     if (isUnlocked) {
@@ -1602,17 +1608,16 @@
                         e.stopPropagation(); // Prevent card detail from opening when a button is clicked
                         const action = actionButton.dataset.action;
                         const cardName = actionButton.dataset.cardName;
-						const cardId = actionButton.closest('[data-card-id]')?.dataset.cardId;
                         if (action === 'set-representative') setRepresentative(cardName);
-                        else if (action === 'add-to-deck') addToDeck(cardId);
-						else if (action === 'remove-from-deck') removeFromDeck(cardId);
+                        else if (action === 'add-to-deck') addToDeck(cardName);
+                        else if (action === 'remove-from-deck') removeFromDeck(cardName);
                     } else {
-                        const cardElement = e.target.closest('[data-card-id]');
+                        const cardElement = e.target.closest('[data-card-name]');
                         if (cardElement) {
                              if (container === collectionContainer && cardElement.dataset.isCollected === 'false') {
                                 return;
                             }
-                            showCardDetails(parseFloat(cardElement.dataset.cardId));
+                            showCardDetails(cardElement.dataset.cardName);
                         }
                     }
                 });
@@ -1691,13 +1696,6 @@
             eventSubTabBattle.addEventListener('click', () => switchSubTab(document.getElementById('event-view'), eventSubTabBattle));
             eventSubTabStory.addEventListener('click', () => switchSubTab(document.getElementById('event-view'), eventSubTabStory));
             eventSubTabShop.addEventListener('click', () => switchSubTab(document.getElementById('event-view'), eventSubTabShop));
-			backToVolumeSelectionButton.addEventListener('click', () => {
-                dungeonStageSelection.classList.add('hidden');
-                dungeonVolumeSelection.classList.remove('hidden');
-            });
-            closeEnhancementSuccessButton.addEventListener('click', () => {
-                enhancementSuccessModal.classList.add('hidden');
-            });
             
             // --- 게임 시작 ---
             loadGame();
@@ -1706,7 +1704,5 @@
     </script>
 </body>
 </html>
-
-
 
 
