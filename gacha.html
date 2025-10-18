@@ -623,8 +623,13 @@
             }
 
             function initializeNewGameData() {
-                playerInventory.push(findCharacter('[편집자] 윤필규'));
-                playerInventory.push(findCharacter('[조수] 한 현'));
+                // 정상적인 보관함 데이터 형태로 지급하도록 수정
+                const char1 = findCharacter('[편집자] 윤필규');
+                if (char1) playerInventory.push({ id: Date.now() + Math.random(), name: char1.name, enhancementLevel: 0 });
+                
+                const char2 = findCharacter('[조수] 한 현');
+                if (char2) playerInventory.push({ id: Date.now() + Math.random(), name: char2.name, enhancementLevel: 0 });
+
                 playerBookmarks = MAX_BOOKMARKS;
                 lastBookmarkUpdateTime = Date.now();
             }
@@ -966,13 +971,11 @@
                 playerEventPoints -= item.cost;
                 purchasedEventItems[item.id] = purchasedCount + 1;
 
-                if (item.type === 'card') {
-                    playerInventory.push(item.itemData);
-                    showMessage(`[${item.name}] 획득!`, 'text-green-300', messageArea);
+                if (item.type === 'card' && item.itemData) {
+                    // 정상적인 보관함 데이터 형태로 지급하도록 수정
+                    playerInventory.push({ id: Date.now() + Math.random(), name: item.itemData.name, enhancementLevel: 0 });
+                    showMessage(`[${item.itemData.name}] 획득!`, 'text-green-300', messageArea);
                 } else if (item.type === 'currency') {
-                    playerCurrency += item.itemData;
-                    showMessage(`보석 ${item.itemData}개 획득!`, 'text-green-300', messageArea);
-                }
 
                 updateUI();
                 displayEventShopView();
@@ -1163,9 +1166,13 @@
             inventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">아직 수집한 동료가 없습니다.</p>`; return;
         }
         sortedInventory.forEach((cardInstance, index) => {
-            inventoryContainer.appendChild(createCard(cardInstance, { animationIndex: index, mode: 'inventory' }));
+            // 캐릭터의 기본 정보를 항상 찾아서 합쳐주도록 수정
+            const characterData = findCharacter(cardInstance.name);
+            if (characterData) {
+                const cardDataForDisplay = { ...characterData, ...cardInstance };
+                inventoryContainer.appendChild(createCard(cardDataForDisplay, { animationIndex: index, mode: 'inventory' }));
+            }
         });
-    }
 
 
             function displayDeckManagement() {
