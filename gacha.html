@@ -1140,17 +1140,7 @@
             
            
 
-            function displayInventory() {
-                inventoryStatus.textContent = `${playerInventory.length} / ${inventoryCapacity}`;
-                inventoryContainer.innerHTML = '';
-                const uniqueCards = getUniqueInventory();
-                if (uniqueCards.length === 0) {
-                    inventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">아직 수집한 동료가 없습니다.</p>`; return;
-                }
-                uniqueCards.forEach((character, index) => {
-                    inventoryContainer.appendChild(createCard(character, { animationIndex: index, mode: 'inventory' }));
-                });
-            }
+            
 
             function displayInventory() {
         inventoryStatus.textContent = `${playerInventory.length} / ${inventoryCapacity}`;
@@ -1176,54 +1166,75 @@
 
 
             function displayDeckManagement() {
-                deckStatus.textContent = `현재 덱: ${playerDeck.length} / ${DECK_CAPACITY}`;
-                deckStatus.classList.toggle('text-green-400', playerDeck.length === DECK_CAPACITY);
-                deckSlotsContainer.innerHTML = '';
-                for (let i = 0; i < DECK_CAPACITY; i++) {
-                    if (playerDeck[i]) {
-                        deckSlotsContainer.appendChild(createCard(playerDeck[i], { mode: 'deckSlot' }));
-                    } else {
-                        const emptySlot = document.createElement('div');
-                        emptySlot.className = 'deck-slot rounded-lg'; emptySlot.textContent = '비어있음';
-                        deckSlotsContainer.appendChild(emptySlot);
-                    }
-                }
-                deckInventoryContainer.innerHTML = '';
-                const uniqueCards = getUniqueInventory();
-                 if (uniqueCards.length === 0) {
-                    deckInventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">덱에 추가할 카드가 없습니다.</p>`; return;
-                }
-                uniqueCards.forEach((character, index) => {
-                    const isCardInDeck = playerDeck.some(deckCard => deckCard.name === character.name);
-                    const isDeckFull = playerDeck.length >= DECK_CAPACITY;
-                    deckInventoryContainer.appendChild(createCard(character, { animationIndex: index, mode: 'deckBuilder', isCardInDeck, isDeckFull }));
-                });
-				displaySynergies();
-            }
+    deckStatus.textContent = `현재 덱: ${playerDeck.length} / ${DECK_CAPACITY}`;
+    deckStatus.classList.toggle('text-green-400', playerDeck.length === DECK_CAPACITY);
+    deckSlotsContainer.innerHTML = '';
+
+    for (let i = 0; i < DECK_CAPACITY; i++) {
+        if (playerDeck[i]) {
+            const characterData = findCharacter(playerDeck[i].name);
+            const cardDataForDisplay = { ...characterData, ...playerDeck[i] }; // 기본 정보 + 인스턴스 정보
+            deckSlotsContainer.appendChild(createCard(cardDataForDisplay, { mode: 'deckSlot' }));
+        } else {
+            const emptySlot = document.createElement('div');
+            emptySlot.className = 'deck-slot rounded-lg'; emptySlot.textContent = '비어있음';
+            deckSlotsContainer.appendChild(emptySlot);
+        }
+    }
+
+    deckInventoryContainer.innerHTML = '';
+    const sortedInventory = [...playerInventory].sort((a, b) => { /* 정렬 로직은 displayInventory와 동일 */
+        const charA = findCharacter(a.name); const charB = findCharacter(b.name);
+        const rarityOrder = { 'SSR': 4, 'SR': 3, 'R': 2, 'N': 1 };
+        if (b.enhancementLevel !== a.enhancementLevel) return b.enhancementLevel - a.enhancementLevel;
+        if (rarityOrder[charB.rarity] !== rarityOrder[charA.rarity]) return rarityOrder[charB.rarity] - rarityOrder[charA.rarity];
+        return a.name.localeCompare(b.name);
+    });
+
+    if (sortedInventory.length === 0) {
+        deckInventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">덱에 추가할 카드가 없습니다.</p>`; return;
+    }
+
+    sortedInventory.forEach((cardInstance, index) => {
+        const characterData = findCharacter(cardInstance.name);
+        const cardDataForDisplay = { ...characterData, ...cardInstance };
+        const isCardInDeck = playerDeck.some(deckCard => deckCard.id === cardInstance.id);
+        const isDeckFull = playerDeck.length >= DECK_CAPACITY;
+        deckInventoryContainer.appendChild(createCard(cardDataForDisplay, { animationIndex: index, mode: 'deckBuilder', isCardInDeck, isDeckFull }));
+    });
+    displaySynergies();
+}
             
             function autoFillDeck() {
-                const uniqueCards = getUniqueInventory();
-                const sortedByPower = uniqueCards.sort((a, b) => (b.stats.atk + b.stats.def) - (a.stats.atk + a.stats.def));
-                playerDeck = sortedByPower.slice(0, DECK_CAPACITY);
-                displayDeckManagement();
-                showMessage('가장 강력한 카드로 덱을 자동 편성했습니다!', 'text-blue-300', messageArea);
-                saveGame();
-            }
+    const sortedByPower = [...playerInventory].sort((a, b) => {
+        const charA = findCharacter(a.name);
+        const charB = findCharacter(b.name);
+        const powerA = charA.stats.atk + charA.stats.def + (a.enhancementLevel * 5); // 강화 보너스 가중치
+        const powerB = charB.stats.atk + charB.stats.def + (b.enhancementLevel * 5);
+        return powerB - powerA;
+    });
+    playerDeck = sortedByPower.slice(0, DECK_CAPACITY);
+    displayDeckManagement();
+    showMessage('가장 강력한 카드로 덱을 자동 편성했습니다!', 'text-blue-300', messageArea);
+    saveGame();
+}
 
-            function addToDeck(cardName) {
-                if (playerDeck.length >= DECK_CAPACITY || playerDeck.some(card => card.name === cardName)) return;
-                const cardToAdd = findCharacter(cardName);
-                if (cardToAdd) { playerDeck.push(cardToAdd); displayDeckManagement(); saveGame(); }
-            }
-            
-            function removeFromDeck(cardName) {
-                const indexToRemove = playerDeck.findIndex(card => card.name === cardName);
-                if(indexToRemove > -1) {
-                    playerDeck.splice(indexToRemove, 1);
-                }
-                displayDeckManagement();
-                saveGame();
-            }
+            function addToDeck(cardId) {
+    const cardIdNum = parseFloat(cardId);
+    if (playerDeck.length >= DECK_CAPACITY || playerDeck.some(card => card.id === cardIdNum)) return;
+    const cardToAdd = playerInventory.find(card => card.id === cardIdNum);
+    if (cardToAdd) { playerDeck.push(cardToAdd); displayDeckManagement(); saveGame(); }
+}
+
+function removeFromDeck(cardId) {
+    const cardIdNum = parseFloat(cardId);
+    const indexToRemove = playerDeck.findIndex(card => card.id === cardIdNum);
+    if(indexToRemove > -1) {
+        playerDeck.splice(indexToRemove, 1);
+    }
+    displayDeckManagement();
+    saveGame();
+}
             
 				// 위치: gacha1.html, 약 1129번째 줄
 			function calculateDeckPower() {
@@ -1759,8 +1770,8 @@
                         const cardName = actionButton.dataset.cardName;
 						const cardId = actionButton.closest('[data-card-id]')?.dataset.cardId;
                         if (action === 'set-representative') setRepresentative(cardName);
-                        else if (action === 'add-to-deck') addToDeck(cardName);
-                        else if (action === 'remove-from-deck') removeFromDeck(cardName);
+                        else if (action === 'add-to-deck') addToDeck(cardId);
+						else if (action === 'remove-from-deck') removeFromDeck(cardId);
                     } else {
                         const cardElement = e.target.closest('[data-card-id]');
                         if (cardElement) {
