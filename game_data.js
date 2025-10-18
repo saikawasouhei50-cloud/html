@@ -45,7 +45,8 @@
                 { name: '[학생] 윤유준', baseName: '윤유준', rarity: 'N', faction: '조수', stats: { hp: 65, atk: 5, def: 8 }, imageUrl: 'https://placehold.co/300x500/e53e3e/ffffff?text=윤유준', cardImageUrl: 'https://placehold.co/150x180/e53e3e/ffffff?text=윤유준', dialogues: ['어? 저건...'], skills: [{ name: '목격', dialogue: '제가 본 게 맞다면...', power: 1.1, type: 'damage' }], deathDialogue: '못 본 척... 했어야 했는데...', story: '호기심 많고 관찰력이 뛰어난 학생. 우연히 사건의 결정적인 순간을 목격하게 된다.' },
                 { name: '[조수] 윤유준', baseName: '윤유준', rarity: 'R', faction: '조수', stats: { hp: 135, atk: 12, def: 15 }, imageUrl: 'https://placehold.co/300x500/c53030/ffffff?text=윤유준', cardImageUrl: 'https://placehold.co/150x180/c53030/ffffff?text=윤유준', dialogues: ['제가 봤어요. 확실해요.'], skills: [{ name: '증언', dialogue: '그날, 그 사람은 거기에 있었어요.', power: 1.4, type: 'damage' }], deathDialogue: '제가... 도움이 되었을까요?', story: '자신의 목격이 사건 해결에 중요한 단서가 된다는 것을 알고, 용기를 내어 탐정을 돕기 시작한다.' },
                 { name: '[방관자] 윤유준', baseName: '윤유준', rarity: 'SR', faction: '조수', stats: { hp: 225, atk: 26, def: 23 }, imageUrl: 'https://placehold.co/300x500/742a2a/ffffff?text=윤유준', cardImageUrl: 'https://placehold.co/150x180/742a2a/ffffff?text=윤유준', dialogues: ['...저는 그저, 보고 있을 뿐입니다.'], skills: [{ name: '객관적 시선', dialogue: '감정은... 배제하는 편이 좋습니다.', power: 1.8, type: 'damage' }], deathDialogue: '결국... 아무것도 하지 못했군.', story: '사건의 추악한 진실과 마주한 후, 그는 한 걸음 물러나 모든 것을 지켜보기로 결심한다. 더 이상 섣불리 개입하지 않으리라 다짐하면서.' }
-            ];
+				{ name: '[이벤트] 어둠의 계약자', baseName: '어둠의 계약자', rarity: 'SSR', faction: '범인', stats: { hp: 400, atk: 55, def: 25 }, imageUrl: 'https://placehold.co/300x500/2d3748/ffffff?text=계약자', cardImageUrl: 'https://placehold.co/150x180/2d3748/ffffff?text=계약자', dialogues: ['어둠과 거래하는 데는 대가가 따르는 법이지.'], skills: [{ name: '그림자 습격', dialogue: '보이지 않는 공포를 느껴봐라.', power: 2.6, type: 'damage' }, { name: '영혼 흡수', dialogue: '네 고통은 나의 힘이 된다.', power: 1.5, type: 'vampire' }], deathDialogue: '이 계약은... 아직 끝나지 않았어...', story: '사건의 배후에서 모든 것을 조종하는 미스터리한 인물. 그의 목적도, 정체도 모두 베일에 싸여 있다.' }
+			];
             
             const monsters = {
                 '슬라임 킹': { name: '슬라임 킹', stats: { hp: 300, atk: 15, def: 10 }, imageUrl: 'https://placehold.co/300x300/a0aec0/ffffff?text=Slime+King' },
@@ -169,7 +170,10 @@
                 { id: 'ach_002', title: '수집의 시작', description: '누군가의 서고에서 10회 뽑기', condition: (state) => state.stats.totalPulls >= 10, reward: { currency: 50 } },
                 { id: 'ach_003', title: '인연의 실', description: '등장인물 10종류 수집', condition: (state) => new Set(state.inventory.map(c => c.name)).size >= 10, reward: { currency: 50 } },
                 { id: 'ach_004', title: '탐정의 자질', description: 'SSR 등급 등장인물 획득', condition: (state) => state.inventory.some(c => c.rarity === 'SSR'), reward: { currency: 100 } },
-                { id: 'ach_005', title: '숲의 정복자', description: "'초보자의 숲' 클리어", condition: (state) => state.clearedDungeons.includes('초보자의 숲'), reward: { bookmarks: 5 } },
+                { id: 'ach_005', title: '숲의 정복자', description: "'초보자의 숲' 클리어", condition: (state) => {
+                        const forestDungeon = dungeons.find(d => d.name === '초보자의 숲');
+                        return forestDungeon && state.clearedStages['초보자의 숲']?.length === forestDungeon.stages.length;
+                    }, reward: { bookmarks: 5 } },
                 { id: 'ach_006', title: '넓어진 서재', description: '보관함 1회 확장', condition: (state) => state.capacity > 100, reward: { currency: 30 } },
             ];
 			
