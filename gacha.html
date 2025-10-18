@@ -1135,22 +1135,44 @@
 			}
 
             function displayCombatView() {
-                deckPowerDisplay.textContent = calculateDeckPower();
-                dungeonListContainer.innerHTML = '';
-                dungeons.forEach((dungeon, index) => {
-                    const monster = monsters[dungeon.monsterName];
-                    const recommendedPower = monster.stats.atk*5 + monster.stats.def*5 + Math.floor(monster.stats.hp / 5);
-                    const dungeonEl = document.createElement('div');
-                    dungeonEl.className = 'bg-black/20 p-4 rounded-lg text-center';
-                    dungeonEl.innerHTML = `
-                        <h3 class="text-xl font-bold text-yellow-300">${dungeon.name}</h3>
-                        <p class="text-gray-300">권장 전투력: ${recommendedPower}</p>
-                        <p class="text-gray-300">예상 보상: 💎${dungeon.rewards.min} ~ ${dungeon.rewards.max}</p>
-                        <button data-action="challenge-dungeon" data-dungeon-index="${index}" class="gacha-button bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-full mt-4">도전</button>
-                    `;
-                    dungeonListContainer.appendChild(dungeonEl);
-                });
-            }
+    deckPowerDisplay.textContent = calculateDeckPower();
+    dungeonVolumeSelection.innerHTML = '';
+    dungeonStageSelection.classList.add('hidden');
+    dungeonVolumeSelection.classList.remove('hidden');
+
+    dungeons.forEach((volume, index) => {
+        const volumeEl = document.createElement('div');
+        volumeEl.className = 'bg-black/20 p-6 rounded-lg text-center cursor-pointer hover:bg-black/30';
+        volumeEl.innerHTML = `<h3 class="text-2xl font-bold text-yellow-300">${volume.name}</h3>`;
+        volumeEl.onclick = () => displayDungeonStages(index);
+        dungeonVolumeSelection.appendChild(volumeEl);
+    });
+}
+
+function displayDungeonStages(volumeIndex) {
+    const volume = dungeons[volumeIndex];
+    dungeonVolumeSelection.classList.add('hidden');
+    dungeonStageSelection.classList.remove('hidden');
+    currentVolumeTitle.textContent = volume.name;
+    stageListContainer.innerHTML = '';
+
+    volume.stages.forEach((stage, stageIndex) => {
+        const isUnlocked = stageIndex === 0 || clearedStages[volume.name]?.includes(stageIndex - 1);
+        const isCleared = clearedStages[volume.name]?.includes(stageIndex);
+        const stageEl = document.createElement('button');
+        stageEl.className = `p-4 rounded-lg transition-colors duration-300 text-center ${isUnlocked ? 'bg-white/20 hover:bg-white/30' : 'bg-black/30 text-gray-500 cursor-not-allowed'}`;
+        stageEl.disabled = !isUnlocked;
+
+        stageEl.innerHTML = `
+            <h4 class="text-lg font-bold">${stage.name}</h4>
+            <p class="text-sm">보상: 🖊️ ${stage.reward.pens} ${isCleared ? '<span class="text-green-400">(클리어)</span>' : ''}</p>
+        `;
+        if (isUnlocked) {
+            stageEl.onclick = () => challengeDungeon(volumeIndex, stageIndex, 'main');
+        }
+        stageListContainer.appendChild(stageEl);
+    });
+}
             
             function challengeDungeon(dungeonIndex, type = 'main') {
                 if (playerBookmarks < 1) {
@@ -1623,10 +1645,10 @@
                 });
             });
 
-            dungeonListContainer.addEventListener('click', (e) => { 
-                const button = e.target.closest('[data-action="challenge-dungeon"]');
-                if(button) challengeDungeon(parseInt(button.dataset.dungeonIndex), 'main'); 
-            });
+            backToVolumeSelectionButton.addEventListener('click', () => {
+    dungeonStageSelection.classList.add('hidden');
+    dungeonVolumeSelection.classList.remove('hidden');
+});
             homeCharacterContainer.addEventListener('click', () => { if (representativeCharacter) displayHomeView(true); });
             eventBanner.addEventListener('click', () => {
                 showMessage(`[${EVENT_CHARACTER_NAME}] 확률 UP 이벤트 진행 중!`, 'text-blue-300', messageArea);
