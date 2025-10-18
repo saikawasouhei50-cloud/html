@@ -499,8 +499,8 @@
                 if (!isStorageAvailable()) return;
                 const saveData = {
                     currency: playerCurrency,
-                    inventory: playerInventory.map(card => card ? card.name : null).filter(Boolean),
-                    deck: playerDeck.map(card => card ? card.name : null).filter(Boolean),
+                    inventory: playerInventory, // 객체 전체를 저장
+deck: playerDeck,           // 객체 전체를 저장
                     capacity: inventoryCapacity,
                     representative: representativeCharacter ? representativeCharacter.name : null,
                     clearedDungeons: clearedDungeons,
@@ -528,7 +528,14 @@
                             const savedData = JSON.parse(savedDataString);
                             playerCurrency = savedData.currency ?? 100;
                             playerInventory = (savedData.inventory || []).map(name => findCharacter(name)).filter(Boolean);
-                            playerDeck = (savedData.deck || []).map(name => findCharacter(name)).filter(Boolean);
+                            playerInventory = (savedData.inventory || []).map(item => {
+    if (typeof item === 'string') { // 옛날 버전 데이터(문자열) 처리
+        return { id: Date.now() + Math.random(), name: item, enhancementLevel: 0 };
+    }
+    return item; // 새로운 버전 데이터(객체)
+}).filter(item => findCharacter(item.name));
+
+playerDeck = (savedData.deck || []).filter(item => findCharacter(item.name));
                             inventoryCapacity = savedData.capacity ?? 100;
                             clearedDungeons = savedData.clearedDungeons || [];
                             playerEventPoints = savedData.eventPoints ?? 0;
@@ -1174,17 +1181,23 @@ function displayDungeonStages(volumeIndex) {
     });
 }
             
-            function challengeDungeon(dungeonIndex, type = 'main') {
-                if (playerBookmarks < 1) {
-                    const msgArea = type === 'event' ? document.getElementById('message-area') : (document.getElementById('combat-message-area') || messageArea);
-                    showMessage('책갈피가 부족합니다!', 'text-yellow-400', msgArea);
-                    return;
-                }
-                if (playerDeck.length < DECK_CAPACITY) {
-                    const msgArea = type === 'event' ? document.getElementById('message-area') : (document.getElementById('combat-message-area') || messageArea);
-                    showMessage('덱을 5장으로 모두 채워야 합니다!', 'text-yellow-400', msgArea);
-                    return;
-                }
+            function challengeDungeon(volumeIndex, stageIndex, type = 'main') {
+    if (playerBookmarks < 1) {
+        showMessage('책갈피가 부족합니다!', 'text-yellow-400', messageArea);
+        return;
+    }
+    if (playerDeck.length < DECK_CAPACITY) {
+        showMessage('덱을 5장으로 모두 채워야 합니다!', 'text-yellow-400', messageArea);
+        return;
+    }
+
+    playerBookmarks--;
+    if (playerBookmarks === MAX_BOOKMARKS - 1) {
+         lastBookmarkUpdateTime = Date.now();
+    }
+    updateUI();
+    startCombat(volumeIndex, stageIndex, type);
+}
                 
                 playerBookmarks--;
                 if (playerBookmarks === MAX_BOOKMARKS - 1) {
