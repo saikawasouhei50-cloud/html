@@ -701,8 +701,8 @@ function downloadSaveData() {
     }
 
     try {
-        // 1. 저장된 JSON 문자열을 Base64로 인코딩 (데이터 보호 및 텍스트 안전성 확보)
-        const encodedData = btoa(saveDataString);
+        // 1. 저장된 JSON 문자열을 UTF-8 안전 Base64로 인코딩
+        const encodedData = utf8_to_b64(saveDataString); // ✨ 수정된 함수 사용 ✨
 
         // 2. 파일 생성 및 다운로드 링크 생성
         const blob = new Blob([encodedData], { type: 'text/plain' });
@@ -727,6 +727,21 @@ function downloadSaveData() {
         alert("데이터 다운로드에 실패했습니다. (오류: 콘솔 확인)");
     }
 }
+
+			function utf8_to_b64(str) {
+    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+        function toSolidBytes(match, p1) {
+            return String.fromCharCode('0x' + p1);
+    }));
+}
+
+// Base64를 UTF-8 문자열로 안전하게 디코딩하는 함수 (한글 처리)
+function b64_to_utf8(str) {
+    return decodeURIComponent(atob(str).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+}
+			
 			function uploadSaveData(file) {
     const reader = new FileReader();
     
@@ -734,8 +749,8 @@ function downloadSaveData() {
         try {
             const encodedData = event.target.result;
             
-            // 1. Base64 디코딩
-            const jsonString = atob(encodedData);
+            // 1. Base64 안전 디코딩
+            const jsonString = b64_to_utf8(encodedData); // ✨ 수정된 함수 사용 ✨
             
             // 2. JSON 파싱 테스트 (데이터 유효성 검사)
             JSON.parse(jsonString); 
@@ -2564,6 +2579,7 @@ storySubTabStage.addEventListener('click', () => {
     </script>
 </body>
 </html>
+
 
 
 
