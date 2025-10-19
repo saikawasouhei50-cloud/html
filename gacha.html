@@ -2734,18 +2734,41 @@ cardClickableContainers.forEach(container => {
         
         const actionButton = e.target.closest('[data-action]');
         if (actionButton) {
-            // ... (기존 actionButton 로직 유지) ...
+            e.stopPropagation();
+            const action = actionButton.dataset.action;
+            
+            if (action === 'set-representative') {
+                setRepresentative(actionButton.dataset.cardName);
+            } else if (action === 'add-to-deck') {
+                addToDeck(actionButton.dataset.cardId); // ID 사용
+            } else if (action === 'remove-from-deck') {
+                removeFromDeck(actionButton.dataset.cardId); // ID 사용
+            }
+
         } else {
             const cardElement = e.target.closest('[data-unique-id]');
             if (cardElement) {
                 const cardId = cardElement.dataset.uniqueId;
 
-                // ✨ 다중 파쇄 모드 처리 시작 (로직 유지) ✨
+                // ✨ 다중 파쇄 모드 처리 시작 (inventoryContainer에서만 작동) ✨
                 if (container === inventoryContainer && isMultiSelectMode) {
-                    // ... (다중 파쇄 로직 유지) ...
+                    const isInDeck = playerDeck.some(deckCard => deckCard.id === cardId);
                     
+                    if (isInDeck) {
+                        showMessage('덱에 포함된 카드는 파쇄할 수 없습니다.', 'text-red-400', messageArea);
+                        return;
+                    }
+                    
+                    // 선택 토글
+                    if (selectedCardsToDismantle.has(cardId)) {
+                        selectedCardsToDismantle.delete(cardId);
+                    } else {
+                        selectedCardsToDismantle.add(cardId);
+                    }
+                    
+                    // UI 업데이트
                     displayInventory(); 
-                    return; 
+                    return; // 다중 선택 모드에서는 상세 정보 모달을 띄우지 않습니다.
                 }
                 // ✨ 다중 파쇄 모드 처리 끝 ✨
 
@@ -2867,6 +2890,7 @@ cardClickableContainers.forEach(container => {
     </script>
 </body>
 </html>
+
 
 
 
