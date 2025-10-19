@@ -1975,6 +1975,44 @@ function startStageCombat(chapterIndex, stageIndex) {
 				document.getElementById('monster-hp-bar').style.width = `${monsterHpPercent}%`;
 				document.getElementById('monster-hp-text').textContent = `${monster.stats.hp} / ${monsterMaxHp}`;
 			}
+
+
+			function displayEventStories() {
+    eventStoryContainer.innerHTML = '';
+    
+    // 이벤트 스토리가 준비되지 않았을 경우 (데이터가 비어있는 경우)
+    if (!eventStories || eventStories.length === 0) {
+        eventStoryContainer.innerHTML = `<p class="text-center text-gray-400 mt-10">이벤트 스토리는 현재 준비 중입니다.</p>`;
+        return;
+    }
+
+    // 이벤트 스토리를 순회하며 버튼 생성
+    eventStories.forEach((story, index) => {
+        // 이벤트 던전 클리어 상태를 스토리 해금 조건으로 사용
+        // 예: eventDungeons[index]가 clearedEventDungeons에 포함되어야 해금
+        const dungeonName = eventDungeons[index]?.name;
+        const isUnlocked = dungeonName && clearedEventDungeons.includes(dungeonName);
+        
+        const storyEl = document.createElement('div');
+        storyEl.className = `p-4 rounded-lg transition-colors duration-300 ${isUnlocked ? 'bg-white/20 hover:bg-white/30 cursor-pointer' : 'bg-black/30 text-gray-500'}`;
+        
+        if (isUnlocked) {
+            storyEl.dataset.storyIndex = index;
+            storyEl.dataset.storyType = 'event';
+        }
+
+        let unlockText = '클릭하여 스토리 읽기';
+        if (!isUnlocked) {
+            unlockText = `${dungeonName} 클리어 시 해금`;
+        }
+
+        storyEl.innerHTML = `
+            <h3 class="text-xl font-bold ${isUnlocked ? 'text-pink-300' : ''}">[이벤트] ${story.title}</h3>
+            <p class="text-sm">${unlockText}</p>
+        `;
+        eventStoryContainer.appendChild(storyEl);
+    });
+}
 			
             // gacha3.html - endCombat 함수 (기존 코드 전체 교체)
 function endCombat(isVictory, combatInfo) { // dungeon, type 대신 combatInfo 객체 받기
@@ -2847,16 +2885,13 @@ cardClickableContainers.forEach(container => {
         } else {
             alert('스토리 데이터를 찾을 수 없습니다.');
         }
+    } else if (storyEl.dataset.storyType === 'event') {
+        // 이벤트 스토리 클릭 처리 (eventStories 배열의 index 사용)
+        startInteractiveStory(parseInt(storyEl.dataset.storyIndex), 'event');
     }
 });
 
-            eventStoryContainer.addEventListener('click', (e) => {
-                const storyEl = e.target.closest('[data-story-index]');
-                if (storyEl) {
-                    // 이벤트 스토리는 아직 준비되지 않았으므로 임시 알림창을 띄웁니다.
-                    alert('이벤트 스토리는 현재 준비 중입니다.');
-                }
-            });
+            
             eventShopContainer.addEventListener('click', (e) => {
                 const button = e.target.closest('button');
                 if (button && button.dataset.itemId) {
@@ -2897,6 +2932,7 @@ cardClickableContainers.forEach(container => {
     </script>
 </body>
 </html>
+
 
 
 
