@@ -495,7 +495,7 @@ function downloadSaveData() {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
         
-        showMessage('게임 데이터가 다운로드되었습니다.', 'text-green-400', messageArea);
+        alert('게임 데이터가 다운로드되었습니다.'); // ✅ 이 코드가 사용되었는지 확인합니다.
     } catch (e) {
         console.error("다운로드 처리 중 오류 발생:", e);
         alert("데이터 다운로드에 실패했습니다. (오류: 콘솔 확인)");
@@ -548,6 +548,8 @@ function b64_to_utf8(str) {
 
     reader.readAsText(file);
 }
+
+		const SAVE_DATA_KEY = 'gachaGameSaveData_v9';
         document.addEventListener('DOMContentLoaded', () => {
             
 
@@ -596,7 +598,7 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
             const PULL_TEN_COST = 100;
             const EXPAND_COST = 50;
             const EXPAND_AMOUNT = 10;
-            const SAVE_DATA_KEY = 'gachaGameSaveData_v9';
+            
 
             // --- HTML 요소 가져오기 ---
 			const fountainPenDisplay = document.getElementById('fountainpen-display');
@@ -2575,6 +2577,7 @@ storySubTabStage.addEventListener('click', () => {
     </script>
 </body>
 </html>
+
 
 
 
