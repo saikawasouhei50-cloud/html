@@ -756,8 +756,9 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
                     achEl.className = `p-4 rounded-lg flex justify-between items-center transition-all ${status ? 'bg-white/20' : 'bg-black/30 opacity-60'}`;
                     
                     let rewardText = '';
-                    if (ach.reward.currency) rewardText = `💎 ${ach.reward.currency}`;
-                    if (ach.reward.bookmarks) rewardText = `🔖 ${ach.reward.bookmarks}`;
+                    if (ach.reward.currency) rewardText += `💎 ${ach.reward.currency} `;
+                    if (ach.reward.fountainPens) rewardText += `🖋️ ${ach.reward.fountainPens} `; // ✨ 이 줄의 로직이 만년필 보상을 추가합니다.
+                    if (ach.reward.bookmarks) rewardText += `🔖 ${ach.reward.bookmarks} `;
 
                     let buttonHTML = '';
                     if (status === 'claimed') {
@@ -2478,6 +2479,7 @@ storySubTabStage.addEventListener('click', () => {
     </script>
 </body>
 </html>
+
 
 
 
