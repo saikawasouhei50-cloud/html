@@ -55,38 +55,35 @@
             };
 
             const mainChapters = [
-                {
-                    chapterName: "제1장: 비 내리는 밤의 서곡",
-                    stages: [
-                        { stageName: "1-1", monsterName: "슬라임 킹", rewards: { fountainPens: 5 } },
-                        { stageName: "1-2", monsterName: "슬라임 킹", rewards: { fountainPens: 5 } },
-                        { stageName: "1-3", monsterName: "슬라임 킹", rewards: { fountainPens: 6 } },
-                        { stageName: "1-4", monsterName: "슬라임 킹", rewards: { fountainPens: 6 } },
-                        { stageName: "1-5", monsterName: "슬라임 킹", rewards: { fountainPens: 7 } },
-                        { stageName: "1-6", monsterName: "슬라임 킹", rewards: { fountainPens: 7 } },
-                        { stageName: "1-7", monsterName: "슬라임 킹", rewards: { fountainPens: 8 } },
-                        { stageName: "1-8", monsterName: "슬라임 킹", rewards: { fountainPens: 8 } },
-                        { stageName: "1-9", monsterName: "슬라임 킹", rewards: { fountainPens: 9 } },
-                        { stageName: "1-10", monsterName: "오크 대장", rewards: { fountainPens: 20, currency: 10 } } // 보스 스테이지
-                    ]
-                },
-                {
-                    chapterName: "제2장: 거짓된 알리바이",
-                    stages: [
-                        { stageName: "2-1", monsterName: "오크 대장", rewards: { fountainPens: 10 } },
-                        { stageName: "2-2", monsterName: "오크 대장", rewards: { fountainPens: 10 } },
-                        { stageName: "2-3", monsterName: "오크 대장", rewards: { fountainPens: 11 } },
-                        { stageName: "2-4", monsterName: "오크 대장", rewards: { fountainPens: 11 } },
-                        { stageName: "2-5", monsterName: "그림자 암살자", rewards: { fountainPens: 15 } },
-                        { stageName: "2-6", monsterName: "그림자 암살자", rewards: { fountainPens: 15 } },
-                        { stageName: "2-7", monsterName: "그림자 암살자", rewards: { fountainPens: 16 } },
-                        { stageName: "2-8", monsterName: "그림자 암살자", rewards: { fountainPens: 16 } },
-                        { stageName: "2-9", monsterName: "그림자 암살자", rewards: { fountainPens: 17 } },
-                        { stageName: "2-10", monsterName: "레드 드래곤", rewards: { fountainPens: 50, currency: 30 } } // 보스 스테이지
-                    ]
-                }
-                // 여기에 3장, 4장 등을 계속 추가할 수 있습니다.
-            ];
+    {
+        chapterName: '제1장: 서재의 흔적',
+        stages: [
+            { stageName: '1-1. 오래된 문장', monsterName: '슬라임 킹', rewards: { fountainPens: 20, currency: 5 } },
+            { stageName: '1-2. 흐릿한 단서', monsterName: '슬라임 킹', rewards: { fountainPens: 25, currency: 5 } },
+            { stageName: '1-3. 모방의 그림자', monsterName: '슬라임 킹', rewards: { fountainPens: 30, currency: 10 } },
+            { stageName: '1-4. 현장의 재구성', monsterName: '슬라임 킹', rewards: { fountainPens: 35, currency: 10 } },
+            { stageName: '1-5. 용의자의 진술', monsterName: '오크 대장', rewards: { fountainPens: 40, currency: 15 } },
+            { stageName: '1-6. 알리바이의 허점', monsterName: '오크 대장', rewards: { fountainPens: 45, currency: 15 } },
+            { stageName: '1-7. 미제 사건 파일', monsterName: '오크 대장', rewards: { fountainPens: 50, currency: 20 } },
+            { stageName: '1-8. 침묵의 증인', monsterName: '오크 대장', rewards: { fountainPens: 55, currency: 20 } },
+            { stageName: '1-9. 숨겨진 의도', monsterName: '오크 대장', rewards: { fountainPens: 60, currency: 25 } },
+            { stageName: '1-10. 장의 결말 (챕터 보스)', monsterName: '그림자 암살자', rewards: { fountainPens: 100, currency: 30 } },
+        ]
+    },
+    {
+        chapterName: '제2장: 미궁 속의 실험',
+        stages: [
+            { stageName: '2-1. 새로운 가설', monsterName: '오크 대장', rewards: { fountainPens: 70, currency: 10 } },
+            { stageName: '2-2. 통제된 변수', monsterName: '오크 대장', rewards: { fountainPens: 75, currency: 10 } },
+            { stageName: '2-3. 예상치 못한 반응', monsterName: '오크 대장', rewards: { fountainPens: 80, currency: 15 } },
+            { stageName: '2-4. 오염된 샘플', monsterName: '오크 대장', rewards: { fountainPens: 85, currency: 15 } },
+            { stageName: '2-5. 연구자의 윤리', monsterName: '그림자 암살자', rewards: { fountainPens: 90, currency: 20 } },
+            { stageName: '2-6. 잊혀진 약물', monsterName: '그림자 암살자', rewards: { fountainPens: 95, currency: 20 } },
+            { stageName: '2-7. 배후의 조력자', monsterName: '그림자 암살자', rewards: { fountainPens: 100, currency: 25 } },
+            { stageName: '2-8. 역추적', monsterName: '그림자 암살자', rewards: { fountainPens: 105, currency: 25 } },
+            { stageName: '2-9. 긴급 상황', monsterName: '그림자 암살자', rewards: { fountainPens: 110, currency: 30 } },
+            { stageName: '2-10. 비극적인 실험 (챕터 보스)', monsterName: '레드 드래곤', rewards: { fountainPens: 180, currency: 40 } },
+        ]
             
             const eventDungeons = [
                 { name: '1장', monsterName: '슬라임 킹', eventPointReward: 100 },
@@ -265,6 +262,7 @@
             const EVENT_START_DATE = new Date('2025-10-14T00:00:00');
             const EVENT_END_DATE = new Date('2025-10-24T23:59:59');
 			const enhancementCosts = [10, 20, 35, 55, 80, 110, 150, 200, 250]; // +1강 ~ +9강에 필요한 만년필 비용
+
 
 
 
