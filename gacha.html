@@ -258,11 +258,11 @@
             <button id="expand-inventory" class="gacha-button bg-yellow-500 hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold py-2 px-4 rounded-full shadow-lg text-sm">칸 확장 (💎50)</button>
         </div>
         <div id="inventory-sort-buttons" class="mt-4 flex justify-center gap-2">
-            <button data-sort="rarity" class="gacha-button sort-button bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-4 rounded-full text-sm">등급순</button>
-            <button data-sort="level" class="gacha-button sort-button bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-4 rounded-full text-sm">퇴고순</button>
-            <button data-sort="revision" class="gacha-button sort-button bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-4 rounded-full text-sm">개정순</button>
-            <button data-sort="name" class="gacha-button sort-button bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-4 rounded-full text-sm">이름순</button>
-        </div>
+    <button data-sort="rarity" class="gacha-button sort-button bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-4 rounded-full text-sm">등급순</button>
+    <button data-sort="level" class="gacha-button sort-button bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-4 rounded-full text-sm">퇴고순</button>
+    <button data-sort="revision" class="gacha-button sort-button bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-4 rounded-full text-sm">개정순</button>
+    <button data-sort="name" class="gacha-button sort-button bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-4 rounded-full text-sm">캐릭터순</button>
+</div>
     </div>
     <div id="inventory-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 min-h-[400px] max-h-[60vh] overflow-y-auto bg-black/20 p-4 rounded-xl"></div>
 </div>
@@ -1187,46 +1187,58 @@ function addCardToInventory(cardName) {
                 return Object.values(cardCounts).sort((a, b) => (rarityOrder[b.rarity] - rarityOrder[a.rarity]) || a.name.localeCompare(b.name));
             }
 
+            // ✅ 이 코드로 기존 displayInventory 함수를 통째로 교체해주세요.
             function displayInventory() {
-    inventoryStatus.textContent = `${playerInventory.length} / ${inventoryCapacity}`;
-    inventoryContainer.innerHTML = '';
+                inventoryStatus.textContent = `${playerInventory.length} / ${inventoryCapacity}`;
+                inventoryContainer.innerHTML = '';
 
-    if (playerInventory.length === 0) {
-        inventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">아직 수집한 동료가 없습니다.</p>`;
-        return;
-    }
+                if (playerInventory.length === 0) {
+                    inventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">아직 수집한 동료가 없습니다.</p>`;
+                    return;
+                }
 
-    // ✨ 정렬 로직 시작 ✨
-    const rarityOrder = { 'SSR': 4, 'SR': 3, 'R': 2, 'N': 1 };
-    const sortedInventory = [...playerInventory].sort((a, b) => {
-        const charA = findCharacter(a.name);
-        const charB = findCharacter(b.name);
-        switch (currentSortOrder) {
-            case 'level':
-                if (b.level !== a.level) return b.level - a.level;
-                return rarityOrder[charB.rarity] - rarityOrder[charA.rarity];
-            case 'revision':
-                if (b.revision !== a.revision) return b.revision - a.revision;
-                return rarityOrder[charB.rarity] - rarityOrder[charA.rarity];
-            case 'name':
-                if (a.name !== b.name) return a.name.localeCompare(b.name);
-                return b.level - a.level;
-            case 'rarity':
-            default:
-                if (rarityOrder[charB.rarity] !== rarityOrder[charA.rarity]) return rarityOrder[charB.rarity] - rarityOrder[charA.rarity];
-                return b.level - a.level;
-        }
-    });
-    // ✨ 정렬 로직 끝 ✨
+                // 정렬 로직 시작
+                const rarityOrder = { 'SSR': 4, 'SR': 3, 'R': 2, 'N': 1 };
+                const sortedInventory = [...playerInventory].sort((a, b) => {
+                    const charA = findCharacter(a.name);
+                    const charB = findCharacter(b.name);
+                    switch (currentSortOrder) {
+                        case 'level':
+                            if (b.level !== a.level) return b.level - a.level;
+                            return rarityOrder[charB.rarity] - rarityOrder[charA.rarity];
+                        case 'revision':
+                            if (b.revision !== a.revision) return b.revision - a.revision;
+                            return rarityOrder[charB.rarity] - rarityOrder[charA.rarity];
+                        
+                        // ✨ '캐릭터순' 정렬 로직 (핵심 수정 부분) ✨
+                        case 'name': 
+                            // 1차: 캐릭터 이름(baseName)으로 가나다순 정렬
+                            if (charA.baseName !== charB.baseName) {
+                                return charA.baseName.localeCompare(charB.baseName);
+                            }
+                            // 2차: 같은 캐릭터 내에서는 등급(rarity)이 높은 순으로 정렬
+                            if (rarityOrder[charB.rarity] !== rarityOrder[charA.rarity]) {
+                                return rarityOrder[charB.rarity] - rarityOrder[charA.rarity];
+                            }
+                            // 3차: 등급도 같으면 퇴고 레벨이 높은 순으로 정렬
+                            return b.level - a.level;
 
-    // 정렬된 목록을 기준으로 화면에 표시합니다.
-    sortedInventory.forEach((cardInstance, index) => {
-        const character = findCharacter(cardInstance.name);
-        if (character) {
-            inventoryContainer.appendChild(createCard(character, { animationIndex: index, mode: 'inventory', instance: cardInstance }));
-        }
-    });
-}
+                        case 'rarity':
+                        default:
+                            if (rarityOrder[charB.rarity] !== rarityOrder[charA.rarity]) return rarityOrder[charB.rarity] - rarityOrder[charA.rarity];
+                            return b.level - a.level;
+                    }
+                });
+                // 정렬 로직 끝
+
+                // 정렬된 목록을 기준으로 화면에 표시합니다.
+                sortedInventory.forEach((cardInstance, index) => {
+                    const character = findCharacter(cardInstance.name);
+                    if (character) {
+                        inventoryContainer.appendChild(createCard(character, { animationIndex: index, mode: 'inventory', instance: cardInstance }));
+                    }
+                });
+            }
 
             function displayCollection() {
     collectionContainer.innerHTML = '';
@@ -2113,6 +2125,7 @@ document.getElementById('inventory-sort-buttons').addEventListener('click', (e) 
     </script>
 </body>
 </html>
+
 
 
 
