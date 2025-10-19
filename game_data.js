@@ -121,6 +121,7 @@
             ];
 
 
+            // ✅ 이 코드로 기존 mainStories 변수 전체를 교체해주세요.
             const mainStories = [
                 {
                     title: '프롤로그: 비 내리는 밤',
@@ -136,7 +137,7 @@
                 },
                 {
                     title: '1장: 첫 번째 사건',
-                    dungeonToUnlock: '초보자의 숲',
+                    dungeonToUnlock: '1-10', // ✅ '제1장'의 마지막 스테이지 클리어 조건
                     content: [
                         { character: null, dialogue: '박민준의 작업실은... 기묘했다. 마치 누군가 연출이라도 한 것처럼, 모든 것이 지나치게 깔끔했다.' },
                         { character: null, dialogue: '흩어진 원고들, 쓰러진 잉크병, 심지어는 바닥에 그어진 핏자국까지도 마치 정교하게 계산된 소품처럼 보였다.' },
@@ -151,7 +152,7 @@
                 },
                 {
                     title: '2장: 어둠 속의 조력자',
-                    dungeonToUnlock: '오크 점령지',
+                    dungeonToUnlock: '2-10', // ✅ '제2장'의 마지막 스테이지 클리어 조건
                     content: [
                         { character: null, dialogue: '수사는 난항에 부딪혔다. 용의선상은 넓었고, 범인이 남긴 단서는 교묘하게 조작된 것들뿐이었다.' },
                         { character: '서도진', expression: 'neutral', position: 'left', dialogue: '막다른 길이군...' },
@@ -164,7 +165,7 @@
                 },
                 {
                     title: '3장: 마지막 퍼즐',
-                    dungeonToUnlock: '용의 둥지',
+                    dungeonToUnlock: null, // ✅ 예시: 3장은 아직 구현되지 않았으므로 null
                     content: [
                         { character: '서도진', expression: 'neutral', position: 'left', dialogue: '계속해서 위화감이 느껴져. 현장에서 발견된 단서들, 의사의 제보, 윤서천의 알리바이까지...' },
                         { character: '서도진', expression: 'serious', position: 'left', dialogue: '모든 것이 너무나도 완벽하게 맞아떨어지는 게 오히려 부자연스러워. 마치 잘 짜인 각본처럼.' },
@@ -264,6 +265,7 @@
             const EVENT_START_DATE = new Date('2025-10-14T00:00:00');
             const EVENT_END_DATE = new Date('2025-10-24T23:59:59');
 			const enhancementCosts = [10, 20, 35, 55, 80, 110, 150, 200, 250]; // +1강 ~ +9강에 필요한 만년필 비용
+
 
 
 
