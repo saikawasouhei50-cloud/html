@@ -68,8 +68,8 @@
             { stageName: '1-8. 침묵의 증인', monsterName: '오크 대장', rewards: { fountainPens: 55, currency: 20 } },
             { stageName: '1-9. 숨겨진 의도', monsterName: '오크 대장', rewards: { fountainPens: 60, currency: 25 } },
             { stageName: '1-10. 장의 결말 (챕터 보스)', monsterName: '그림자 암살자', rewards: { fountainPens: 100, currency: 30 } },
-        ];
-    },
+        ], // 👈 스테이지 배열 닫고, 쉼표로 다음 챕터 객체와 구분
+    }, // 👈 첫 번째 챕터 객체 닫고, 쉼표로 다음 챕터 객체와 구분
     {
         chapterName: '제2장: 미궁 속의 실험',
         stages: [
@@ -83,7 +83,9 @@
             { stageName: '2-8. 역추적', monsterName: '그림자 암살자', rewards: { fountainPens: 105, currency: 25 } },
             { stageName: '2-9. 긴급 상황', monsterName: '그림자 암살자', rewards: { fountainPens: 110, currency: 30 } },
             { stageName: '2-10. 비극적인 실험 (챕터 보스)', monsterName: '레드 드래곤', rewards: { fountainPens: 180, currency: 40 } },
-        ];
+        ],
+    } // 👈 두 번째 챕터 객체 뒤에는 쉼표가 없어야 합니다.
+]; // 👈 배열을 닫고, 세미콜론으로 문장 전체를 명확하게 종료합니다.
             
             const eventDungeons = [
                 { name: '1장', monsterName: '슬라임 킹', eventPointReward: 100 },
@@ -262,6 +264,7 @@
             const EVENT_START_DATE = new Date('2025-10-14T00:00:00');
             const EVENT_END_DATE = new Date('2025-10-24T23:59:59');
 			const enhancementCosts = [10, 20, 35, 55, 80, 110, 150, 200, 250]; // +1강 ~ +9강에 필요한 만년필 비용
+
 
 
 
