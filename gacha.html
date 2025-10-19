@@ -446,6 +446,7 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
             const SAVE_DATA_KEY = 'gachaGameSaveData_v9';
 
             // --- HTML 요소 가져오기 ---
+			const fountainPenDisplay = document.getElementById('fountainpen-display');
             const currencyDisplay = document.getElementById('currency-display');
             const messageArea = document.getElementById('message-area');
             const allTabs = document.querySelectorAll('.tab-button');
@@ -537,12 +538,12 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
             }
 
             function saveGame() {
-    if (!isStorageAvailable()) return;
-    const saveData = {
-        currency: playerCurrency,
-        fountainPens: playerFountainPens, // 🖋️ 만년필 저장
-        inventory: playerInventory, // ✨ 이제 인벤토리는 고유 ID와 레벨을 포함하므로 그대로 저장
-                    deck: playerDeck.map(card => card ? card.name : null).filter(Boolean),
+                if (!isStorageAvailable()) return;
+                const saveData = {
+                    currency: playerCurrency,
+                    fountainPens: playerFountainPens,
+                    inventory: playerInventory,
+                    deck: playerDeck.map(cardInstance => cardInstance.id), // ✨ 덱에는 이제 고유 ID만 저장합니다.
                     capacity: inventoryCapacity,
                     representative: representativeCharacter ? representativeCharacter.name : null,
                     clearedDungeons: clearedDungeons,
@@ -551,7 +552,7 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
                     purchasedEventItems: purchasedEventItems,
                     bookmarks: playerBookmarks,
                     lastBookmarkUpdate: lastBookmarkUpdateTime,
-                    achievements: playerAchievements, // 이 줄 추가
+                    achievements: playerAchievements,
                     stats: playerStats,
                 };
                 localStorage.setItem(SAVE_DATA_KEY, JSON.stringify(saveData));
@@ -561,30 +562,32 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
                 if (!isStorageAvailable()) {
                     storageWarning.classList.remove('hidden');
                     resetButton.disabled = true;
-                    playerInventory.push(findCharacter('[편집자] 윤필규'));
-                    playerInventory.push(findCharacter('[조수] 한 현'));
+                    initializeNewGameData(); // 저장 기능 없어도 초기 카드는 지급
                 } else {
                     const savedDataString = localStorage.getItem(SAVE_DATA_KEY);
                     if (savedDataString) {
                         try {
                             const savedData = JSON.parse(savedDataString);
-    playerCurrency = savedData.currency ?? 100;
-    playerFountainPens = savedData.fountainPens ?? 500; // 🖋️ 만년필 불러오기
-    playerInventory = savedData.inventory || []; // ✨ 저장된 카드 목록을 그대로 불러옵니다.
-    // ... (후략) ...
-                            playerDeck = (savedData.deck || []).map(name => findCharacter(name)).filter(Boolean);
+                            playerCurrency = savedData.currency ?? 100;
+                            playerFountainPens = savedData.fountainPens ?? 500;
+                            playerInventory = savedData.inventory || [];
+                            
+                            // ✨ 저장된 ID를 사용해 playerInventory에서 실제 카드 인스턴스를 찾아 덱을 복원합니다.
+                            const savedDeckIds = savedData.deck || [];
+                            playerDeck = savedDeckIds.map(id => playerInventory.find(card => card.id === id)).filter(Boolean);
+
                             inventoryCapacity = savedData.capacity ?? 100;
+                            if (savedData.representative) {
+                                representativeCharacter = findCharacter(savedData.representative) || null;
+                            }
                             clearedDungeons = savedData.clearedDungeons || [];
                             playerEventPoints = savedData.eventPoints ?? 0;
                             clearedEventDungeons = savedData.clearedEventDungeons || [];
                             purchasedEventItems = savedData.purchasedEventItems || {};
                             playerBookmarks = savedData.bookmarks ?? MAX_BOOKMARKS;
                             lastBookmarkUpdateTime = savedData.lastBookmarkUpdate ?? Date.now();
-                            playerAchievements = savedData.achievements || {}; // 이 줄 추가
+                            playerAchievements = savedData.achievements || {};
                             playerStats = savedData.stats || { totalPulls: 0 };
-                            if (savedData.representative) {
-                                representativeCharacter = findCharacter(savedData.representative) || null;
-                            }
                         } catch (e) {
                             console.error("저장된 데이터 파싱 오류:", e);
                             initializeNewGameData();
@@ -1007,6 +1010,7 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
 
             function updateUI() {
                 currencyDisplay.textContent = playerCurrency;
+                fountainPenDisplay.textContent = playerFountainPens; // 만년필 UI 업데이트
                 eventPointsSpan.textContent = playerEventPoints;
                 bookmarkDisplay.textContent = playerBookmarks;
                 maxBookmarkDisplay.textContent = MAX_BOOKMARKS;
@@ -1017,12 +1021,9 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
                     else btn.disabled = playerCurrency < PULL_ONE_COST;
                 });
                 expandInventoryButton.disabled = playerCurrency < EXPAND_COST;
-				const fountainPenDisplay = document.getElementById('fountainpen-display'); // 🖋️ 요소 가져오기 추가
-
-function updateUI() {
-    currencyDisplay.textContent = playerCurrency;
-    fountainPenDisplay.textContent = playerFountainPens; // 🖋️ 만년필 UI 업데이트
             }
+			
+            
 
             function showMessage(message, colorClass, element) {
                 element.textContent = message;
@@ -1159,30 +1160,46 @@ function addCardToInventory(cardName) {
 
 
             function displayDeckManagement() {
-                deckStatus.textContent = `현재 덱: ${playerDeck.length} / ${DECK_CAPACITY}`;
+                deckStatus.textContent = `현재 편찬: ${playerDeck.length} / ${DECK_CAPACITY}`;
                 deckStatus.classList.toggle('text-green-400', playerDeck.length === DECK_CAPACITY);
+                
+                // 덱 슬롯 표시
                 deckSlotsContainer.innerHTML = '';
                 for (let i = 0; i < DECK_CAPACITY; i++) {
                     if (playerDeck[i]) {
-                        deckSlotsContainer.appendChild(createCard(playerDeck[i], { mode: 'deckSlot' }));
+                        const baseCharacter = findCharacter(playerDeck[i].name);
+                        deckSlotsContainer.appendChild(createCard(baseCharacter, { mode: 'deckSlot', instance: playerDeck[i] }));
                     } else {
                         const emptySlot = document.createElement('div');
                         emptySlot.className = 'deck-slot rounded-lg'; emptySlot.textContent = '비어있음';
                         deckSlotsContainer.appendChild(emptySlot);
                     }
                 }
+
+                // 덱에 추가할 수 있는 인벤토리 카드 목록 표시
                 deckInventoryContainer.innerHTML = '';
-                const uniqueCards = getUniqueInventory();
-                 if (uniqueCards.length === 0) {
-                    deckInventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">덱에 추가할 카드가 없습니다.</p>`; return;
+                if (playerInventory.length === 0) {
+                    deckInventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">편찬할 등장인물이 없습니다.</p>`;
+                } else {
+                    playerInventory.forEach((cardInstance, index) => {
+                        const baseCharacter = findCharacter(cardInstance.name);
+                        const isCardInDeck = playerDeck.some(deckCard => deckCard.id === cardInstance.id);
+                        const isSameCharacterInDeck = playerDeck.some(deckCard => deckCard.name === cardInstance.name);
+                        const isDeckFull = playerDeck.length >= DECK_CAPACITY;
+                        
+                        deckInventoryContainer.appendChild(createCard(baseCharacter, {
+                            animationIndex: index,
+                            mode: 'deckBuilder',
+                            instance: cardInstance,
+                            isCardInDeck: isCardInDeck,
+                            isSameCharacterInDeck: isSameCharacterInDeck, // 동일 인물 체크용
+                            isDeckFull: isDeckFull
+                        }));
+                    });
                 }
-                uniqueCards.forEach((character, index) => {
-                    const isCardInDeck = playerDeck.some(deckCard => deckCard.name === character.name);
-                    const isDeckFull = playerDeck.length >= DECK_CAPACITY;
-                    deckInventoryContainer.appendChild(createCard(character, { animationIndex: index, mode: 'deckBuilder', isCardInDeck, isDeckFull }));
-                });
-				displaySynergies();
+                displaySynergies();
             }
+
             
             function autoFillDeck() {
                 const uniqueCards = getUniqueInventory();
@@ -1193,14 +1210,22 @@ function addCardToInventory(cardName) {
                 saveGame();
             }
 
-            function addToDeck(cardName) {
-                if (playerDeck.length >= DECK_CAPACITY || playerDeck.some(card => card.name === cardName)) return;
-                const cardToAdd = findCharacter(cardName);
-                if (cardToAdd) { playerDeck.push(cardToAdd); displayDeckManagement(); saveGame(); }
+            function addToDeck(cardId) {
+                if (playerDeck.length >= DECK_CAPACITY) return;
+                // 이미 덱에 있는 카드의 '이름'과 같은 카드는 추가하지 못하게 막습니다. (동일 인물 중복 방지)
+                const cardInstanceToAdd = playerInventory.find(c => c.id === cardId);
+                if (!cardInstanceToAdd || playerDeck.some(deckCard => deckCard.name === cardInstanceToAdd.name)) {
+                     showMessage('이미 동일한 등장인물이 편찬되어 있습니다.', 'text-yellow-400', messageArea);
+                    return;
+                }
+
+                playerDeck.push(cardInstanceToAdd);
+                displayDeckManagement();
+                saveGame();
             }
             
-            function removeFromDeck(cardName) {
-                const indexToRemove = playerDeck.findIndex(card => card.name === cardName);
+            function removeFromDeck(cardId) {
+                const indexToRemove = playerDeck.findIndex(card => card.id === cardId);
                 if(indexToRemove > -1) {
                     playerDeck.splice(indexToRemove, 1);
                 }
@@ -1477,10 +1502,9 @@ function addCardToInventory(cardName) {
             }
 
             function createCard(character, options = {}) {
-                const { animationIndex, mode = 'default', isCardInDeck, isDeckFull, isCollected } = options;
+                const { animationIndex, mode = 'default', isCardInDeck, isSameCharacterInDeck, isDeckFull, isCollected } = options;
                 const card = document.createElement('div');
                 card.className = `rarity-${character.rarity} relative text-center rounded-lg shadow-md p-2 transform transition-transform duration-300 hover:scale-105 cursor-pointer`;
-                card.dataset.cardName = character.name;
                 card.title = character.name;
                 const rarityColor = { 'N': 'text-gray-600', 'R': 'text-blue-800', 'SR': 'text-white', 'SSR': 'text-black' }[character.rarity];
                 const factionColors = {
@@ -1488,29 +1512,19 @@ function addCardToInventory(cardName) {
                     '조수': 'bg-green-500 text-white',
                     '범인': 'bg-red-500 text-white'
                 };
-				const cardInstance = options.instance; // ✨ 카드 인스턴스 정보를 받도록 추가
+                const cardInstance = options.instance;
 
-    let badgeHTML = '';
-    if(mode === 'inventory' && character.count > 1) {
-        badgeHTML = `<div class="count-badge">x${character.count}</div>`;
-    }
-    // 🖋️ 레벨 뱃지 HTML 추가
-    let levelBadgeHTML = '';
-    if (cardInstance && cardInstance.level > 0) {
-        levelBadgeHTML = `<div class="level-badge">+${cardInstance.level}</div>`;
-    }
-                
-                let badgeHTML = '';
-                if(mode === 'inventory' && character.count > 1) {
-                    badgeHTML = `<div class="count-badge">x${character.count}</div>`;
+                let levelBadgeHTML = '';
+                if (cardInstance && cardInstance.level > 0) {
+                    levelBadgeHTML = `<div class="level-badge">+${cardInstance.level}</div>`;
                 }
-
+                
                 let actionButtonsHTML = '';
-                if (mode === 'deckBuilder') {
-                    const disabled = isDeckFull || isCardInDeck;
-                    const buttonText = isCardInDeck ? '추가됨' : '추가';
-                    const buttonColor = disabled ? 'bg-gray-500' : 'bg-green-500 hover:bg-green-600';
-                    actionButtonsHTML = `<button data-action="add-to-deck" data-card-name="${character.name}" class="w-full mt-2 py-1 rounded-md text-white font-bold text-sm ${buttonColor}" ${disabled ? 'disabled' : ''}>${buttonText}</button>`;
+                if (mode === 'deckBuilder' && cardInstance) {
+                    const disabled = isDeckFull || isSameCharacterInDeck;
+                    const buttonText = isCardInDeck ? '편찬됨' : (isSameCharacterInDeck ? '동일인물' : '추가');
+                    const buttonColor = (isCardInDeck || isSameCharacterInDeck) ? 'bg-gray-500' : 'bg-green-500 hover:bg-green-600';
+                    actionButtonsHTML = `<button data-action="add-to-deck" data-card-id="${cardInstance.id}" class="w-full mt-2 py-1 rounded-md text-white font-bold text-sm ${buttonColor}" ${disabled ? 'disabled' : ''}>${buttonText}</button>`;
                 } else if (mode === 'inventory') {
                     const isRepresentative = representativeCharacter && representativeCharacter.name === character.name;
                     const repButtonText = isRepresentative ? '대표' : '대표 설정';
@@ -1519,32 +1533,36 @@ function addCardToInventory(cardName) {
                 }
                 
                 let deckSlotButton = '';
-                if(mode === 'deckSlot') {
-                    deckSlotButton = `<button data-action="remove-from-deck" data-card-name="${character.name}" class="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 text-sm font-bold flex items-center justify-center z-10">X</button>`;
+                if(mode === 'deckSlot' && cardInstance) {
+                    deckSlotButton = `<button data-action="remove-from-deck" data-card-id="${cardInstance.id}" class="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 text-sm font-bold flex items-center justify-center z-10">X</button>`;
                 }
 
                 const factionBadge = `<span class="absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full ${factionColors[character.faction]} z-10">${character.faction}</span>`;
 
                 card.innerHTML = `
-        ${badgeHTML} ${deckSlotButton} ${factionBadge} ${levelBadgeHTML} <div class="relative pointer-events-none">
+                    ${deckSlotButton} ${factionBadge} ${levelBadgeHTML}
                     <div class="relative pointer-events-none">
                         <img src="${character.cardImageUrl}" alt="${character.name}" class="w-full h-auto rounded-md mb-2 border-2 border-white/50">
                         <p class="font-bold text-sm ${rarityColor} truncate">${character.name}</p>
                         <p class="font-black text-lg ${rarityColor}" style="text-shadow: 1px 1px 2px rgba(255,255,255,0.5);">${character.rarity}</p>
                     </div>
-                     ${actionButtonsHTML}
+                    ${actionButtonsHTML}
                 `;
-				if (cardInstance) { // ✨ 고유 ID를 data 속성에 추가
-        card.dataset.uniqueId = cardInstance.id;
-    }
+
+                if (cardInstance) {
+                    card.dataset.uniqueId = cardInstance.id;
+                }
+
                 if (typeof animationIndex === 'number') {
                     card.style.opacity = '0';
                     card.style.animationDelay = `${animationIndex * 0.05}s`;
                     card.classList.add('card-animation');
                 }
-                if(mode === 'deckBuilder' && isCardInDeck) {
+                
+                if(mode === 'deckBuilder' && (isCardInDeck || isSameCharacterInDeck)) {
                     card.classList.add('opacity-50');
                 }
+
                 if (mode === 'collection') {
                     if (isCollected) {
                         card.dataset.isCollected = "true";
@@ -1800,28 +1818,25 @@ function addCardToInventory(cardName) {
             const cardClickableContainers = [inventoryContainer, deckInventoryContainer, deckSlotsContainer, collectionContainer];
             cardClickableContainers.forEach(container => {
                 container.addEventListener('click', (e) => {
-                    // 카드 위의 작은 버튼(대표 설정, 추가 등)을 눌렀는지 먼저 확인합니다.
                     const actionButton = e.target.closest('[data-action]');
                     if (actionButton) {
-                        e.stopPropagation(); // 버튼을 누르면 카드 상세보기 창이 열리지 않도록 이벤트 전파를 막습니다.
+                        e.stopPropagation();
                         const action = actionButton.dataset.action;
-                        const cardName = actionButton.dataset.cardName; // 버튼들은 여전히 name 기반으로 동작할 수 있습니다.
                         
-                        if (action === 'set-representative') setRepresentative(cardName);
-                        else if (action === 'add-to-deck') addToDeck(cardName);
-                        else if (action === 'remove-from-deck') removeFromDeck(cardName);
+                        if (action === 'set-representative') {
+                            setRepresentative(actionButton.dataset.cardName);
+                        } else if (action === 'add-to-deck') {
+                            addToDeck(actionButton.dataset.cardId); // 이름 대신 ID 사용
+                        } else if (action === 'remove-from-deck') {
+                            removeFromDeck(actionButton.dataset.cardId); // 이름 대신 ID 사용
+                        }
 
                     } else {
-                        // 버튼이 아닌 카드 자체를 클릭했을 때의 로직입니다.
-                        // ✨ 변경점 1: 'data-card-name' 대신 'data-unique-id'로 카드를 찾습니다.
                         const cardElement = e.target.closest('[data-unique-id]');
-                        
                         if (cardElement) {
-                             // 도감에서 아직 수집하지 않은 카드는 상세보기가 열리지 않도록 합니다.
                             if (container === collectionContainer && cardElement.dataset.isCollected === 'false') {
                                 return;
                             }
-                            // ✨ 변경점 2: showCardDetails 함수에 카드의 '이름' 대신 '고유 ID'를 전달합니다.
                             showCardDetails(cardElement.dataset.uniqueId);
                         }
                     }
