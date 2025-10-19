@@ -1379,18 +1379,37 @@ function addCardToInventory(cardName) {
     }, 0);
 }
 
-            // ✅ 이 코드로 기존 displayCombatView 함수를 교체해주세요.
+            // ✅ 이 코드로 기존 displayCombatView 함수를 통째로 교체해주세요.
             function displayCombatView() {
                 deckPowerDisplay.textContent = calculateDeckPower();
                 const chapterContainer = document.getElementById('chapter-list-container');
-                chapterContainer.innerHTML = ''; // 초기화
+                chapterContainer.innerHTML = '';
 
                 mainChapters.forEach((chapter, index) => {
+                    // ✨ 챕터 잠금 해제 조건 로직 시작 ✨
+                    let isChapterUnlocked = false;
+                    if (index === 0) {
+                        isChapterUnlocked = true; // 1장은 항상 열려있음
+                    } else {
+                        // 이전 챕터의 마지막 스테이지 ID를 만듭니다. (예: 2장의 조건 -> 1-10)
+                        const prevChapter = mainChapters[index - 1];
+                        const lastStageIdOfPrevChapter = `${index}-${prevChapter.stages.length}`;
+                        isChapterUnlocked = clearedStages.includes(lastStageIdOfPrevChapter);
+                    }
+                    // ✨ 챕터 잠금 해제 조건 로직 끝 ✨
+
                     const chapterEl = document.createElement('button');
-                    chapterEl.className = 'w-full gacha-button bg-black/20 hover:bg-black/40 text-white font-bold py-3 px-4 rounded-lg text-left';
-                    chapterEl.dataset.action = 'select-chapter';
-                    chapterEl.dataset.chapterIndex = index;
-                    chapterEl.textContent = chapter.chapterName;
+                    chapterEl.className = `w-full gacha-button text-white font-bold py-3 px-4 rounded-lg text-left ${isChapterUnlocked ? 'bg-black/20 hover:bg-black/40' : 'bg-black/40 text-gray-500 cursor-not-allowed'}`;
+                    chapterEl.disabled = !isChapterUnlocked;
+                    
+                    if (isChapterUnlocked) {
+                        chapterEl.dataset.action = 'select-chapter';
+                        chapterEl.dataset.chapterIndex = index;
+                        chapterEl.textContent = chapter.chapterName;
+                    } else {
+                        chapterEl.textContent = `${chapter.chapterName} (제${index}장 클리어 시 해금)`;
+                    }
+                    
                     chapterContainer.appendChild(chapterEl);
                 });
 
@@ -1925,20 +1944,30 @@ function addCardToInventory(cardName) {
                 return characters.find(c => c.name === name);
             }
 
+            // ✅ 이 코드로 기존 displayStoryView 함수를 통째로 교체해주세요.
             function displayStoryView() {
                 mainStoryContainer.innerHTML = '';
                 mainStories.forEach((story, index) => {
+                    // ✨ isUnlocked 조건을 clearedStages를 사용하도록 수정 ✨
                     const isUnlocked = story.dungeonToUnlock === null || clearedStages.includes(story.dungeonToUnlock);
                     const storyEl = document.createElement('div');
                     storyEl.className = `p-4 rounded-lg transition-colors duration-300 ${isUnlocked ? 'bg-white/20 hover:bg-white/30 cursor-pointer' : 'bg-black/30 text-gray-500'}`;
+                    
                     if (isUnlocked) {
                         storyEl.dataset.storyIndex = index;
                         storyEl.dataset.storyType = 'main';
                     }
 
+                    // ✨ 잠금 해제 조건 텍스트를 더 명확하게 수정 ✨
+                    let unlockText = '클릭하여 스토리 읽기';
+                    if (!isUnlocked) {
+                        const [chap, stg] = story.dungeonToUnlock.split('-');
+                        unlockText = `챕터 ${chap}-${stg} 클리어 시 해금`;
+                    }
+
                     storyEl.innerHTML = `
                         <h3 class="text-xl font-bold ${isUnlocked ? 'text-yellow-300' : ''}">${story.title}</h3>
-                        <p class="text-sm">${isUnlocked ? '클릭하여 스토리 읽기' : `${story.dungeonToUnlock} 클리어 시 해금`}</p>
+                        <p class="text-sm">${unlockText}</p>
                     `;
                     mainStoryContainer.appendChild(storyEl);
                 });
@@ -2237,6 +2266,7 @@ function addCardToInventory(cardName) {
     </script>
 </body>
 </html>
+
 
 
 
