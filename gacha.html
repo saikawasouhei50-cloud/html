@@ -566,9 +566,12 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
             const bookmarkDisplay = document.getElementById('bookmark-display');
             const maxBookmarkDisplay = document.getElementById('max-bookmark-display');
             const bookmarkTimerContainer = document.getElementById('bookmark-timer-container'); 
-            const achievementsContainer = document.getElementById('achievements-container'); // 이 줄 추가
+            const achievementsContainer = document.getElementById('achievements-container'); // ✅ 이 위치에 있어야 합니다.
             const toastNotification = document.getElementById('toast-notification');
-			const synergyList = document.getElementById('synergy-list'); // <-- 이 줄 추가
+			const synergyList = document.getElementById('synergy-list');
+			const stageStoryContainer = document.getElementById('stage-story-container');
+            const storySubTabMain = document.getElementById('story-sub-tab-main');
+            const storySubTabStage = document.getElementById('story-sub-tab-stage');
 			const interactiveStoryModal = document.getElementById('interactive-story-modal');
 			const storyCharLeft = document.getElementById('story-char-left');
 			const storyCharRight = document.getElementById('story-char-right');
@@ -578,9 +581,6 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
 			const storySkipButton = document.getElementById('story-skip-button');
 			const detailStoryPrevButton = document.getElementById('detail-story-prev');
             const detailStoryNextButton = document.getElementById('detail-story-next');
-			const stageStoryContainer = document.getElementById('stage-story-container');
-            const storySubTabMain = document.getElementById('story-sub-tab-main');
-            const storySubTabStage = document.getElementById('story-sub-tab-stage');
             
             // --- 데이터 저장/불러오기 함수 ---
             function isStorageAvailable() {
@@ -2462,6 +2462,7 @@ storySubTabStage.addEventListener('click', () => {
     </script>
 </body>
 </html>
+
 
 
 
