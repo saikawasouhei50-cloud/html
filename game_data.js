@@ -54,10 +54,38 @@
                 '그림자 암살자': { name: '그림자 암살자', stats: { hp: 1200, atk: 40, def: 15 }, imageUrl: 'https://placehold.co/300x300/4a5568/ffffff?text=Shadow' }
             };
 
-            const dungeons = [
-                { name: '초보자의 숲', monsterName: '슬라임 킹', rewards: { min: 10, max: 20 } },
-                { name: '오크 점령지', monsterName: '오크 대장', rewards: { min: 25, max: 40 } },
-                { name: '용의 둥지', monsterName: '레드 드래곤', rewards: { min: 60, max: 100 } }
+            const mainChapters = [
+                {
+                    chapterName: "제1장: 비 내리는 밤의 서곡",
+                    stages: [
+                        { stageName: "1-1", monsterName: "슬라임 킹", rewards: { fountainPens: 5 } },
+                        { stageName: "1-2", monsterName: "슬라임 킹", rewards: { fountainPens: 5 } },
+                        { stageName: "1-3", monsterName: "슬라임 킹", rewards: { fountainPens: 6 } },
+                        { stageName: "1-4", monsterName: "슬라임 킹", rewards: { fountainPens: 6 } },
+                        { stageName: "1-5", monsterName: "슬라임 킹", rewards: { fountainPens: 7 } },
+                        { stageName: "1-6", monsterName: "슬라임 킹", rewards: { fountainPens: 7 } },
+                        { stageName: "1-7", monsterName: "슬라임 킹", rewards: { fountainPens: 8 } },
+                        { stageName: "1-8", monsterName: "슬라임 킹", rewards: { fountainPens: 8 } },
+                        { stageName: "1-9", monsterName: "슬라임 킹", rewards: { fountainPens: 9 } },
+                        { stageName: "1-10", monsterName: "오크 대장", rewards: { fountainPens: 20, currency: 10 } } // 보스 스테이지
+                    ]
+                },
+                {
+                    chapterName: "제2장: 거짓된 알리바이",
+                    stages: [
+                        { stageName: "2-1", monsterName: "오크 대장", rewards: { fountainPens: 10 } },
+                        { stageName: "2-2", monsterName: "오크 대장", rewards: { fountainPens: 10 } },
+                        { stageName: "2-3", monsterName: "오크 대장", rewards: { fountainPens: 11 } },
+                        { stageName: "2-4", monsterName: "오크 대장", rewards: { fountainPens: 11 } },
+                        { stageName: "2-5", monsterName: "그림자 암살자", rewards: { fountainPens: 15 } },
+                        { stageName: "2-6", monsterName: "그림자 암살자", rewards: { fountainPens: 15 } },
+                        { stageName: "2-7", monsterName: "그림자 암살자", rewards: { fountainPens: 16 } },
+                        { stageName: "2-8", monsterName: "그림자 암살자", rewards: { fountainPens: 16 } },
+                        { stageName: "2-9", monsterName: "그림자 암살자", rewards: { fountainPens: 17 } },
+                        { stageName: "2-10", monsterName: "레드 드래곤", rewards: { fountainPens: 50, currency: 30 } } // 보스 스테이지
+                    ]
+                }
+                // 여기에 3장, 4장 등을 계속 추가할 수 있습니다.
             ];
             
             const eventDungeons = [
@@ -236,4 +264,5 @@
             const EVENT_START_DATE = new Date('2025-10-14T00:00:00');
             const EVENT_END_DATE = new Date('2025-10-24T23:59:59');
 			const enhancementCosts = [10, 20, 35, 55, 80, 110, 150, 200, 250]; // +1강 ~ +9강에 필요한 만년필 비용
+
 
