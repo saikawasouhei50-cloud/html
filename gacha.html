@@ -2463,6 +2463,8 @@ function startInteractiveStory(storyOrIndex, type) {
     }
 }
 
+// gacha3.html - dismantleMultipleCards 함수 (기존 함수 전체 교체)
+
 function dismantleMultipleCards() {
     if (selectedCardsToDismantle.size === 0) {
         showMessage('파쇄할 카드를 선택해주세요.', 'text-yellow-400', messageArea);
@@ -2478,7 +2480,7 @@ function dismantleMultipleCards() {
     let cardsToRemove = []; 
     let cardsInDeck = []; 
     
-    // 1. 유효성 검사 및 보상 계산 (로직 유지)
+    // 1. 유효성 검사 및 보상 계산
     selectedCardsToDismantle.forEach(cardId => {
         const cardInstance = playerInventory.find(c => c.id === cardId);
         if (!cardInstance) return;
@@ -2499,31 +2501,43 @@ function dismantleMultipleCards() {
         return;
     }
 
-    // 2. 파쇄 실행 및 보상 지급 (로직 유지)
+    // 2. 파쇄 실행 및 보상 지급
     playerInventory = playerInventory.filter(card => !cardsToRemove.includes(card.id));
     playerFountainPens += totalFountainPens;
     playerInkwells += totalInkwells;
 
-   // 3. 모달 표시 및 결과 업데이트 (Alert 대체)
+    // 3. 모달 표시 및 결과 업데이트
     hideCardDetails();
     exitMultiSelectMode(); 
     updateUI();
     displayInventory();
     saveGame();
     
-    // 4. 결과 모달에 보상 표시 (로직 유지)
+    // 4. 결과 모달에 보상 표시
     dismantleRewardsList.innerHTML = '';
-    // ... (보상 리스트 추가 로직 유지)
+    
+    if (totalFountainPens > 0) {
+        dismantleRewardsList.innerHTML += `<div class="text-xl text-gray-300 font-bold">🖋️ 만년필: +${totalFountainPens}</div>`;
+    }
+    if (totalInkwells > 0) {
+        dismantleRewardsList.innerHTML += `<div class="text-xl text-fuchsia-400 font-bold">💧 잉크병: +${totalInkwells}</div>`;
+    }
+    
+    // 덱에 포함되어 파쇄하지 못한 카드가 있다면 경고 메시지를 추가합니다.
+    if (cardsInDeck.length > 0) {
+         dismantleRewardsList.innerHTML += `<div class="text-xs text-red-400 mt-2">(${cardsInDeck.length}장은 덱에 포함되어 파쇄되지 않았습니다.)</div>`;
+    }
+
+    // 5. 모달에 최종 메시지 상태 저장 (핵심: 모달이 닫힌 후 메시지 출력용)
+    if (cardsToRemove.length > 0) {
+        dismantleResultModal.dataset.finalMessage = `총 ${cardsToRemove.length}장의 원고를 파쇄했습니다.`;
+        dismantleResultModal.dataset.messageColor = 'text-yellow-300';
+    } else {
+        dismantleResultModal.dataset.finalMessage = ''; // 메시지 표시 안 함
+    }
     
     // 모달 표시
     dismantleResultModal.classList.remove('hidden');
-
-    // 5. 성공 메시지 즉시 호출 (setTimeout 제거)
-    if (cardsToRemove.length > 0) {
-        const finalMessage = `총 ${cardsToRemove.length}장의 원고를 파쇄했습니다.`;
-        // setTimeout 없이 즉시 호출
-        showMessage(finalMessage, 'text-yellow-300', messageArea); 
-    }
 }
 			
 
@@ -2615,7 +2629,18 @@ exitMultiModeButton.addEventListener('click', exitMultiSelectMode);
 dismantleSelectedButton.addEventListener('click', dismantleMultipleCards);
 
 			closeDismantleResultButton.addEventListener('click', () => {
+    // 1. 모달에 저장된 메시지 확인
+    const finalMessage = dismantleResultModal.dataset.finalMessage;
+    const messageColor = dismantleResultModal.dataset.messageColor;
+
+    // 2. 모달 숨기기
     dismantleResultModal.classList.add('hidden');
+    
+    // 3. 메시지가 있다면 표시 (모달이 닫힌 후에 메시지 표시)
+    if (finalMessage) {
+        showMessage(finalMessage, messageColor, messageArea);
+        dismantleResultModal.dataset.finalMessage = ''; // 메시지 초기화
+    }
 });
 			
 dismantleCardButton.addEventListener('click', () => {
@@ -2848,6 +2873,7 @@ cardClickableContainers.forEach(container => {
     </script>
 </body>
 </html>
+
 
 
 
