@@ -826,21 +826,38 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
 
             // --- 핵심 게임 로직 함수 ---
             function switchTab(tabName) {
-                if (isCombatRunning) return;
-                allViews.forEach(view => view.classList.add('hidden'));
-                allTabs.forEach(tab => tab.classList.remove('active'));
-                document.getElementById(`${tabName}-view`).classList.remove('hidden');
-                document.getElementById(`tab-${tabName}`).classList.add('active');
-                if (tabName === 'home') displayHomeView();
-                else if (tabName === 'inventory') displayInventory(); 
-                else if (tabName === 'deck') displayDeckManagement();
-                else if (tabName === 'combat') displayCombatView();
-                else if (tabName === 'collection') displayCollection();
-                else if (tabName === 'story') displayStoryView();
-                else if (tabName === 'event') displayEventView();
-                else if (tabName === 'achievements') displayAchievements();
-            }
-            
+    if (isCombatRunning) return;
+    
+    // 1. 모든 뷰 숨기기 및 탭 비활성화
+    allViews.forEach(view => {
+        // 뷰 요소가 유효한지 확인 후 hidden 클래스 추가
+        if (view) view.classList.add('hidden'); 
+    });
+    allTabs.forEach(tab => tab.classList.remove('active'));
+    
+    // 2. 선택된 뷰 활성화
+    const targetView = document.getElementById(`${tabName}-view`);
+    const targetTab = document.getElementById(`tab-${tabName}`);
+
+    // ✨ 방어 코드: 뷰가 존재하지 않으면 함수를 종료합니다. ✨
+    if (!targetView || !targetTab) {
+        console.error(`Error: Cannot find view or tab for name: ${tabName}`);
+        return; 
+    }
+    
+    targetView.classList.remove('hidden');
+    targetTab.classList.add('active');
+    
+    // 3. 뷰별 렌더링 함수 호출
+    if (tabName === 'home') displayHomeView();
+    else if (tabName === 'inventory') displayInventory(); 
+    else if (tabName === 'deck') displayDeckManagement();
+    else if (tabName === 'combat') displayCombatView();
+    else if (tabName === 'collection') displayCollection();
+    else if (tabName === 'story') displayStoryView();
+    else if (tabName === 'event') displayEventView();
+    else if (tabName === 'achievements') displayAchievements();
+}
             function switchSubTab(viewContainer, button) {
                 Array.from(viewContainer.children).forEach(view => {
                     if(view.id.endsWith('-view')) view.classList.add('hidden');
@@ -2445,6 +2462,7 @@ storySubTabStage.addEventListener('click', () => {
     </script>
 </body>
 </html>
+
 
 
 
