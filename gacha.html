@@ -1107,138 +1107,169 @@ const closeEnhancementSuccessButton = document.getElementById('close-enhancement
             
 
             function displayInventory() {
-    inventoryStatus.textContent = `${playerInventory.length} / ${inventoryCapacity}`;
-    inventoryContainer.innerHTML = '';
+            inventoryStatus.textContent = `${playerInventory.length} / ${inventoryCapacity}`;
+            inventoryContainer.innerHTML = '';
 
-    // 강화 레벨과 등급 순으로 정렬
-    const sortedInventory = [...playerInventory].sort((a, b) => {
-        const charA = findCharacter(a.name);
-        const charB = findCharacter(b.name);
-        const rarityOrder = { 'SSR': 4, 'SR': 3, 'R': 2, 'N': 1 };
-        if (b.enhancementLevel !== a.enhancementLevel) return b.enhancementLevel - a.enhancementLevel;
-        if (rarityOrder[charB.rarity] !== rarityOrder[charA.rarity]) return rarityOrder[charB.rarity] - rarityOrder[charA.rarity];
-        return a.name.localeCompare(b.name);
-    });
+            const sortedInventory = [...playerInventory].sort((a, b) => {
+                const charA = findCharacter(a.name); const charB = findCharacter(b.name);
+                const rarityOrder = { 'SSR': 4, 'SR': 3, 'R': 2, 'N': 1 };
+                if (b.enhancementLevel !== a.enhancementLevel) return b.enhancementLevel - a.enhancementLevel;
+                if (rarityOrder[charB.rarity] !== rarityOrder[charA.rarity]) return rarityOrder[charB.rarity] - rarityOrder[charA.rarity];
+                return a.name.localeCompare(b.name);
+            });
 
-    if (sortedInventory.length === 0) {
-        inventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">아직 수집한 동료가 없습니다.</p>`; return;
-    }
-    sortedInventory.forEach((cardInstance, index) => {
-        inventoryContainer.appendChild(createCard(cardInstance, { animationIndex: index, mode: 'inventory' }));
-    });
-}
-
-            function displayCollection() {
-                collectionContainer.innerHTML = '';
-                const collectedCardNames = new Set(playerInventory.map(card => card.name));
-
-                characters.forEach((character, index) => {
-                    const isCollected = collectedCardNames.has(character.name);
-                    collectionContainer.appendChild(createCard(character, {
-                        animationIndex: index,
-                        mode: 'collection',
-                        isCollected: isCollected
-                    }));
-                });
+            if (sortedInventory.length === 0) {
+                inventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">아직 수집한 동료가 없습니다.</p>`; return;
             }
+            sortedInventory.forEach((cardInstance, index) => {
+                inventoryContainer.appendChild(createCard(cardInstance, { animationIndex: index, mode: 'inventory' }));
+            });
+        }
 
+        function displayCollection() {
+            collectionContainer.innerHTML = '';
+            const collectedCardNames = new Set(playerInventory.map(card => card.name));
+            characters.forEach((character, index) => {
+                collectionContainer.appendChild(createCard(character, {
+                    animationIndex: index, mode: 'collection', isCollected: collectedCardNames.has(character.name)
+                }));
+            });
+        }
 
-            function displayDeckManagement() {
-                deckStatus.textContent = `현재 덱: ${playerDeck.length} / ${DECK_CAPACITY}`;
-                deckStatus.classList.toggle('text-green-400', playerDeck.length === DECK_CAPACITY);
-                deckSlotsContainer.innerHTML = '';
-                for (let i = 0; i < DECK_CAPACITY; i++) {
-                    if (playerDeck[i]) {
-                        deckSlotsContainer.appendChild(createCard(playerDeck[i], { mode: 'deckSlot' }));
-                    } else {
-                        const emptySlot = document.createElement('div');
-                        emptySlot.className = 'deck-slot rounded-lg'; emptySlot.textContent = '비어있음';
-                        deckSlotsContainer.appendChild(emptySlot);
-                    }
+        function displayDeckManagement() {
+            deckStatus.textContent = `현재 덱: ${playerDeck.length} / ${DECK_CAPACITY}`;
+            deckStatus.classList.toggle('text-green-400', playerDeck.length === DECK_CAPACITY);
+            deckSlotsContainer.innerHTML = '';
+
+            for (let i = 0; i < DECK_CAPACITY; i++) {
+                if (playerDeck[i]) {
+                    const characterData = findCharacter(playerDeck[i].name);
+                    const cardDataForDisplay = { ...characterData, ...playerDeck[i] };
+                    deckSlotsContainer.appendChild(createCard(cardDataForDisplay, { mode: 'deckSlot' }));
+                } else {
+                    const emptySlot = document.createElement('div');
+                    emptySlot.className = 'deck-slot rounded-lg'; emptySlot.textContent = '비어있음';
+                    deckSlotsContainer.appendChild(emptySlot);
                 }
-                deckInventoryContainer.innerHTML = '';
-                const uniqueCards = getUniqueInventory();
-                 if (uniqueCards.length === 0) {
-                    deckInventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">덱에 추가할 카드가 없습니다.</p>`; return;
-                }
-                uniqueCards.forEach((character, index) => {
-                    const isCardInDeck = playerDeck.some(deckCard => deckCard.name === character.name);
-                    const isDeckFull = playerDeck.length >= DECK_CAPACITY;
-                    deckInventoryContainer.appendChild(createCard(character, { animationIndex: index, mode: 'deckBuilder', isCardInDeck, isDeckFull }));
-                });
-				displaySynergies();
-            }
-            
-            function autoFillDeck() {
-                const uniqueCards = getUniqueInventory();
-                const sortedByPower = uniqueCards.sort((a, b) => (b.stats.atk + b.stats.def) - (a.stats.atk + a.stats.def));
-                playerDeck = sortedByPower.slice(0, DECK_CAPACITY);
-                displayDeckManagement();
-                showMessage('가장 강력한 카드로 덱을 자동 편성했습니다!', 'text-blue-300', messageArea);
-                saveGame();
             }
 
-            function addToDeck(cardName) {
-                if (playerDeck.length >= DECK_CAPACITY || playerDeck.some(card => card.name === cardName)) return;
-                const cardToAdd = findCharacter(cardName);
-                if (cardToAdd) { playerDeck.push(cardToAdd); displayDeckManagement(); saveGame(); }
-            }
-            
-            function removeFromDeck(cardName) {
-                const indexToRemove = playerDeck.findIndex(card => card.name === cardName);
-                if(indexToRemove > -1) {
-                    playerDeck.splice(indexToRemove, 1);
-                }
-                displayDeckManagement();
-                saveGame();
-            }
-            
-				// 위치: gacha1.html, 약 1129번째 줄
-			function calculateDeckPower() {
-				if (playerDeck.length === 0) return 0;
-				const deckWithBonuses = applySynergyBonusesToDeck(playerDeck);
-				return deckWithBonuses.reduce((total, card) => total + (card.stats.atk + card.stats.def + Math.floor(card.stats.hp / 10)), 0);
-			}
+            deckInventoryContainer.innerHTML = '';
+            const sortedInventory = [...playerInventory].sort((a, b) => {
+                const charA = findCharacter(a.name); const charB = findCharacter(b.name);
+                const rarityOrder = { 'SSR': 4, 'SR': 3, 'R': 2, 'N': 1 };
+                if (b.enhancementLevel !== a.enhancementLevel) return b.enhancementLevel - a.enhancementLevel;
+                if (rarityOrder[charB.rarity] !== rarityOrder[charA.rarity]) return rarityOrder[charB.rarity] - rarityOrder[charA.rarity];
+                return a.name.localeCompare(b.name);
+            });
 
-            function displayCombatView() {
-                deckPowerDisplay.textContent = calculateDeckPower();
-                dungeonListContainer.innerHTML = '';
-                dungeons.forEach((dungeon, index) => {
-                    const monster = monsters[dungeon.monsterName];
-                    const recommendedPower = monster.stats.atk*5 + monster.stats.def*5 + Math.floor(monster.stats.hp / 5);
-                    const dungeonEl = document.createElement('div');
-                    dungeonEl.className = 'bg-black/20 p-4 rounded-lg text-center';
-                    dungeonEl.innerHTML = `
-                        <h3 class="text-xl font-bold text-yellow-300">${dungeon.name}</h3>
-                        <p class="text-gray-300">권장 전투력: ${recommendedPower}</p>
-                        <p class="text-gray-300">예상 보상: 💎${dungeon.rewards.min} ~ ${dungeon.rewards.max}</p>
-                        <button data-action="challenge-dungeon" data-dungeon-index="${index}" class="gacha-button bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-full mt-4">도전</button>
-                    `;
-                    dungeonListContainer.appendChild(dungeonEl);
-                });
+            if (sortedInventory.length === 0) {
+                deckInventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">덱에 추가할 카드가 없습니다.</p>`; return;
             }
-            
-            function challengeDungeon(dungeonIndex, type = 'main') {
-                if (playerBookmarks < 1) {
-                    const msgArea = type === 'event' ? document.getElementById('message-area') : (document.getElementById('combat-message-area') || messageArea);
-                    showMessage('책갈피가 부족합니다!', 'text-yellow-400', msgArea);
-                    return;
-                }
-                if (playerDeck.length < DECK_CAPACITY) {
-                    const msgArea = type === 'event' ? document.getElementById('message-area') : (document.getElementById('combat-message-area') || messageArea);
-                    showMessage('덱을 5장으로 모두 채워야 합니다!', 'text-yellow-400', msgArea);
-                    return;
-                }
-                
-                playerBookmarks--;
-                if (playerBookmarks === MAX_BOOKMARKS - 1) {
-                     lastBookmarkUpdateTime = Date.now();
-                }
-                updateUI();
-                // saveGame(); // 전투 시작 전에 저장하지 않고, 전투 종료 후에 저장.
 
-                startCombat(dungeonIndex, type);
+            sortedInventory.forEach((cardInstance, index) => {
+                const characterData = findCharacter(cardInstance.name);
+                const cardDataForDisplay = { ...characterData, ...cardInstance };
+                const isCardInDeck = playerDeck.some(deckCard => deckCard.id === cardInstance.id);
+                const isDeckFull = playerDeck.length >= DECK_CAPACITY;
+                deckInventoryContainer.appendChild(createCard(cardDataForDisplay, { animationIndex: index, mode: 'deckBuilder', isCardInDeck, isDeckFull }));
+            });
+            displaySynergies();
+        }
+
+        function autoFillDeck() {
+            const sortedByPower = [...playerInventory].sort((a, b) => {
+                const charA = findCharacter(a.name);
+                const charB = findCharacter(b.name);
+                const powerA = charA.stats.atk + charA.stats.def + (a.enhancementLevel * 5);
+                const powerB = charB.stats.atk + charB.stats.def + (b.enhancementLevel * 5);
+                return powerB - powerA;
+            });
+            playerDeck = sortedByPower.slice(0, DECK_CAPACITY);
+            displayDeckManagement();
+            showMessage('가장 강력한 카드로 덱을 자동 편성했습니다!', 'text-blue-300', messageArea);
+            saveGame();
+        }
+
+        function addToDeck(cardId) {
+            const cardIdNum = parseFloat(cardId);
+            if (playerDeck.length >= DECK_CAPACITY || playerDeck.some(card => card.id === cardIdNum)) return;
+            const cardToAdd = playerInventory.find(card => card.id === cardIdNum);
+            if (cardToAdd) { playerDeck.push(cardToAdd); displayDeckManagement(); saveGame(); }
+        }
+
+        function removeFromDeck(cardId) {
+            const cardIdNum = parseFloat(cardId);
+            const indexToRemove = playerDeck.findIndex(card => card.id === cardIdNum);
+            if(indexToRemove > -1) {
+                playerDeck.splice(indexToRemove, 1);
             }
+            displayDeckManagement();
+            saveGame();
+        }
+
+		function calculateDeckPower() {
+			if (playerDeck.length === 0) return 0;
+			const deckWithBonuses = applySynergyBonusesToDeck(playerDeck);
+			return deckWithBonuses.reduce((total, card) => total + (card.stats.atk + card.stats.def + Math.floor(card.stats.hp / 10)), 0);
+		}
+
+        function displayCombatView() {
+            deckPowerDisplay.textContent = calculateDeckPower();
+            dungeonVolumeSelection.innerHTML = '';
+            dungeonStageSelection.classList.add('hidden');
+            dungeonVolumeSelection.classList.remove('hidden');
+
+            dungeons.forEach((volume, index) => {
+                const volumeEl = document.createElement('div');
+                volumeEl.className = 'bg-black/20 p-6 rounded-lg text-center cursor-pointer hover:bg-black/30';
+                volumeEl.innerHTML = `<h3 class="text-2xl font-bold text-yellow-300">${volume.name}</h3>`;
+                volumeEl.onclick = () => displayDungeonStages(index);
+                dungeonVolumeSelection.appendChild(volumeEl);
+            });
+        }
+
+        function displayDungeonStages(volumeIndex) {
+            const volume = dungeons[volumeIndex];
+            dungeonVolumeSelection.classList.add('hidden');
+            dungeonStageSelection.classList.remove('hidden');
+            currentVolumeTitle.textContent = volume.name;
+            stageListContainer.innerHTML = '';
+
+            volume.stages.forEach((stage, stageIndex) => {
+                const isUnlocked = stageIndex === 0 || clearedStages[volume.name]?.includes(stageIndex - 1);
+                const isCleared = clearedStages[volume.name]?.includes(stageIndex);
+                const stageEl = document.createElement('button');
+                stageEl.className = `p-4 rounded-lg transition-colors duration-300 text-center ${isUnlocked ? 'bg-white/20 hover:bg-white/30' : 'bg-black/30 text-gray-500 cursor-not-allowed'}`;
+                stageEl.disabled = !isUnlocked;
+
+                stageEl.innerHTML = `
+                    <h4 class="text-lg font-bold">${stage.name}</h4>
+                    <p class="text-sm">보상: 🖊️ ${stage.reward.pens} ${isCleared ? '<span class="text-green-400">(클리어)</span>' : ''}</p>
+                `;
+                if (isUnlocked) {
+                    stageEl.onclick = () => challengeDungeon(volumeIndex, stageIndex, 'main');
+                }
+                stageListContainer.appendChild(stageEl);
+            });
+        }
+
+        function challengeDungeon(volumeIndex, stageIndex, type = 'main') {
+            if (playerBookmarks < 1) {
+                showMessage('책갈피가 부족합니다!', 'text-yellow-400', messageArea);
+                return;
+            }
+            if (playerDeck.length < DECK_CAPACITY) {
+                showMessage('덱을 5장으로 모두 채워야 합니다!', 'text-yellow-400', messageArea);
+                return;
+            }
+
+            playerBookmarks--;
+            if (playerBookmarks === MAX_BOOKMARKS - 1) {
+                 lastBookmarkUpdateTime = Date.now();
+            }
+            updateUI();
+            startCombat(volumeIndex, stageIndex, type);
+        }
 
             function setCombatSpeed(speed) {
                 combatSpeedMultiplier = speed;
@@ -1428,80 +1459,73 @@ const closeEnhancementSuccessButton = document.getElementById('close-enhancement
             }
 
             function createCard(character, options = {}) {
-                const { animationIndex, mode = 'default', isCardInDeck, isDeckFull, isCollected } = options;
-                const card = document.createElement('div');
-                card.className = `rarity-${character.rarity} relative text-center rounded-lg shadow-md p-2 transform transition-transform duration-300 hover:scale-105 cursor-pointer`;
-                card.dataset.cardId = character.id; // 고유 ID로 변경
-				card.dataset.cardName = character.name;
-                card.title = character.name;
-                const rarityColor = { 'N': 'text-gray-600', 'R': 'text-blue-800', 'SR': 'text-white', 'SSR': 'text-black' }[character.rarity];
-                const factionColors = {
-                    '탐정': 'bg-blue-500 text-white',
-                    '조수': 'bg-green-500 text-white',
-                    '범인': 'bg-red-500 text-white'
-                };
-                
-                let badgeHTML = '';
-                if(mode === 'inventory' && character.count > 1) {
-                    badgeHTML = `<div class="count-badge">x${character.count}</div>`;
-                }
+    const { animationIndex, mode = 'default', isCardInDeck, isDeckFull, isCollected } = options;
+    const card = document.createElement('div');
+    const characterData = findCharacter(character.name) || character; // 기본 데이터 찾기
 
-                let actionButtonsHTML = '';
-                if (mode === 'deckBuilder') {
-                    const disabled = isDeckFull || isCardInDeck;
-                    const buttonText = isCardInDeck ? '추가됨' : '추가';
-                    const buttonColor = disabled ? 'bg-gray-500' : 'bg-green-500 hover:bg-green-600';
-                    actionButtonsHTML = `<button data-action="add-to-deck" data-card-name="${character.name}" class="w-full mt-2 py-1 rounded-md text-white font-bold text-sm ${buttonColor}" ${disabled ? 'disabled' : ''}>${buttonText}</button>`;
-                } else if (mode === 'inventory') {
-                    const isRepresentative = representativeCharacter && representativeCharacter.name === character.name;
-                    const repButtonText = isRepresentative ? '대표' : '대표 설정';
-                    const repButtonColor = isRepresentative ? 'bg-yellow-500' : 'bg-gray-600 hover:bg-gray-700';
-                    actionButtonsHTML = `<button data-action="set-representative" data-card-name="${character.name}" class="w-full mt-2 py-1 rounded-md text-white font-bold text-sm ${repButtonColor}" ${isRepresentative ? 'disabled' : ''}>${repButtonText}</button>`;
-                }
-                
-				let enhancementHTML = '';
-if (character.enhancementLevel > 0) {
-    enhancementHTML = `<div class="absolute top-1 left-1 bg-yellow-400 text-black font-bold text-xs px-2 py-0.5 rounded-full z-10">+${character.enhancementLevel}</div>`;
+    card.className = `rarity-${characterData.rarity} relative text-center rounded-lg shadow-md p-2 transform transition-transform duration-300 hover:scale-105 cursor-pointer`;
+    card.dataset.cardId = character.id;
+    card.dataset.cardName = character.name;
+    card.title = character.name;
+
+    const rarityColor = { 'N': 'text-gray-600', 'R': 'text-blue-800', 'SR': 'text-white', 'SSR': 'text-black' }[characterData.rarity];
+    const factionColorClass = factionColors[characterData.faction] || 'bg-gray-400 text-white';
+
+    let badgeHTML = '';
+    if (mode === 'inventory' && character.count > 1) {
+        badgeHTML = `<div class="count-badge">x${character.count}</div>`;
+    }
+
+    let enhancementHTML = '';
+    if (character.enhancementLevel > 0) {
+        enhancementHTML = `<div class="absolute top-1 left-1 bg-yellow-400 text-black font-bold text-xs px-2 py-0.5 rounded-full z-10">+${character.enhancementLevel}</div>`;
+    }
+
+    let actionButtonsHTML = '';
+    if (mode === 'deckBuilder') {
+        const disabled = isDeckFull || isCardInDeck;
+        actionButtonsHTML = `<button data-action="add-to-deck" data-card-id="${character.id}" class="w-full mt-2 py-1 rounded-md text-white font-bold text-sm ${disabled ? 'bg-gray-500' : 'bg-green-500 hover:bg-green-600'}" ${disabled ? 'disabled' : ''}>${isCardInDeck ? '추가됨' : '추가'}</button>`;
+    } else if (mode === 'inventory') {
+        const isRepresentative = representativeCharacter && representativeCharacter.name === character.name;
+        actionButtonsHTML = `<button data-action="set-representative" data-card-name="${character.name}" class="w-full mt-2 py-1 rounded-md text-white font-bold text-sm ${isRepresentative ? 'bg-yellow-500' : 'bg-gray-600 hover:bg-gray-700'}" ${isRepresentative ? 'disabled' : ''}>${isRepresentative ? '대표' : '대표 설정'}</button>`;
+    }
+
+    let deckSlotButton = '';
+    if (mode === 'deckSlot') {
+        deckSlotButton = `<button data-action="remove-from-deck" data-card-id="${character.id}" class="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 text-sm font-bold flex items-center justify-center z-10">X</button>`;
+    }
+
+    const factionBadge = `<span class="absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full ${factionColorClass} z-10">${characterData.faction}</span>`;
+
+    card.innerHTML = `
+        ${enhancementHTML} ${badgeHTML} ${deckSlotButton} ${factionBadge}
+        <div class="relative pointer-events-none">
+            <img src="${characterData.cardImageUrl}" alt="${character.name}" class="w-full h-auto rounded-md mb-2 border-2 border-white/50">
+            <p class="font-bold text-sm ${rarityColor} truncate">${character.name}</p>
+            <p class="font-black text-lg ${rarityColor}" style="text-shadow: 1px 1px 2px rgba(255,255,255,0.5);">${characterData.rarity}</p>
+        </div>
+        ${actionButtonsHTML}
+    `;
+
+    if (typeof animationIndex === 'number') {
+        card.style.opacity = '0';
+        card.style.animationDelay = `${animationIndex * 0.05}s`;
+        card.classList.add('card-animation');
+    }
+    if (mode === 'deckBuilder' && isCardInDeck) {
+        card.classList.add('opacity-50');
+    }
+    if (mode === 'collection') {
+        if (isCollected) {
+            card.dataset.isCollected = "true";
+        } else {
+            card.dataset.isCollected = "false";
+            card.classList.add('grayscale', 'opacity-75');
+            card.classList.remove('hover:scale-105', 'cursor-pointer');
+        }
+    }
+    return card;
 }
-
-card.innerHTML = `
-    ${enhancementHTML} ${badgeHTML} ${deckSlotButton} ${factionBadge}
-	
-                let deckSlotButton = '';
-                if(mode === 'deckSlot') {
-                    deckSlotButton = `<button data-action="remove-from-deck" data-card-name="${character.name}" class="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 text-sm font-bold flex items-center justify-center z-10">X</button>`;
-                }
-
-                const factionBadge = `<span class="absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full ${factionColors[character.faction]} z-10">${character.faction}</span>`;
-
-                card.innerHTML = `
-                    ${badgeHTML} ${deckSlotButton} ${factionBadge}
-                    <div class="relative pointer-events-none">
-                        <img src="${character.cardImageUrl}" alt="${character.name}" class="w-full h-auto rounded-md mb-2 border-2 border-white/50">
-                        <p class="font-bold text-sm ${rarityColor} truncate">${character.name}</p>
-                        <p class="font-black text-lg ${rarityColor}" style="text-shadow: 1px 1px 2px rgba(255,255,255,0.5);">${character.rarity}</p>
-                    </div>
-                     ${actionButtonsHTML}
-                `;
-                if (typeof animationIndex === 'number') {
-                    card.style.opacity = '0';
-                    card.style.animationDelay = `${animationIndex * 0.05}s`;
-                    card.classList.add('card-animation');
-                }
-                if(mode === 'deckBuilder' && isCardInDeck) {
-                    card.classList.add('opacity-50');
-                }
-                if (mode === 'collection') {
-                    if (isCollected) {
-                        card.dataset.isCollected = "true";
-                    } else {
-                        card.dataset.isCollected = "false";
-                        card.classList.add('grayscale', 'opacity-75');
-                        card.classList.remove('hover:scale-105', 'cursor-pointer');
-                    }
-                }
-                return card;
-            }
 
             function getSkillDescription(skill) {
                 switch(skill.type) {
@@ -1702,8 +1726,8 @@ card.innerHTML = `
                         const action = actionButton.dataset.action;
                         const cardName = actionButton.dataset.cardName;
                         if (action === 'set-representative') setRepresentative(cardName);
-                        else if (action === 'add-to-deck') addToDeck(cardName);
-                        else if (action === 'remove-from-deck') removeFromDeck(cardName);
+                        else if (action === 'add-to-deck') addToDeck(cardId);
+else if (action === 'remove-from-deck') removeFromDeck(cardId);
                     } else {
                         const cardElement = e.target.closest('[data-card-id]'); // 'data-card-name'에서 'data-card-id'로 변경
                         if (cardElement) {
