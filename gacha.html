@@ -266,6 +266,22 @@
             <p id="inventory-status" class="text-lg font-bold bg-black/20 py-2 px-4 rounded-full"></p>
             <button id="expand-inventory" class="gacha-button bg-yellow-500 hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold py-2 px-4 rounded-full shadow-lg text-sm">칸 확장 (💎50)</button>
         </div>
+
+
+		<div id="dismantle-multi-ui" class="mt-4 p-4 rounded-xl bg-gray-800/50 hidden">
+    <div class="flex justify-between items-center mb-3">
+        <p class="text-lg font-bold text-yellow-300">다중 파쇄 모드</p>
+        <button id="exit-multi-mode" class="gacha-button bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded-full text-sm">모드 종료</button>
+    </div>
+    <div class="flex justify-between items-center">
+        <p class="text-sm text-gray-300">선택된 카드: <span id="selected-card-count" class="font-bold text-white">0장</span></p>
+        <button id="dismantle-selected-button" class="gacha-button bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold py-2 px-4 rounded-full shadow-lg text-sm" disabled>선택된 원고 파쇄</button>
+    </div>
+</div>
+<div class="flex justify-center mt-4 mb-4">
+    <button id="enter-multi-mode" class="gacha-button bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-lg">다중 파쇄 모드 진입</button>
+</div>
+		 
         <div id="inventory-sort-buttons" class="mt-4 flex justify-center gap-2">
     <button data-sort="rarity" class="gacha-button sort-button bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-4 rounded-full text-sm">등급순<span class="sort-indicator"></span></button>
     <button data-sort="level" class="gacha-button sort-button bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-4 rounded-full text-sm">퇴고순<span class="sort-indicator"></span></button>
@@ -592,6 +608,8 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
             let playerCurrency = 100;
 			let playerFountainPens = 500; // 🖋️
 			let playerInkwells = 0;
+			let isMultiSelectMode = false; // ✨ 다중 선택 모드 상태 추가
+            let selectedCardsToDismantle = new Set(); // ✨ 선택된 카드 ID Set 추가
             let playerInventory = [];
 			let isSortAscending = false; // ✨ 정렬 방향 변수 추가 (false: 내림차순, true: 오름차순)
             let playerDeck = [];
@@ -625,6 +643,11 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
             
 
             // --- HTML 요소 가져오기 ---
+			const dismantleMultiUI = document.getElementById('dismantle-multi-ui');
+const enterMultiModeButton = document.getElementById('enter-multi-mode');
+const exitMultiModeButton = document.getElementById('exit-multi-mode');
+const selectedCardCountSpan = document.getElementById('selected-card-count');
+const dismantleSelectedButton = document.getElementById('dismantle-selected-button');
 			const fountainPenDisplay = document.getElementById('fountainpen-display');
             const currencyDisplay = document.getElementById('currency-display');
             const messageArea = document.getElementById('message-area');
@@ -1380,89 +1403,98 @@ function addCardToInventory(cardName) {
             // ✅ 이 코드로 기존 displayInventory 함수를 통째로 교체해주세요.
             // ✅ 이 코드로 기존 displayInventory 함수를 통째로 교체해주세요.
             function displayInventory() {
-                inventoryStatus.textContent = `${playerInventory.length} / ${inventoryCapacity}`;
-                inventoryContainer.innerHTML = '';
+    inventoryStatus.textContent = `${playerInventory.length} / ${inventoryCapacity}`;
+    inventoryContainer.innerHTML = '';
 
-                if (playerInventory.length === 0) {
-                    inventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">아직 수집한 동료가 없습니다.</p>`;
-                    return;
-                }
-
-                // 정렬 로직 시작
-                const rarityOrder = { 'SSR': 4, 'SR': 3, 'R': 2, 'N': 1 };
-                const sortedInventory = [...playerInventory].sort((a, b) => {
-                    const charA = findCharacter(a.name);
-                    const charB = findCharacter(b.name);
-                    let comparison = 0;
-
-                    switch (currentSortOrder) {
-                        case 'level':
-                            comparison = b.level - a.level || rarityOrder[charB.rarity] - rarityOrder[charA.rarity];
-                            break;
-                        case 'revision':
-                            comparison = b.revision - a.revision || rarityOrder[charB.rarity] - rarityOrder[charA.rarity];
-                            break;
-                        case 'name': 
-                            comparison = charA.baseName.localeCompare(charB.baseName) || rarityOrder[charB.rarity] - rarityOrder[charA.rarity] || b.level - a.level;
-                            break;
-                        case 'rarity':
-                        default:
-                            comparison = rarityOrder[charB.rarity] - rarityOrder[charA.rarity] || b.level - a.level;
-                            break;
-                    }
-                    // ✨ 오름차순(isSortAscending)이 true이면 결과에 -1을 곱해 순서를 뒤집음 ✨
-                    return isSortAscending ? comparison * -1 : comparison;
-                });
-                // 정렬 로직 끝
-
-                // 정렬된 목록을 기준으로 화면에 표시합니다.
-                sortedInventory.forEach((cardInstance, index) => {
-                    const character = findCharacter(cardInstance.name);
-                    if (character) {
-                        inventoryContainer.appendChild(createCard(character, { animationIndex: index, mode: 'inventory', instance: cardInstance }));
-                    }
-                });
-
-                // ✨ 활성화된 버튼 스타일 및 화살표 표시 로직 ✨
-                document.querySelectorAll('.sort-button').forEach(btn => {
-                    btn.classList.remove('active', 'bg-blue-500');
-                    btn.querySelector('.sort-indicator').textContent = '';
-                });
-                const activeButton = document.querySelector(`.sort-button[data-sort="${currentSortOrder}"]`);
-                if (activeButton) {
-                    activeButton.classList.add('active', 'bg-blue-500');
-                    activeButton.querySelector('.sort-indicator').textContent = isSortAscending ? ' ▲' : ' ▼';
-                }
-            }
-            function displayCollection() {
-    collectionContainer.innerHTML = '';
-
-    // 게임에 존재하는 모든 캐릭터 목록을 순회합니다.
-    characters.forEach((character, index) => {
-        // 플레이어의 보관함에서 현재 캐릭터와 이름이 같은 카드들을 모두 찾습니다.
-        const userCards = playerInventory.filter(invCard => invCard.name === character.name);
-        
-        let instanceToShow = null;
-        const isCollected = userCards.length > 0;
-
-        // ✨ 만약 수집한 카드라면 (같은 이름의 카드가 1장 이상 있다면)
-        if (isCollected) {
-            // 그중에서 레벨이 가장 높은 카드를 찾아서 대표로 보여줍니다.
-            userCards.sort((a, b) => b.level - a.level);
-            instanceToShow = userCards[0];
+    if (playerInventory.length === 0) {
+        inventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">아직 수집한 동료가 없습니다.</p>`;
+        // 다중 선택 모드일 때 카드가 없으면 UI를 업데이트합니다.
+        if (isMultiSelectMode) {
+            updateMultiSelectUI();
         }
+        return;
+    }
 
-        // createCard 함수를 호출할 때, 찾은 실제 카드 정보(instanceToShow)를 넘겨줍니다.
-        // 수집하지 않은 카드는 instanceToShow가 null이므로 고유 ID 없이 생성됩니다.
-        collectionContainer.appendChild(createCard(character, {
-            animationIndex: index,
-            mode: 'collection',
-            isCollected: isCollected,
-            instance: instanceToShow // ✨ 이 부분이 핵심입니다!
-        }));
+    // 정렬 로직 시작 (기존 정렬 로직 유지)
+    const rarityOrder = { 'SSR': 4, 'SR': 3, 'R': 2, 'N': 1 };
+    const sortedInventory = [...playerInventory].sort((a, b) => {
+        const charA = findCharacter(a.name);
+        const charB = findCharacter(b.name);
+        let comparison = 0;
+
+        switch (currentSortOrder) {
+            case 'level':
+                comparison = b.level - a.level || rarityOrder[charB.rarity] - rarityOrder[charA.rarity];
+                break;
+            case 'revision':
+                comparison = b.revision - a.revision || rarityOrder[charB.rarity] - rarityOrder[charA.rarity];
+                break;
+            case 'name': 
+                comparison = charA.baseName.localeCompare(charB.baseName) || rarityOrder[charB.rarity] - rarityOrder[charA.rarity] || b.level - a.level;
+                break;
+            case 'rarity':
+            default:
+                comparison = rarityOrder[charB.rarity] - rarityOrder[charA.rarity] || b.level - a.level;
+                break;
+        }
+        return isSortAscending ? comparison * -1 : comparison;
     });
-}
+    // 정렬 로직 끝
 
+    // 정렬된 목록을 기준으로 화면에 표시합니다.
+    sortedInventory.forEach((cardInstance, index) => {
+        const character = findCharacter(cardInstance.name);
+        if (character) {
+            // mode: 'inventory'는 인벤토리 뷰에서 일반적인 상태를 나타냅니다.
+            const cardElement = createCard(character, { animationIndex: index, mode: 'inventory', instance: cardInstance });
+            
+            // ✨ 다중 선택 모드 UI 처리 시작 ✨
+            if (isMultiSelectMode) {
+                cardElement.classList.add('multi-select-card'); // CSS로 경계선 추가를 위한 클래스
+                
+                // 덱에 포함된 카드는 선택 불가
+                const isInDeck = playerDeck.some(deckCard => deckCard.id === cardInstance.id);
+                if (isInDeck) {
+                    // 비활성화 UI
+                    cardElement.classList.add('opacity-40', 'cursor-not-allowed', 'bg-red-900/30');
+                    cardElement.title = "덱에 포함되어 파쇄 불가";
+                } else {
+                    cardElement.classList.add('cursor-pointer');
+                }
+                
+                // 선택된 카드에 하이라이트 표시
+                if (selectedCardsToDismantle.has(cardInstance.id)) {
+                    cardElement.classList.remove('bg-black/20');
+                    cardElement.classList.add('border-4', 'border-yellow-400', 'bg-blue-900/50'); // 선택 하이라이트
+                } else if (!isInDeck) {
+                    cardElement.classList.add('border', 'border-gray-500', 'bg-black/20'); // 미선택 테두리
+                }
+                
+                // 상세 정보 버튼은 숨깁니다. (대표 설정 버튼)
+                cardElement.querySelector('[data-action="set-representative"]').classList.add('hidden');
+            }
+            // ✨ 다중 선택 모드 UI 처리 끝 ✨
+
+            inventoryContainer.appendChild(cardElement);
+        }
+    });
+
+    // ✨ 정렬 UI 업데이트 로직 (기존 정렬 로직 유지) ✨
+    document.querySelectorAll('.sort-button').forEach(btn => {
+        btn.classList.remove('active', 'bg-blue-500');
+        btn.querySelector('.sort-indicator').textContent = '';
+    });
+    const activeButton = document.querySelector(`.sort-button[data-sort="${currentSortOrder}"]`);
+    if (activeButton) {
+        activeButton.classList.add('active', 'bg-blue-500');
+        activeButton.querySelector('.sort-indicator').textContent = isSortAscending ? ' ▲' : ' ▼';
+    }
+    
+    // 다중 선택 모드일 때만 상태 UI 업데이트
+    if (isMultiSelectMode) {
+        updateMultiSelectUI();
+    }
+}
 
             function displayDeckManagement() {
                 deckStatus.textContent = `현재 편찬: ${playerDeck.length} / ${DECK_CAPACITY}`;
@@ -2149,6 +2181,91 @@ enhanceButton.disabled = playerFountainPens < cost;
                 cardDetailModal.classList.remove('hidden');
             }
 
+function dismantleMultipleCards() {
+    if (selectedCardsToDismantle.size === 0) {
+        showMessage('파쇄할 카드를 선택해주세요.', 'text-yellow-400', messageArea);
+        return;
+    }
+
+    if (!confirm(`선택된 ${selectedCardsToDismantle.size}장의 카드를 파쇄하고 재료를 회수하시겠습니까? (복구 불가)`)) {
+        return;
+    }
+
+    let totalFountainPens = 0;
+    let totalInkwells = 0;
+    let cardsToRemove = []; // 실제로 제거할 카드의 ID 목록
+    let cardsInDeck = []; // 덱에 포함되어 제거하지 못하는 카드 목록
+    
+    // 1. 유효성 검사 및 보상 계산
+    selectedCardsToDismantle.forEach(cardId => {
+        const cardInstance = playerInventory.find(c => c.id === cardId);
+        if (!cardInstance) return;
+
+        // 덱 포함 여부 검사
+        if (playerDeck.some(deckCard => deckCard.id === cardId)) {
+            cardsInDeck.push(cardInstance.name);
+        } else {
+            const character = findCharacter(cardInstance.name);
+            const rewards = DISMANTLE_REWARDS[character.rarity];
+            totalFountainPens += rewards.fountainPens;
+            totalInkwells += rewards.inkwells;
+            cardsToRemove.push(cardId);
+        }
+    });
+
+    // 2. 파쇄 실행 (인벤토리에서 제거)
+    playerInventory = playerInventory.filter(card => !cardsToRemove.includes(card.id));
+    
+    // 3. 보상 지급
+    playerFountainPens += totalFountainPens;
+    playerInkwells += totalInkwells;
+
+    // 4. 메시지 구성
+    let message = `총 ${cardsToRemove.length}장의 카드를 파쇄했습니다.`;
+    if (totalFountainPens > 0) message += ` 🖋️${totalFountainPens} 획득.`;
+    if (totalInkwells > 0) message += ` 💧잉크병 ${totalInkwells} 획득.`;
+
+    if (cardsInDeck.length > 0) {
+        message += ` (⚠️ 덱에 포함된 카드 ${cardsInDeck.length}장은 파쇄되지 않았습니다.)`;
+        showMessage(message, 'text-red-400', messageArea);
+    } else {
+        showMessage(message, 'text-yellow-300', messageArea);
+    }
+    
+    // 5. 모드 종료 및 UI 갱신
+    exitMultiSelectMode(); // 모드 종료 함수 호출
+    updateUI();
+    displayInventory();
+    saveGame();
+}
+
+			function enterMultiSelectMode() {
+    isMultiSelectMode = true;
+    selectedCardsToDismantle.clear();
+    dismantleMultiUI.classList.remove('hidden');
+    enterMultiModeButton.classList.add('hidden');
+    displayInventory();
+}
+
+function exitMultiSelectMode() {
+    isMultiSelectMode = false;
+    selectedCardsToDismantle.clear();
+    dismantleMultiUI.classList.add('hidden');
+    enterMultiModeButton.classList.remove('hidden');
+    displayInventory();
+    // 모드 종료 시 인벤토리 뷰가 열려있다면 새로고침하여 카드 상세 모달이 뜨도록 합니다.
+    if (!document.getElementById('inventory-view').classList.contains('hidden')) {
+        switchTab('inventory');
+    }
+}
+
+function updateMultiSelectUI() {
+    const count = selectedCardsToDismantle.size;
+    selectedCardCountSpan.textContent = `${count}장`;
+    dismantleSelectedButton.disabled = count === 0;
+    dismantleSelectedButton.classList.toggle('bg-red-700', count > 0);
+}
+			
 			function dismantleCard(cardId) {
     if (!confirm('이 카드를 파쇄하고 재료를 회수하시겠습니까? 카드는 영구히 사라집니다.')) {
         return;
@@ -2462,6 +2579,10 @@ function startInteractiveStory(storyOrIndex, type) {
             // --- 이벤트 리스너 ---
 
 
+enterMultiModeButton.addEventListener('click', enterMultiSelectMode);
+exitMultiModeButton.addEventListener('click', exitMultiSelectMode);
+dismantleSelectedButton.addEventListener('click', dismantleMultipleCards);
+			
 dismantleCardButton.addEventListener('click', () => {
     // 현재 모달에 표시된 카드의 ID를 사용
     dismantleCard(currentDetailCardId);
@@ -2532,32 +2653,58 @@ storySubTabStage.addEventListener('click', () => {
             gachaTabEvent.addEventListener('click', () => switchGachaTab('event'));
             
             const cardClickableContainers = [inventoryContainer, deckInventoryContainer, deckSlotsContainer, collectionContainer];
-            cardClickableContainers.forEach(container => {
-                container.addEventListener('click', (e) => {
-                    const actionButton = e.target.closest('[data-action]');
-                    if (actionButton) {
-                        e.stopPropagation();
-                        const action = actionButton.dataset.action;
-                        
-                        if (action === 'set-representative') {
-                            setRepresentative(actionButton.dataset.cardName);
-                        } else if (action === 'add-to-deck') {
-                            addToDeck(actionButton.dataset.cardId); // 이름 대신 ID 사용
-                        } else if (action === 'remove-from-deck') {
-                            removeFromDeck(actionButton.dataset.cardId); // 이름 대신 ID 사용
-                        }
+cardClickableContainers.forEach(container => {
+    container.addEventListener('click', (e) => {
+        const actionButton = e.target.closest('[data-action]');
+        if (actionButton) {
+            e.stopPropagation();
+            const action = actionButton.dataset.action;
+            
+            if (action === 'set-representative') {
+                setRepresentative(actionButton.dataset.cardName);
+            } else if (action === 'add-to-deck') {
+                addToDeck(actionButton.dataset.cardId); // 이름 대신 ID 사용
+            } else if (action === 'remove-from-deck') {
+                removeFromDeck(actionButton.dataset.cardId); // 이름 대신 ID 사용
+            }
 
-                    } else {
-                        const cardElement = e.target.closest('[data-unique-id]');
-                        if (cardElement) {
-                            if (container === collectionContainer && cardElement.dataset.isCollected === 'false') {
-                                return;
-                            }
-                            showCardDetails(cardElement.dataset.uniqueId);
-                        }
+        } else {
+            const cardElement = e.target.closest('[data-unique-id]');
+            if (cardElement) {
+                const cardId = cardElement.dataset.uniqueId;
+
+                // ✨ 다중 파쇄 모드 처리 시작 (inventoryContainer에서만 작동) ✨
+                if (container === inventoryContainer && isMultiSelectMode) {
+                    const isInDeck = playerDeck.some(deckCard => deckCard.id === cardId);
+                    
+                    if (isInDeck) {
+                        showMessage('덱에 포함된 카드는 파쇄할 수 없습니다.', 'text-red-400', messageArea);
+                        return;
                     }
-                });
-            });
+                    
+                    // 선택 토글
+                    if (selectedCardsToDismantle.has(cardId)) {
+                        selectedCardsToDismantle.delete(cardId);
+                    } else {
+                        selectedCardsToDismantle.add(cardId);
+                    }
+                    
+                    // UI 업데이트
+                    displayInventory(); 
+                    return; // 다중 선택 모드에서는 상세 정보 모달을 띄우지 않습니다.
+                }
+                // ✨ 다중 파쇄 모드 처리 끝 ✨
+
+
+                // (기존) 단일 카드 상세 정보 표시 로직 
+                if (container === collectionContainer && cardElement.dataset.isCollected === 'false') {
+                    return;
+                }
+                showCardDetails(cardElement.dataset.uniqueId);
+            }
+        }
+    });
+});
 
             // ⛔️ 기존 dungeonListContainer.addEventListener... 부분을 삭제하고,
             // ✅ 아래의 새로운 이벤트 리스너를 추가합니다.
@@ -2666,6 +2813,7 @@ storySubTabStage.addEventListener('click', () => {
     </script>
 </body>
 </html>
+
 
 
 
