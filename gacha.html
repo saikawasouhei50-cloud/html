@@ -258,10 +258,10 @@
             <button id="expand-inventory" class="gacha-button bg-yellow-500 hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold py-2 px-4 rounded-full shadow-lg text-sm">칸 확장 (💎50)</button>
         </div>
         <div id="inventory-sort-buttons" class="mt-4 flex justify-center gap-2">
-    <button data-sort="rarity" class="gacha-button sort-button bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-4 rounded-full text-sm">등급순</button>
-    <button data-sort="level" class="gacha-button sort-button bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-4 rounded-full text-sm">퇴고순</button>
-    <button data-sort="revision" class="gacha-button sort-button bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-4 rounded-full text-sm">개정순</button>
-    <button data-sort="name" class="gacha-button sort-button bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-4 rounded-full text-sm">캐릭터순</button>
+    <button data-sort="rarity" class="gacha-button sort-button bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-4 rounded-full text-sm">등급순<span class="sort-indicator"></span></button>
+    <button data-sort="level" class="gacha-button sort-button bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-4 rounded-full text-sm">퇴고순<span class="sort-indicator"></span></button>
+    <button data-sort="revision" class="gacha-button sort-button bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-4 rounded-full text-sm">개정순<span class="sort-indicator"></span></button>
+    <button data-sort="name" class="gacha-button sort-button bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-4 rounded-full text-sm">캐릭터순<span class="sort-indicator"></span></button>
 </div>
     </div>
     <div id="inventory-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 min-h-[400px] max-h-[60vh] overflow-y-auto bg-black/20 p-4 rounded-xl"></div>
@@ -455,6 +455,7 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
             let playerCurrency = 100;
 			let playerFountainPens = 500; // 🖋️
             let playerInventory = [];
+			let isSortAscending = false; // ✨ 정렬 방향 변수 추가 (false: 내림차순, true: 오름차순)
             let playerDeck = [];
             let inventoryCapacity = 100;
             let representativeCharacter = null;
@@ -1188,6 +1189,7 @@ function addCardToInventory(cardName) {
             }
 
             // ✅ 이 코드로 기존 displayInventory 함수를 통째로 교체해주세요.
+            // ✅ 이 코드로 기존 displayInventory 함수를 통째로 교체해주세요.
             function displayInventory() {
                 inventoryStatus.textContent = `${playerInventory.length} / ${inventoryCapacity}`;
                 inventoryContainer.innerHTML = '';
@@ -1202,32 +1204,25 @@ function addCardToInventory(cardName) {
                 const sortedInventory = [...playerInventory].sort((a, b) => {
                     const charA = findCharacter(a.name);
                     const charB = findCharacter(b.name);
+                    let comparison = 0;
+
                     switch (currentSortOrder) {
                         case 'level':
-                            if (b.level !== a.level) return b.level - a.level;
-                            return rarityOrder[charB.rarity] - rarityOrder[charA.rarity];
+                            comparison = b.level - a.level || rarityOrder[charB.rarity] - rarityOrder[charA.rarity];
+                            break;
                         case 'revision':
-                            if (b.revision !== a.revision) return b.revision - a.revision;
-                            return rarityOrder[charB.rarity] - rarityOrder[charA.rarity];
-                        
-                        // ✨ '캐릭터순' 정렬 로직 (핵심 수정 부분) ✨
+                            comparison = b.revision - a.revision || rarityOrder[charB.rarity] - rarityOrder[charA.rarity];
+                            break;
                         case 'name': 
-                            // 1차: 캐릭터 이름(baseName)으로 가나다순 정렬
-                            if (charA.baseName !== charB.baseName) {
-                                return charA.baseName.localeCompare(charB.baseName);
-                            }
-                            // 2차: 같은 캐릭터 내에서는 등급(rarity)이 높은 순으로 정렬
-                            if (rarityOrder[charB.rarity] !== rarityOrder[charA.rarity]) {
-                                return rarityOrder[charB.rarity] - rarityOrder[charA.rarity];
-                            }
-                            // 3차: 등급도 같으면 퇴고 레벨이 높은 순으로 정렬
-                            return b.level - a.level;
-
+                            comparison = charA.baseName.localeCompare(charB.baseName) || rarityOrder[charB.rarity] - rarityOrder[charA.rarity] || b.level - a.level;
+                            break;
                         case 'rarity':
                         default:
-                            if (rarityOrder[charB.rarity] !== rarityOrder[charA.rarity]) return rarityOrder[charB.rarity] - rarityOrder[charA.rarity];
-                            return b.level - a.level;
+                            comparison = rarityOrder[charB.rarity] - rarityOrder[charA.rarity] || b.level - a.level;
+                            break;
                     }
+                    // ✨ 오름차순(isSortAscending)이 true이면 결과에 -1을 곱해 순서를 뒤집음 ✨
+                    return isSortAscending ? comparison * -1 : comparison;
                 });
                 // 정렬 로직 끝
 
@@ -1238,8 +1233,18 @@ function addCardToInventory(cardName) {
                         inventoryContainer.appendChild(createCard(character, { animationIndex: index, mode: 'inventory', instance: cardInstance }));
                     }
                 });
-            }
 
+                // ✨ 활성화된 버튼 스타일 및 화살표 표시 로직 ✨
+                document.querySelectorAll('.sort-button').forEach(btn => {
+                    btn.classList.remove('active', 'bg-blue-500');
+                    btn.querySelector('.sort-indicator').textContent = '';
+                });
+                const activeButton = document.querySelector(`.sort-button[data-sort="${currentSortOrder}"]`);
+                if (activeButton) {
+                    activeButton.classList.add('active', 'bg-blue-500');
+                    activeButton.querySelector('.sort-indicator').textContent = isSortAscending ? ' ▲' : ' ▼';
+                }
+            }
             function displayCollection() {
     collectionContainer.innerHTML = '';
 
@@ -1985,17 +1990,26 @@ async function startCombat(dungeonIndex, type) {
             // --- 이벤트 리스너 ---
 			
 			// document.getElementById('enhance-card-button')... 바로 위에 추가
-document.getElementById('inventory-sort-buttons').addEventListener('click', (e) => {
-    const button = e.target.closest('.sort-button');
-    if (button && button.dataset.sort) {
-        currentSortOrder = button.dataset.sort;
-        // 모든 버튼에서 active 클래스 제거
-        document.querySelectorAll('.sort-button').forEach(btn => btn.classList.remove('active', 'bg-blue-500'));
-        // 클릭된 버튼에만 active 클래스 추가
-        button.classList.add('active', 'bg-blue-500');
-        displayInventory();
-    }
-});
+			// ✅ 이 코드로 기존 정렬 버튼 이벤트 리스너를 통째로 교체해주세요.
+            document.getElementById('inventory-sort-buttons').addEventListener('click', (e) => {
+                const button = e.target.closest('.sort-button');
+                if (button && button.dataset.sort) {
+                    const newSortOrder = button.dataset.sort;
+                    
+                    // ✨ 토글 로직 시작 ✨
+                    if (newSortOrder === currentSortOrder) {
+                        // 같은 버튼을 또 누르면 정렬 방향만 바꿈
+                        isSortAscending = !isSortAscending;
+                    } else {
+                        // 다른 버튼을 누르면 정렬 기준을 바꾸고, 기본값(내림차순)으로 초기화
+                        currentSortOrder = newSortOrder;
+                        isSortAscending = false; 
+                    }
+                    // ✨ 토글 로직 끝 ✨
+
+                    displayInventory(); // 정렬 후 인벤토리 다시 표시
+                }
+            });
 			
 			document.getElementById('enhance-card-button').addEventListener('click', enhanceCard);
 			document.getElementById('revise-card-button').addEventListener('click', reviseCard);
@@ -2125,6 +2139,7 @@ document.getElementById('inventory-sort-buttons').addEventListener('click', (e) 
     </script>
 </body>
 </html>
+
 
 
 
