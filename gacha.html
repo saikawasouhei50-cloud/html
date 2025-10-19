@@ -1098,7 +1098,40 @@ const closeDismantleResultButton = document.getElementById('close-dismantle-resu
                     homeDefaultMessage.classList.remove('hidden');
                 }
             }
-            
+
+
+function displayCollection() {
+    collectionContainer.innerHTML = '';
+    
+    // 1. 플레이어가 수집한 모든 고유 캐릭터 이름 목록을 만듭니다.
+    const collectedNames = new Set(playerInventory.map(card => card.name));
+
+    // 2. 전체 캐릭터 목록을 순회하며 도감 항목을 생성합니다.
+    characters.forEach((character, index) => {
+        const isCollected = collectedNames.has(character.name);
+        
+        // 도감 항목은 '카드 인스턴스'가 아닌 '캐릭터 데이터' 그 자체입니다.
+        const cardElement = createCard(character, { 
+            animationIndex: index, 
+            mode: 'collection', 
+            isCollected: isCollected,
+            // 인스턴스가 없으므로 unique-id 대신 name을 임시 ID로 사용합니다.
+            instance: { id: character.name, level: 0, revision: 0 } 
+        });
+
+        // 수집된 경우에만 showCardDetails가 열리도록 데이터셋을 설정합니다.
+        if (isCollected) {
+            cardElement.dataset.uniqueId = playerInventory.find(c => c.name === character.name).id;
+        } else {
+            // 미수집 카드는 고유 ID를 가질 수 없으므로, 클릭을 막거나 데이터를 표시하지 않습니다.
+            cardElement.dataset.uniqueId = ''; 
+            cardElement.dataset.isCollected = "false";
+        }
+        
+        collectionContainer.appendChild(cardElement);
+    });
+}
+			
             function displayEventView() {
                 displayEventBattleView();
                 displayEventStoryView();
@@ -2864,6 +2897,7 @@ cardClickableContainers.forEach(container => {
     </script>
 </body>
 </html>
+
 
 
 
