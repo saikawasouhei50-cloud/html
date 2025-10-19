@@ -278,6 +278,7 @@
             const characterPortraits = {
                 '서도진': {
                     neutral: 'https://i.imgur.com/9AoLI6I.png',
+					serious: 'https://i.imgur.com/9AoLI6I.png',
                     surprised: 'https://i.imgur.com/IayOWqf.png',
                     angry: 'https://i.imgur.com/ERUGX0P.png',
                 },
@@ -312,6 +313,7 @@ const RARITY_COST_MULTIPLIER = {
 // (만약 있다면 삭제하세요): const enhancementCosts = [10, 20, 35, 55, 80, 110, 150, 200, 250];
 
 // 나머지 게임 설정 데이터는 그대로 유지합니다.
+
 
 
 
