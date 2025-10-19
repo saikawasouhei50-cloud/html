@@ -1957,6 +1957,35 @@ function startStageCombat(chapterIndex, stageIndex) {
                 combatLogContainer.scrollTop = combatLogContainer.scrollHeight;
             }
 
+
+			function renderEventStoryList() {
+    const eventStoryContainer = document.getElementById('eventStoryContainer');
+    eventStoryContainer.innerHTML = '';
+    
+    // 1번에서 정의한 eventStories 배열을 사용합니다.
+    eventStories.forEach((story, index) => {
+        const storyEl = document.createElement('div');
+        storyEl.className = 'p-3 bg-white/10 rounded-lg shadow-md mb-2 cursor-pointer transition-transform hover:scale-[1.01]';
+        
+        // ⭐ 이 두 가지 data- 속성이 중요합니다!
+        storyEl.dataset.storyIndex = index;
+        storyEl.dataset.storyType = 'event'; // ✅ 이 속성이 'event'여야 합니다.
+        
+        storyEl.innerHTML = `
+            <div class="text-lg font-bold text-white">${story.title}</div>
+            <div class="text-sm text-gray-300">획득 보상: 북마크 10개</div>
+        `;
+
+        if (story.isLocked) {
+             storyEl.classList.add('opacity-50', 'cursor-default');
+             storyEl.innerHTML = `<div class="text-lg font-bold text-gray-500">스토리 잠금</div><div class="text-sm text-gray-500">이벤트 진행을 통해 해제 가능</div>`;
+             storyEl.dataset.storyType = 'locked'; // 잠긴 스토리는 다른 타입으로 설정하여 클릭 방지
+        }
+        
+        eventStoryContainer.appendChild(storyEl);
+    });
+}
+
              function updateCombatUI(deck, originalBonusDeck, monster) {
 				deck.forEach((card, index) => {
 					const originalCardWithBonus = originalBonusDeck[index];
@@ -2932,6 +2961,7 @@ cardClickableContainers.forEach(container => {
     </script>
 </body>
 </html>
+
 
 
 
