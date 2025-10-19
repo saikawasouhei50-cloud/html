@@ -606,6 +606,8 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
     // ✨ 게임 첫 시작 시 기본 지급 카드에 고유 ID와 레벨 부여
     addCardToInventory('[편집자] 윤필규');
     addCardToInventory('[조수] 한 현');
+	playerCurrency = 100; // 💎 초기 보석 100개 지급
+    playerFountainPens = 500; // 🖋️ 초기 펜 수량도 명시적으로 지정
     playerBookmarks = MAX_BOOKMARKS;
     lastBookmarkUpdateTime = Date.now();
 }
@@ -1946,6 +1948,7 @@ async function startCombat(dungeonIndex, type) {
     </script>
 </body>
 </html>
+
 
 
 
