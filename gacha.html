@@ -2710,6 +2710,14 @@ function dismantleMultipleCards() {
 			
             // --- 이벤트 리스너 ---
 
+			document.getElementById('event-view').addEventListener('click', (e) => {
+                // 클릭된 요소가 스토리 버튼인지 확인합니다.
+                const storyButton = e.target.closest('[data-story-type="event"]');
+                if (storyButton && storyButton.dataset.storyIndex) {
+                    const storyIndex = parseInt(storyButton.dataset.storyIndex, 10);
+                    startInteractiveStory(storyIndex, 'event'); // 이벤트 스토리 실행
+                }
+            });
 
 enterMultiModeButton.addEventListener('click', enterMultiSelectMode);
 exitMultiModeButton.addEventListener('click', exitMultiSelectMode);
@@ -2967,6 +2975,7 @@ cardClickableContainers.forEach(container => {
     </script>
 </body>
 </html>
+
 
 
 
