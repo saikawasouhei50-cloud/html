@@ -262,9 +262,9 @@
     { 
         title: '어둠 속의 계약: 공범의 조건', 
         content: [
-            { character: '독고유진', expression: 'serious', dialogue: '범인은 혼자가 아닐 겁니다. 누군가에게 협조를 얻고, 그 대가로 물질적 보상이 아닌 '정보'를 약속했을 가능성이 높아요.' },
+            { character: '독고유진', expression: 'serious', dialogue: '범인은 혼자가 아닐 겁니다. 누군가에게 협조를 얻고, 그 대가로 물질적 보상이 아닌 "정보"를 약속했을 가능성이 높아요.' },
             { character: '윤필규', expression: 'neutral', dialogue: '어둠 속에서 계약된 것은 무엇일까요? 진실의 은폐? 아니면... 새로운 이야기의 집필?' },
-            { character: null, dialogue: '계약서의 흔적은 없었지만, 그들이 주고받은 교환의 에너지('열 추적')는 현장에 강하게 남아 있었다.' }
+            { character: null, dialogue: '계약서의 흔적은 없었지만, 그들이 주고받은 교환의 에너지("열 추적")는 현장에 강하게 남아 있었다.' }
         ]
     },
     { 
@@ -286,7 +286,7 @@
     { 
         title: '함정: 조작된 데이터', 
         content: [
-            { character: '강은율', expression: 'serious', dialogue: '범인의 것으로 추정되는 데이터를 해킹했습니다. 하지만 분석 결과, 데이터에 '디지털 흔적 조작'의 징후가 있습니다.' },
+            { character: '강은율', expression: 'serious', dialogue: '범인의 것으로 추정되는 데이터를 해킹했습니다. 하지만 분석 결과, 데이터에 "디지털 흔적 조작"의 징후가 있습니다.' },
             { character: '백정문', expression: 'neutral', dialogue: '함정입니다. 범인은 우리가 잘못된 에너지 경로를 따르도록 유도하고 있어요. 빛을 따라가지 마십시오.' },
             { character: null, dialogue: '모든 것이 조작된 상황. 진실은 데이터의 이면(裏面)에 숨어 있었다.' }
         ]
@@ -495,6 +495,7 @@ const RARITY_COST_MULTIPLIER = {
 // (만약 있다면 삭제하세요): const enhancementCosts = [10, 20, 35, 55, 80, 110, 150, 200, 250];
 
 // 나머지 게임 설정 데이터는 그대로 유지합니다.
+
 
 
 
