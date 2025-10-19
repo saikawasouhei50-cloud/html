@@ -178,6 +178,12 @@
 
         <!-- 메인 컨텐츠 영역 -->
         <main>
+			<div id="message-area" class="text-center text-lg h-8 mb-4 transition-opacity duration-300"></div>
+
+    <div id="gacha-view" class="hidden">
+        <div id="results-container" class="grid ..."></div>
+    </div>
+    
              <!-- 저장 불가 경고 메시지 -->
             <div id="storage-warning" class="hidden text-center bg-red-500 p-2 rounded-lg mb-4">
                 <strong>경고:</strong> 게임 진행 상황을 저장할 수 없습니다. 브라우저가 시크릿 모드이거나 저장 기능이 비활성화되었는지 확인해주세요.
@@ -254,7 +260,6 @@
                         <button id="pull-ten-event" class="gacha-button w-full sm:w-auto bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-8 rounded-full shadow-lg">🔥🔥 10회 뽑기 (100)</button>
                     </div>
                 </div>
-                <div id="message-area" class="text-center text-lg h-8 mb-4 transition-opacity duration-300"></div>
                 <div id="results-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 min-h-[200px] bg-black/20 p-4 rounded-xl"></div>
             </div>
 
@@ -2499,7 +2504,7 @@ function dismantleMultipleCards() {
     playerFountainPens += totalFountainPens;
     playerInkwells += totalInkwells;
 
-    // 3. 모달 표시 및 결과 업데이트 (Alert 대체)
+   // 3. 모달 표시 및 결과 업데이트 (Alert 대체)
     hideCardDetails();
     exitMultiSelectMode(); 
     updateUI();
@@ -2513,13 +2518,11 @@ function dismantleMultipleCards() {
     // 모달 표시
     dismantleResultModal.classList.remove('hidden');
 
-    // 5. 성공 메시지 딜레이 호출 (핵심 수정)
+    // 5. 성공 메시지 즉시 호출 (setTimeout 제거)
     if (cardsToRemove.length > 0) {
-        // UI 갱신이 완료된 후 짧은 딜레이를 주어 메시지가 덮어쓰이지 않도록 함
         const finalMessage = `총 ${cardsToRemove.length}장의 원고를 파쇄했습니다.`;
-        setTimeout(() => {
-            showMessage(finalMessage, 'text-yellow-300', messageArea);
-        }, 100); // 100ms 딜레이
+        // setTimeout 없이 즉시 호출
+        showMessage(finalMessage, 'text-yellow-300', messageArea); 
     }
 }
 			
@@ -2845,6 +2848,7 @@ cardClickableContainers.forEach(container => {
     </script>
 </body>
 </html>
+
 
 
 
