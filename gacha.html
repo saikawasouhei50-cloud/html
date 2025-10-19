@@ -503,8 +503,8 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
             const messageArea = document.getElementById('message-area');
             const allTabs = document.querySelectorAll('.tab-button');
             const allViews = document.querySelectorAll(
-  'main > div:not(#combat-result-modal):not(#card-detail-modal):not(#interactive-story-modal)'
-);
+              'main > div:not(#combat-result-modal):not(#card-detail-modal):not(#interactive-story-modal)'
+            );
             const pullOneButton = document.getElementById('pull-one');
             const pullTenButton = document.getElementById('pull-ten');
             const pullOneEventButton = document.getElementById('pull-one-event');
@@ -566,9 +566,11 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
             const bookmarkDisplay = document.getElementById('bookmark-display');
             const maxBookmarkDisplay = document.getElementById('max-bookmark-display');
             const bookmarkTimerContainer = document.getElementById('bookmark-timer-container'); 
-            const achievementsContainer = document.getElementById('achievements-container'); // ✅ 이 위치에 있어야 합니다.
+            const achievementsContainer = document.getElementById('achievements-container'); // ✅ 여기서 명확하게 선언
             const toastNotification = document.getElementById('toast-notification');
 			const synergyList = document.getElementById('synergy-list');
+			
+			// ✨ 스토리 탭 관련 변수들 ✨
 			const stageStoryContainer = document.getElementById('stage-story-container');
             const storySubTabMain = document.getElementById('story-sub-tab-main');
             const storySubTabStage = document.getElementById('story-sub-tab-stage');
@@ -2462,6 +2464,7 @@ storySubTabStage.addEventListener('click', () => {
     </script>
 </body>
 </html>
+
 
 
 
