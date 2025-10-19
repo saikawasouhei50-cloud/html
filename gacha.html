@@ -464,6 +464,90 @@
 	<script src="game_data.js"></script>
 	
     <script>
+
+		// gacha3.html - downloadSaveData 함수 (기존 함수 전체 교체)
+
+function downloadSaveData() {
+    const saveDataString = localStorage.getItem(SAVE_DATA_KEY);
+    if (!saveDataString) {
+        showMessage('저장된 게임 데이터가 없습니다!', 'text-red-400', messageArea);
+        return;
+    }
+
+    try {
+        // 1. 저장된 JSON 문자열을 UTF-8 안전 Base64로 인코딩
+        const encodedData = utf8_to_b64(saveDataString); // ✨ 수정된 함수 사용 ✨
+
+        // 2. 파일 생성 및 다운로드 링크 생성
+        const blob = new Blob([encodedData], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        
+        // 파일명: Kside_Save_20251019.txt (현재 날짜 사용)
+        const now = new Date();
+        const dateString = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+        a.download = `Kside_Save_${dateString}.txt`;
+        
+        // 3. 요소 추가, 클릭, 제거 및 URL 해제
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showMessage('게임 데이터가 다운로드되었습니다.', 'text-green-400', messageArea);
+    } catch (e) {
+        console.error("다운로드 처리 중 오류 발생:", e);
+        alert("데이터 다운로드에 실패했습니다. (오류: 콘솔 확인)");
+    }
+}
+
+			function utf8_to_b64(str) {
+    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+        function toSolidBytes(match, p1) {
+            return String.fromCharCode('0x' + p1);
+    }));
+}
+
+// Base64를 UTF-8 문자열로 안전하게 디코딩하는 함수 (한글 처리)
+function b64_to_utf8(str) {
+    return decodeURIComponent(atob(str).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+}
+			
+			function uploadSaveData(file) {
+    const reader = new FileReader();
+    
+    reader.onload = function(event) {
+        try {
+            const encodedData = event.target.result;
+            
+            // 1. Base64 안전 디코딩
+            const jsonString = b64_to_utf8(encodedData); // ✨ 수정된 함수 사용 ✨
+            
+            // 2. JSON 파싱 테스트 (데이터 유효성 검사)
+            JSON.parse(jsonString); 
+            
+            // 3. 유효한 데이터이므로 localStorage에 저장하고 로드
+            localStorage.setItem(SAVE_DATA_KEY, jsonString);
+            
+            alert("데이터 로드 성공! 게임이 새로고침됩니다.");
+            location.reload();
+
+        } catch (e) {
+            console.error("데이터 로드 오류:", e);
+            alert("⚠️ 유효하지 않은 저장 파일입니다. (데이터 손상)");
+            showMessage('유효하지 않은 저장 파일입니다.', 'text-red-400', messageArea);
+        }
+    };
+    
+    reader.onerror = function() {
+        alert("파일을 읽는 도중 오류가 발생했습니다.");
+    };
+
+    reader.readAsText(file);
+}
         document.addEventListener('DOMContentLoaded', () => {
             
 
@@ -691,89 +775,6 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
                 checkAchievements();
             }
 
-// gacha3.html - downloadSaveData 함수 (기존 함수 전체 교체)
-
-function downloadSaveData() {
-    const saveDataString = localStorage.getItem(SAVE_DATA_KEY);
-    if (!saveDataString) {
-        showMessage('저장된 게임 데이터가 없습니다!', 'text-red-400', messageArea);
-        return;
-    }
-
-    try {
-        // 1. 저장된 JSON 문자열을 UTF-8 안전 Base64로 인코딩
-        const encodedData = utf8_to_b64(saveDataString); // ✨ 수정된 함수 사용 ✨
-
-        // 2. 파일 생성 및 다운로드 링크 생성
-        const blob = new Blob([encodedData], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        
-        // 파일명: Kside_Save_20251019.txt (현재 날짜 사용)
-        const now = new Date();
-        const dateString = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
-        a.download = `Kside_Save_${dateString}.txt`;
-        
-        // 3. 요소 추가, 클릭, 제거 및 URL 해제
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        
-        showMessage('게임 데이터가 다운로드되었습니다.', 'text-green-400', messageArea);
-    } catch (e) {
-        console.error("다운로드 처리 중 오류 발생:", e);
-        alert("데이터 다운로드에 실패했습니다. (오류: 콘솔 확인)");
-    }
-}
-
-			function utf8_to_b64(str) {
-    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
-        function toSolidBytes(match, p1) {
-            return String.fromCharCode('0x' + p1);
-    }));
-}
-
-// Base64를 UTF-8 문자열로 안전하게 디코딩하는 함수 (한글 처리)
-function b64_to_utf8(str) {
-    return decodeURIComponent(atob(str).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
-}
-			
-			function uploadSaveData(file) {
-    const reader = new FileReader();
-    
-    reader.onload = function(event) {
-        try {
-            const encodedData = event.target.result;
-            
-            // 1. Base64 안전 디코딩
-            const jsonString = b64_to_utf8(encodedData); // ✨ 수정된 함수 사용 ✨
-            
-            // 2. JSON 파싱 테스트 (데이터 유효성 검사)
-            JSON.parse(jsonString); 
-            
-            // 3. 유효한 데이터이므로 localStorage에 저장하고 로드
-            localStorage.setItem(SAVE_DATA_KEY, jsonString);
-            
-            alert("데이터 로드 성공! 게임이 새로고침됩니다.");
-            location.reload();
-
-        } catch (e) {
-            console.error("데이터 로드 오류:", e);
-            alert("⚠️ 유효하지 않은 저장 파일입니다. (데이터 손상)");
-            showMessage('유효하지 않은 저장 파일입니다.', 'text-red-400', messageArea);
-        }
-    };
-    
-    reader.onerror = function() {
-        alert("파일을 읽는 도중 오류가 발생했습니다.");
-    };
-
-    reader.readAsText(file);
-}
 			
             function initializeNewGameData() {
     // ✨ 게임 첫 시작 시 기본 지급 카드에 고유 ID와 레벨 부여
@@ -2384,12 +2385,7 @@ function startInteractiveStory(storyOrIndex, type) {
 			
             // --- 이벤트 리스너 ---
 
-			document.getElementById('upload-file').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        uploadSaveData(file);
-    }
-});
+			
 
 			storySubTabMain.addEventListener('click', () => {
     storySubTabMain.classList.add('active');
@@ -2579,6 +2575,7 @@ storySubTabStage.addEventListener('click', () => {
     </script>
 </body>
 </html>
+
 
 
 
