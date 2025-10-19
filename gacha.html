@@ -708,30 +708,32 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
             }
 
             function checkAchievements() {
-                const currentState = {
-                    inventory: playerInventory,
-                    stats: playerStats,
-                    clearedStages: clearedStages,
-                    capacity: inventoryCapacity,
-                };
-                let newAchievementUnlocked = false;
-                achievements.forEach(ach => {
-                    // 아직 달성하지 않은 업적만 체크
-                    if (!playerAchievements[ach.id]) {
-                        if (ach.condition(currentState)) {
-                            playerAchievements[ach.id] = 'unlocked';
-                            newAchievementUnlocked = true;
-                        }
-                    }
-                });
-                if (newAchievementUnlocked) {
-                    showToast();
-                    // 현재 업적 탭을 보고 있다면 UI를 즉시 갱신
-                    if (document.getElementById('achievements-view').classList.contains('hidden') === false) {
-                        displayAchievements();
-                    }
-                }
+    const currentState = {
+        inventory: playerInventory,
+        stats: playerStats,
+        clearedStages: clearedStages,
+        capacity: inventoryCapacity,
+        fountainPens: playerFountainPens, // ✨ 만년필 수량 상태를 추가합니다. ✨
+    };
+    let newAchievementUnlocked = false;
+    achievements.forEach(ach => {
+        // 아직 달성하지 않은 업적만 체크
+        if (!playerAchievements[ach.id]) {
+            // 업적 조건이 playerFountainPens를 사용하도록 수정합니다.
+            if (ach.condition(currentState)) { 
+                playerAchievements[ach.id] = 'unlocked';
+                newAchievementUnlocked = true;
             }
+        }
+    });
+    if (newAchievementUnlocked) {
+        showToast();
+        // 현재 업적 탭을 보고 있다면 UI를 즉시 갱신
+        if (document.getElementById('achievements-view').classList.contains('hidden') === false) {
+            displayAchievements();
+        }
+    }
+}
             
             function displayAchievements() {
                 achievementsContainer.innerHTML = '';
@@ -2404,6 +2406,7 @@ function startInteractiveStory(storyOrIndex, type) {
     </script>
 </body>
 </html>
+
 
 
 
