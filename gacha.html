@@ -456,6 +456,13 @@
 const STAT_INCREASE_PER_REVISION = 0.10; // ✨ 개정 1단계당 기본 능력치 10% 증가
 			const MAX_ENHANCEMENT_LEVEL = 9;
 const ENHANCEMENT_COSTS = [5, 10, 15, 25, 40, 60, 85, 115, 150]; // 레벨 0->1, 1->2, ..., 8->9 비용
+			const ENHANCEMENT_BASE_COSTS = [5, 10, 15, 25, 40, 60, 85, 115, 150]; // 👈 이 코드를 추가
+const RARITY_COST_MULTIPLIER = { // 👈 이 코드를 추가
+    'N': 0.7,
+    'R': 1.0,
+    'SR': 1.3,
+    'SSR': 1.6,
+};
 const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
             let playerCurrency = 100;
 			let playerFountainPens = 500; // 🖋️
@@ -2280,6 +2287,7 @@ enhanceButton.disabled = playerFountainPens < cost;
     </script>
 </body>
 </html>
+
 
 
 
