@@ -227,17 +227,87 @@
 ];
 
             const eventStories = [
-                { title: '사건의 발단', content: `어느 날, 탐정 사무소에 한 통의 편지가 도착한다...` },
-                { title: '사라진 그림자', content: `편지의 발신인을 찾아간 곳은 텅 비어있었다...` },
-                { title: '첫 번째 증인', content: `사건의 유일한 목격자는 겁에 질려 있었다...` },
-                { title: '거짓된 알리바이', content: `용의자의 알리바이는 너무나도 완벽했다...` },
-                { title: '어둠 속의 계약', content: `사건의 배후에는 거대한 조직이 있었다...` },
-                { title: '두 번째 피해자', content: `범인의 경고에도 수사를 계속하자, 새로운 희생자가 발생했다...` },
-                { title: '숨겨진 단서', content: `피해자가 남긴 다잉 메시지. 그 의미는 과연...` },
-                { title: '함정', content: `모든 단서가 한 곳을 가리키고 있었다. 하지만 그것은 함정이었다...` },
-                { title: '배신자의 얼굴', content: `가장 믿었던 동료가 범인이었다니...` },
-                { title: '진실의 이면', content: `모든 사건의 배후에는 예상치 못한 인물이 있었다...` }
-            ];
+    { 
+        title: '사건의 발단: 푸른 잉크의 경고', 
+        content: [
+            { character: '서도진', expression: 'neutral', dialogue: '익명의 제보가 또 들어왔군. 이번엔 푸른 잉크로 쓰여 있어.' },
+            { character: '윤필규', expression: 'neutral', dialogue: '푸른 잉크요? 저번에 쓰러진 작가분의 원고와는 전혀 다른 색이네요.' },
+            { character: null, dialogue: '편지에는 암호 같은 화학식이 적혀 있었다. 이는 단순한 경고가 아니라, 앞으로 벌어질 사건의 매뉴얼 같았다.' }
+        ]
+    },
+    { 
+        title: '사라진 그림자: 감춰진 연구실', 
+        content: [
+            { character: '도천영', expression: 'serious', dialogue: '이 화학식은 존재하지 않습니다. 하지만 구조를 역산해보니, 폐쇄된 화학 연구소의 위치를 가리키고 있군요.' },
+            { character: '강은율', expression: 'neutral', dialogue: '시뮬레이션 결과, 그 연구소는 최근 48시간 이내에 누군가 침입한 기록이 있습니다.' },
+            { character: null, dialogue: '현장은 이미 누군가의 손을 거친 후였다. 범인의 그림자는 잡히지 않았지만, 뒤섞인 시약병만이 그들의 흔적을 증명했다.' }
+        ]
+    },
+    { 
+        title: '첫 번째 증인: 떨리는 목소리', 
+        content: [
+            { character: '박연우', expression: 'neutral', dialogue: '연구소 근처를 수색했습니다. 폐지 수거인이 사건 당일 새벽, 흰 가운을 입은 사람을 봤다고 증언했어요.' },
+            { character: '백정문', expression: 'serious', dialogue: '그의 진술에서 미세한 "두려움의 파장"이 느껴집니다. 그가 본 것은 단순한 연구원이 아닐 겁니다.' },
+            { character: null, dialogue: '목격자는 겁에 질려 있었고, 그가 본 흰 가운의 모습은 평범한 연구원보다는 실험에 미친 광인에 가까웠다.' }
+        ]
+    },
+    { 
+        title: '거짓된 알리바이: 완벽한 밀실', 
+        content: [
+            { character: '서도진', expression: 'serious', dialogue: '용의자 B는 사건 당일, 자신이 완벽한 밀실 같은 환경에 있었다고 주장해. 물 샐 틈 없는 알리바이야.' },
+            { character: '양석민', expression: 'neutral', dialogue: '모든 반응 경로를 시뮬레이션했지만, 그가 밀실을 벗어날 방법은 없습니다. 하지만... 경로는 하나뿐이 아니죠.' },
+            { character: null, dialogue: '탐정은 완벽한 진술 속에서, 단 하나의 거짓된 문장을 찾아내려 애쓴다.' }
+        ]
+    },
+    { 
+        title: '어둠 속의 계약: 공범의 조건', 
+        content: [
+            { character: '독고유진', expression: 'serious', dialogue: '범인은 혼자가 아닐 겁니다. 누군가에게 협조를 얻고, 그 대가로 물질적 보상이 아닌 '정보'를 약속했을 가능성이 높아요.' },
+            { character: '윤필규', expression: 'neutral', dialogue: '어둠 속에서 계약된 것은 무엇일까요? 진실의 은폐? 아니면... 새로운 이야기의 집필?' },
+            { character: null, dialogue: '계약서의 흔적은 없었지만, 그들이 주고받은 교환의 에너지('열 추적')는 현장에 강하게 남아 있었다.' }
+        ]
+    },
+    { 
+        title: '두 번째 피해자: 붉게 물든 펜', 
+        content: [
+            { character: null, dialogue: '두 번째 피해자는 평범한 기자였다. 그는 사건에 대해 깊이 파고들고 있었고, 그 대가로 붉게 물든 펜을 남겼다.' },
+            { character: '도천영', expression: 'serious', dialogue: '사망 원인은 D-성분 노출입니다. 하지만 이번엔 농도가 매우 낮아요. 경고 살인입니다.' },
+            { character: '서도진', expression: 'angry', dialogue: '경고라니! 범인은 우리에게 자신의 이야기를 강요하고 있어!' }
+        ]
+    },
+    { 
+        title: '숨겨진 단서: 미발표 논문', 
+        content: [
+            { character: '박연우', expression: 'neutral', dialogue: '피해자 기자에게서 미발표된 화학 논문 초안이 발견되었습니다. 논문의 주제는 D-성분의 파생 물질입니다.' },
+            { character: '윤서천', expression: 'serious', dialogue: '파생 물질? 그건 제가 폐기한 연구입니다! 이 물질을 만들 수 있는 건... 저를 제외하고 단 한 사람뿐입니다.' },
+            { character: null, dialogue: '단서는 과거의 실패한 연구를 향하고 있었다.' }
+        ]
+    },
+    { 
+        title: '함정: 조작된 데이터', 
+        content: [
+            { character: '강은율', expression: 'serious', dialogue: '범인의 것으로 추정되는 데이터를 해킹했습니다. 하지만 분석 결과, 데이터에 '디지털 흔적 조작'의 징후가 있습니다.' },
+            { character: '백정문', expression: 'neutral', dialogue: '함정입니다. 범인은 우리가 잘못된 에너지 경로를 따르도록 유도하고 있어요. 빛을 따라가지 마십시오.' },
+            { character: null, dialogue: '모든 것이 조작된 상황. 진실은 데이터의 이면(裏面)에 숨어 있었다.' }
+        ]
+    },
+    { 
+        title: '배신자의 얼굴: 가까운 그림자', 
+        content: [
+            { character: '서도진', expression: 'serious', dialogue: '모든 용의자를 배제했을 때 남는 단 하나의 이름... 그가 이 모든 사건의 발단이었어.' },
+            { character: '독고유진', expression: 'neutral', dialogue: '가장 믿었던 이가 뒤에서 칼을 꽂는다는 결말은... 최악의 이야기입니다.' },
+            { character: '양석민', expression: 'serious', dialogue: '배신자가 정한 경로는 이미 명확합니다. 마지막 결전의 장소로 향해야 합니다.' }
+        ]
+    },
+    { 
+        title: '진실의 이면: 마지막 문장', 
+        content: [
+            { character: null, dialogue: '모든 것이 끝났다. 진실은 잔혹했고, 그 이면에는 왜곡된 정의와 복수가 숨겨져 있었다.' },
+            { character: '서도진', expression: 'neutral', dialogue: '결국... 내가 썼던 소설보다 더 비극적인 결말을 맞이했군.' },
+            { character: '도천영', expression: 'serious', dialogue: '이제 남은 것은 사건을 종결하고... 남겨진 흔적을 정리하는 것뿐입니다.' }
+        ]
+    }
+];
 
             const eventShopItems = [
                 { id: 'event_ssr_card', name: '[이벤트] 어둠의 계약자', type: 'card', cost: 10000, limit: 1, itemData: characters.find(c => c.name === '[이벤트] 어둠의 계약자') },
@@ -425,6 +495,7 @@ const RARITY_COST_MULTIPLIER = {
 // (만약 있다면 삭제하세요): const enhancementCosts = [10, 20, 35, 55, 80, 110, 150, 200, 250];
 
 // 나머지 게임 설정 데이터는 그대로 유지합니다.
+
 
 
 
