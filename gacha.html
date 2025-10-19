@@ -1077,7 +1077,7 @@ function addCardToInventory(cardName) {
     const newCard = {
         id: generateUniqueId(), // 고유 ID 생성
         name: cardName,
-        level: 0 // 최초 레벨은 0
+        level: 0, // 최초 레벨은 0
 		revision: 0 // ✨ 최초 개정 레벨은 0
     };
     playerInventory.push(newCard);
@@ -2094,6 +2094,7 @@ document.getElementById('inventory-sort-buttons').addEventListener('click', (e) 
     </script>
 </body>
 </html>
+
 
 
 
