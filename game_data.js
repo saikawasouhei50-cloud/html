@@ -293,7 +293,26 @@
             const EVENT_CHARACTER_NAME = '[악몽] 서도진';
             const EVENT_START_DATE = new Date('2025-10-14T00:00:00');
             const EVENT_END_DATE = new Date('2025-10-24T23:59:59');
-			const enhancementCosts = [10, 20, 35, 55, 80, 110, 150, 200, 250]; // +1강 ~ +9강에 필요한 만년필 비용
+			// --- 강화(퇴고) 비용 설정 ---
+
+// 레벨 0->1, 1->2, ..., 8->9로 갈 때 필요한 만년필의 기본 비용
+// (기존의 ENHANCEMENT_COSTS 배열을 대체합니다)
+const ENHANCEMENT_BASE_COSTS = [5, 10, 15, 25, 40, 60, 85, 115, 150];
+
+// 등급별 비용 배율 (N등급이 기준 1.0)
+const RARITY_COST_MULTIPLIER = {
+    'N': 0.7,   // N등급: 기준 비용의 70% 소모 (가장 저렴)
+    'R': 1.0,   // R등급: 기준 비용의 100% 소모 (기준)
+    'SR': 1.3,  // SR등급: 기준 비용의 130% 소모
+    'SSR': 1.6, // SSR등급: 기준 비용의 160% 소모 (가장 비쌈)
+};
+
+// 기존에 있던 ENHANCEMENT_COSTS 또는 enhancementCosts 변수는 삭제하거나 주석 처리해야 합니다.
+// (만약 있다면 삭제하세요): const ENHANCEMENT_COSTS = [5, 10, 15, 25, 40, 60, 85, 115, 150];
+// (만약 있다면 삭제하세요): const enhancementCosts = [10, 20, 35, 55, 80, 110, 150, 200, 250];
+
+// 나머지 게임 설정 데이터는 그대로 유지합니다.
+
 
 
 
