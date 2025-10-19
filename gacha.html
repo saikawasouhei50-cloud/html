@@ -767,20 +767,20 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
             }
             
             function claimAchievement(achievementId) {
-                const ach = achievements.find(a => a.id === achievementId);
-                if (!ach || playerAchievements[ach.id] !== 'unlocked') return;
+    const ach = achievements.find(a => a.id === achievementId);
+    if (!ach || playerAchievements[ach.id] !== 'unlocked') return;
 
-                // 보상 지급
-                if (ach.reward.currency) playerCurrency += ach.reward.currency;
-                if (ach.reward.fountainPens) playerFountainPens += ach.reward.fountainPens; // ✨ 이 라인이 있는지 확인!
-                if (ach.reward.bookmarks) playerBookmarks = Math.min(MAX_BOOKMARKS, playerBookmarks + ach.reward.bookmarks);
-                
-                playerAchievements[ach.id] = 'claimed'; // 상태 변경
-                
-                updateUI();
-                displayAchievements(); // UI 갱신
-                saveGame();
-            }
+    // 보상 지급
+    if (ach.reward.currency) playerCurrency += ach.reward.currency;
+    if (ach.reward.fountainPens) playerFountainPens += ach.reward.fountainPens; // ✨ 이 라인이 중요합니다! ✨
+    if (ach.reward.bookmarks) playerBookmarks = Math.min(MAX_BOOKMARKS, playerBookmarks + ach.reward.bookmarks);
+    
+    playerAchievements[ach.id] = 'claimed'; // 상태 변경
+    
+    updateUI();
+    displayAchievements(); // UI 갱신
+    saveGame();
+}
 			
 			// --- 인연(Synergy) 관련 함수 ---
             function calculateActiveSynergies(deck) {
@@ -2407,6 +2407,7 @@ function startInteractiveStory(storyOrIndex, type) {
     </script>
 </body>
 </html>
+
 
 
 
