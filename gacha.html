@@ -7,6 +7,11 @@
     <!-- Tailwind CSS를 사용하여 빠르고 멋진 디자인을 적용합니다 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+
+body.pointer-events-none {
+    pointer-events: none;
+}
+		
         /* 사용자 정의 애니메이션 및 스타일 */
         @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
         body {
@@ -2508,7 +2513,7 @@ function dismantleMultipleCards() {
     playerInkwells += totalInkwells;
 
     // 3. 모달 표시 및 결과 업데이트
-    hideCardDetails();
+    // hideCardDetails(); // 단일 파쇄가 아니므로 카드 상세 모달은 닫을 필요 없습니다.
     exitMultiSelectMode(); 
     updateUI();
     displayInventory();
@@ -2529,7 +2534,7 @@ function dismantleMultipleCards() {
          dismantleRewardsList.innerHTML += `<div class="text-xs text-red-400 mt-2">(${cardsInDeck.length}장은 덱에 포함되어 파쇄되지 않았습니다.)</div>`;
     }
 
-    // 5. 모달에 최종 메시지 상태 저장 (핵심: 모달이 닫힌 후 메시지 출력용)
+    // 5. 모달에 최종 메시지 상태 저장
     if (cardsToRemove.length > 0) {
         dismantleResultModal.dataset.finalMessage = `총 ${cardsToRemove.length}장의 원고를 파쇄했습니다.`;
         dismantleResultModal.dataset.messageColor = 'text-yellow-300';
@@ -2537,8 +2542,14 @@ function dismantleMultipleCards() {
         dismantleResultModal.dataset.finalMessage = ''; // 메시지 표시 안 함
     }
     
-    // 모달 표시
+    // 모달 표시 (✅ 이 시점에 다른 이벤트가 덮어쓰지 않도록 합니다.)
     dismantleResultModal.classList.remove('hidden');
+    
+    // ✨✨ 최종 해결책: 잠시 클릭 이벤트를 비활성화합니다. ✨✨
+    document.body.classList.add('pointer-events-none');
+    setTimeout(() => {
+        document.body.classList.remove('pointer-events-none');
+    }, 500); // 0.5초 동안 클릭 비활성화하여 DOM 갱신 완료를 기다립니다.
 }
 			
 
@@ -2875,6 +2886,7 @@ cardClickableContainers.forEach(container => {
     </script>
 </body>
 </html>
+
 
 
 
