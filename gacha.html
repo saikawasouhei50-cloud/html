@@ -496,74 +496,66 @@
             }
 
             function saveGame() {
-            if (!isStorageAvailable()) return;
-            const saveData = {
-                currency: playerCurrency,
-                inventory: playerInventory,
-                deck: playerDeck,
-                capacity: inventoryCapacity,
-                representative: representativeCharacter ? representativeCharacter.name : null,
-                clearedStages: clearedStages, // clearedDungeons 대신 clearedStages 저장
-                eventPoints: playerEventPoints,
-                clearedEventDungeons: clearedEventDungeons,
-                purchasedEventItems: purchasedEventItems,
-                bookmarks: playerBookmarks,
-                lastBookmarkUpdate: lastBookmarkUpdateTime,
-                achievements: playerAchievements,
-                stats: playerStats,
-            };
-            localStorage.setItem(SAVE_DATA_KEY, JSON.stringify(saveData));
-        }
-
-        function loadGame() {
-            if (!isStorageAvailable()) {
-                storageWarning.classList.remove('hidden');
-                resetButton.disabled = true;
-                initializeNewGameData();
-            } else {
-                const savedDataString = localStorage.getItem(SAVE_DATA_KEY);
-                if (savedDataString) {
-                    try {
-                        const savedData = JSON.parse(savedDataString);
-                        playerCurrency = savedData.currency ?? 100;
-
-                        // 새로운 인벤토리 로드 방식 (하위 호환성 포함)
-                        playerInventory = (savedData.inventory || []).map(item => {
-                            if (typeof item === 'string') { // 옛날 버전 데이터(문자열) 처리
-                                return { id: Date.now() + Math.random(), name: item, enhancementLevel: 0 };
-                            }
-                            return item; // 새로운 버전 데이터(객체)
-                        }).filter(item => findCharacter(item.name));
-
-                        playerDeck = (savedData.deck || []).filter(item => findCharacter(item.name));
-
-                        inventoryCapacity = savedData.capacity ?? 100;
-                        clearedStages = savedData.clearedStages || {}; // clearedDungeons 대신 clearedStages 로드
-                        playerEventPoints = savedData.eventPoints ?? 0;
-                        clearedEventDungeons = savedData.clearedEventDungeons || [];
-                        purchasedEventItems = savedData.purchasedEventItems || {};
-                        playerBookmarks = savedData.bookmarks ?? MAX_BOOKMARKS;
-                        lastBookmarkUpdateTime = savedData.lastBookmarkUpdate ?? Date.now();
-                        playerAchievements = savedData.achievements || {};
-                        playerStats = savedData.stats || { totalPulls: 0 };
-                        if (savedData.representative) {
-                            representativeCharacter = findCharacter(savedData.representative) || null;
-                        }
-                    } catch (e) {
-                        console.error("저장된 데이터 파싱 오류:", e);
-                        initializeNewGameData();
-                    }
-                } else {
-                    initializeNewGameData();
-                    saveGame();
-                }
+                if (!isStorageAvailable()) return;
+                const saveData = {
+                    currency: playerCurrency,
+                    inventory: playerInventory.map(card => card ? card.name : null).filter(Boolean),
+                    deck: playerDeck.map(card => card ? card.name : null).filter(Boolean),
+                    capacity: inventoryCapacity,
+                    representative: representativeCharacter ? representativeCharacter.name : null,
+                    clearedDungeons: clearedDungeons,
+                    eventPoints: playerEventPoints,
+                    clearedEventDungeons: clearedEventDungeons,
+                    purchasedEventItems: purchasedEventItems,
+                    bookmarks: playerBookmarks,
+                    lastBookmarkUpdate: lastBookmarkUpdateTime,
+                    achievements: playerAchievements, // 이 줄 추가
+                    stats: playerStats,
+                };
+                localStorage.setItem(SAVE_DATA_KEY, JSON.stringify(saveData));
             }
-            calculateOfflineRegen();
-            updateUI();
-            checkEventStatus();
-            switchTab('home');
-            checkAchievements();
-        }
+
+            function loadGame() {
+                if (!isStorageAvailable()) {
+                    storageWarning.classList.remove('hidden');
+                    resetButton.disabled = true;
+                    playerInventory.push(findCharacter('[편집자] 윤필규'));
+                    playerInventory.push(findCharacter('[조수] 한 현'));
+                } else {
+                    const savedDataString = localStorage.getItem(SAVE_DATA_KEY);
+                    if (savedDataString) {
+                        try {
+                            const savedData = JSON.parse(savedDataString);
+                            playerCurrency = savedData.currency ?? 100;
+                            playerInventory = (savedData.inventory || []).map(name => findCharacter(name)).filter(Boolean);
+                            playerDeck = (savedData.deck || []).map(name => findCharacter(name)).filter(Boolean);
+                            inventoryCapacity = savedData.capacity ?? 100;
+                            clearedDungeons = savedData.clearedDungeons || [];
+                            playerEventPoints = savedData.eventPoints ?? 0;
+                            clearedEventDungeons = savedData.clearedEventDungeons || [];
+                            purchasedEventItems = savedData.purchasedEventItems || {};
+                            playerBookmarks = savedData.bookmarks ?? MAX_BOOKMARKS;
+                            lastBookmarkUpdateTime = savedData.lastBookmarkUpdate ?? Date.now();
+                            playerAchievements = savedData.achievements || {}; // 이 줄 추가
+                            playerStats = savedData.stats || { totalPulls: 0 };
+                            if (savedData.representative) {
+                                representativeCharacter = findCharacter(savedData.representative) || null;
+                            }
+                        } catch (e) {
+                            console.error("저장된 데이터 파싱 오류:", e);
+                            initializeNewGameData();
+                        }
+                    } else {
+                        initializeNewGameData();
+                        saveGame();
+                    }
+                }
+                calculateOfflineRegen();
+                updateUI();
+                checkEventStatus();
+                switchTab('home');
+                checkAchievements();
+            }
 
             function initializeNewGameData() {
                 playerInventory.push(findCharacter('[편집자] 윤필규'));
@@ -1046,170 +1038,141 @@
                 });
             }
             
+            function getUniqueInventory() {
+                const cardCounts = playerInventory.reduce((acc, card) => {
+                    if (card && card.name) {
+                        if (!acc[card.name]) { acc[card.name] = { ...card, count: 0 }; }
+                        acc[card.name].count++;
+                    }
+                    return acc;
+                }, {});
+                const rarityOrder = { 'SSR': 4, 'SR': 3, 'R': 2, 'N': 1 };
+                return Object.values(cardCounts).sort((a, b) => (rarityOrder[b.rarity] - rarityOrder[a.rarity]) || a.name.localeCompare(b.name));
+            }
+
             function displayInventory() {
-            inventoryStatus.textContent = `${playerInventory.length} / ${inventoryCapacity}`;
-            inventoryContainer.innerHTML = '';
-
-            const sortedInventory = [...playerInventory].sort((a, b) => {
-                const charA = findCharacter(a.name); const charB = findCharacter(b.name);
-                const rarityOrder = { 'SSR': 4, 'SR': 3, 'R': 2, 'N': 1 };
-                if (b.enhancementLevel !== a.enhancementLevel) return b.enhancementLevel - a.enhancementLevel;
-                if (rarityOrder[charB.rarity] !== rarityOrder[charA.rarity]) return rarityOrder[charB.rarity] - rarityOrder[charA.rarity];
-                return a.name.localeCompare(b.name);
-            });
-
-            if (sortedInventory.length === 0) {
-                inventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">아직 수집한 동료가 없습니다.</p>`; return;
-            }
-            sortedInventory.forEach((cardInstance, index) => {
-                inventoryContainer.appendChild(createCard(cardInstance, { animationIndex: index, mode: 'inventory' }));
-            });
-        }
-
-        function displayCollection() {
-            collectionContainer.innerHTML = '';
-            const collectedCardNames = new Set(playerInventory.map(card => card.name));
-            characters.forEach((character, index) => {
-                collectionContainer.appendChild(createCard(character, {
-                    animationIndex: index, mode: 'collection', isCollected: collectedCardNames.has(character.name)
-                }));
-            });
-        }
-
-        function displayDeckManagement() {
-            deckStatus.textContent = `현재 덱: ${playerDeck.length} / ${DECK_CAPACITY}`;
-            deckStatus.classList.toggle('text-green-400', playerDeck.length === DECK_CAPACITY);
-            deckSlotsContainer.innerHTML = '';
-
-            for (let i = 0; i < DECK_CAPACITY; i++) {
-                if (playerDeck[i]) {
-                    const characterData = findCharacter(playerDeck[i].name);
-                    const cardDataForDisplay = { ...characterData, ...playerDeck[i] };
-                    deckSlotsContainer.appendChild(createCard(cardDataForDisplay, { mode: 'deckSlot' }));
-                } else {
-                    const emptySlot = document.createElement('div');
-                    emptySlot.className = 'deck-slot rounded-lg'; emptySlot.textContent = '비어있음';
-                    deckSlotsContainer.appendChild(emptySlot);
+                inventoryStatus.textContent = `${playerInventory.length} / ${inventoryCapacity}`;
+                inventoryContainer.innerHTML = '';
+                const uniqueCards = getUniqueInventory();
+                if (uniqueCards.length === 0) {
+                    inventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">아직 수집한 동료가 없습니다.</p>`; return;
                 }
+                uniqueCards.forEach((character, index) => {
+                    inventoryContainer.appendChild(createCard(character, { animationIndex: index, mode: 'inventory' }));
+                });
             }
 
-            deckInventoryContainer.innerHTML = '';
-            const sortedInventory = [...playerInventory].sort((a, b) => {
-                const charA = findCharacter(a.name); const charB = findCharacter(b.name);
-                const rarityOrder = { 'SSR': 4, 'SR': 3, 'R': 2, 'N': 1 };
-                if (b.enhancementLevel !== a.enhancementLevel) return b.enhancementLevel - a.enhancementLevel;
-                if (rarityOrder[charB.rarity] !== rarityOrder[charA.rarity]) return rarityOrder[charB.rarity] - rarityOrder[charA.rarity];
-                return a.name.localeCompare(b.name);
-            });
+            function displayCollection() {
+                collectionContainer.innerHTML = '';
+                const collectedCardNames = new Set(playerInventory.map(card => card.name));
 
-            if (sortedInventory.length === 0) {
-                deckInventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">덱에 추가할 카드가 없습니다.</p>`; return;
+                characters.forEach((character, index) => {
+                    const isCollected = collectedCardNames.has(character.name);
+                    collectionContainer.appendChild(createCard(character, {
+                        animationIndex: index,
+                        mode: 'collection',
+                        isCollected: isCollected
+                    }));
+                });
             }
 
-            sortedInventory.forEach((cardInstance, index) => {
-                const characterData = findCharacter(cardInstance.name);
-                const cardDataForDisplay = { ...characterData, ...cardInstance };
-                const isCardInDeck = playerDeck.some(deckCard => deckCard.id === cardInstance.id);
-                const isDeckFull = playerDeck.length >= DECK_CAPACITY;
-                deckInventoryContainer.appendChild(createCard(cardDataForDisplay, { animationIndex: index, mode: 'deckBuilder', isCardInDeck, isDeckFull }));
-            });
-            displaySynergies();
-        }
 
-        function autoFillDeck() {
-            const sortedByPower = [...playerInventory].sort((a, b) => {
-                const charA = findCharacter(a.name);
-                const charB = findCharacter(b.name);
-                const powerA = charA.stats.atk + charA.stats.def + (a.enhancementLevel * 5);
-                const powerB = charB.stats.atk + charB.stats.def + (b.enhancementLevel * 5);
-                return powerB - powerA;
-            });
-            playerDeck = sortedByPower.slice(0, DECK_CAPACITY);
-            displayDeckManagement();
-            showMessage('가장 강력한 카드로 덱을 자동 편성했습니다!', 'text-blue-300', messageArea);
-            saveGame();
-        }
-
-        function addToDeck(cardId) {
-            const cardIdNum = parseFloat(cardId);
-            if (playerDeck.length >= DECK_CAPACITY || playerDeck.some(card => card.id === cardIdNum)) return;
-            const cardToAdd = playerInventory.find(card => card.id === cardIdNum);
-            if (cardToAdd) { playerDeck.push(cardToAdd); displayDeckManagement(); saveGame(); }
-        }
-
-        function removeFromDeck(cardId) {
-            const cardIdNum = parseFloat(cardId);
-            const indexToRemove = playerDeck.findIndex(card => card.id === cardIdNum);
-            if(indexToRemove > -1) {
-                playerDeck.splice(indexToRemove, 1);
-            }
-            displayDeckManagement();
-            saveGame();
-        }
-
-		function calculateDeckPower() {
-			if (playerDeck.length === 0) return 0;
-			const deckWithBonuses = applySynergyBonusesToDeck(playerDeck);
-			return deckWithBonuses.reduce((total, card) => total + (card.stats.atk + card.stats.def + Math.floor(card.stats.hp / 10)), 0);
-		}
-
-        function displayCombatView() {
-            deckPowerDisplay.textContent = calculateDeckPower();
-            dungeonVolumeSelection.innerHTML = '';
-            dungeonStageSelection.classList.add('hidden');
-            dungeonVolumeSelection.classList.remove('hidden');
-
-            dungeons.forEach((volume, index) => {
-                const volumeEl = document.createElement('div');
-                volumeEl.className = 'bg-black/20 p-6 rounded-lg text-center cursor-pointer hover:bg-black/30';
-                volumeEl.innerHTML = `<h3 class="text-2xl font-bold text-yellow-300">${volume.name}</h3>`;
-                volumeEl.onclick = () => displayDungeonStages(index);
-                dungeonVolumeSelection.appendChild(volumeEl);
-            });
-        }
-
-        function displayDungeonStages(volumeIndex) {
-            const volume = dungeons[volumeIndex];
-            dungeonVolumeSelection.classList.add('hidden');
-            dungeonStageSelection.classList.remove('hidden');
-            currentVolumeTitle.textContent = volume.name;
-            stageListContainer.innerHTML = '';
-
-            volume.stages.forEach((stage, stageIndex) => {
-                const isUnlocked = stageIndex === 0 || clearedStages[volume.name]?.includes(stageIndex - 1);
-                const isCleared = clearedStages[volume.name]?.includes(stageIndex);
-                const stageEl = document.createElement('button');
-                stageEl.className = `p-4 rounded-lg transition-colors duration-300 text-center ${isUnlocked ? 'bg-white/20 hover:bg-white/30' : 'bg-black/30 text-gray-500 cursor-not-allowed'}`;
-                stageEl.disabled = !isUnlocked;
-
-                stageEl.innerHTML = `
-                    <h4 class="text-lg font-bold">${stage.name}</h4>
-                    <p class="text-sm">보상: 🖊️ ${stage.reward.pens} ${isCleared ? '<span class="text-green-400">(클리어)</span>' : ''}</p>
-                `;
-                if (isUnlocked) {
-                    stageEl.onclick = () => challengeDungeon(volumeIndex, stageIndex, 'main');
+            function displayDeckManagement() {
+                deckStatus.textContent = `현재 덱: ${playerDeck.length} / ${DECK_CAPACITY}`;
+                deckStatus.classList.toggle('text-green-400', playerDeck.length === DECK_CAPACITY);
+                deckSlotsContainer.innerHTML = '';
+                for (let i = 0; i < DECK_CAPACITY; i++) {
+                    if (playerDeck[i]) {
+                        deckSlotsContainer.appendChild(createCard(playerDeck[i], { mode: 'deckSlot' }));
+                    } else {
+                        const emptySlot = document.createElement('div');
+                        emptySlot.className = 'deck-slot rounded-lg'; emptySlot.textContent = '비어있음';
+                        deckSlotsContainer.appendChild(emptySlot);
+                    }
                 }
-                stageListContainer.appendChild(stageEl);
-            });
-        }
+                deckInventoryContainer.innerHTML = '';
+                const uniqueCards = getUniqueInventory();
+                 if (uniqueCards.length === 0) {
+                    deckInventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">덱에 추가할 카드가 없습니다.</p>`; return;
+                }
+                uniqueCards.forEach((character, index) => {
+                    const isCardInDeck = playerDeck.some(deckCard => deckCard.name === character.name);
+                    const isDeckFull = playerDeck.length >= DECK_CAPACITY;
+                    deckInventoryContainer.appendChild(createCard(character, { animationIndex: index, mode: 'deckBuilder', isCardInDeck, isDeckFull }));
+                });
+				displaySynergies();
+            }
+            
+            function autoFillDeck() {
+                const uniqueCards = getUniqueInventory();
+                const sortedByPower = uniqueCards.sort((a, b) => (b.stats.atk + b.stats.def) - (a.stats.atk + a.stats.def));
+                playerDeck = sortedByPower.slice(0, DECK_CAPACITY);
+                displayDeckManagement();
+                showMessage('가장 강력한 카드로 덱을 자동 편성했습니다!', 'text-blue-300', messageArea);
+                saveGame();
+            }
 
-        function challengeDungeon(volumeIndex, stageIndex, type = 'main') {
-            if (playerBookmarks < 1) {
-                showMessage('책갈피가 부족합니다!', 'text-yellow-400', messageArea);
-                return;
+            function addToDeck(cardName) {
+                if (playerDeck.length >= DECK_CAPACITY || playerDeck.some(card => card.name === cardName)) return;
+                const cardToAdd = findCharacter(cardName);
+                if (cardToAdd) { playerDeck.push(cardToAdd); displayDeckManagement(); saveGame(); }
             }
-            if (playerDeck.length < DECK_CAPACITY) {
-                showMessage('덱을 5장으로 모두 채워야 합니다!', 'text-yellow-400', messageArea);
-                return;
+            
+            function removeFromDeck(cardName) {
+                const indexToRemove = playerDeck.findIndex(card => card.name === cardName);
+                if(indexToRemove > -1) {
+                    playerDeck.splice(indexToRemove, 1);
+                }
+                displayDeckManagement();
+                saveGame();
             }
+            
+				// 위치: gacha1.html, 약 1129번째 줄
+			function calculateDeckPower() {
+				if (playerDeck.length === 0) return 0;
+				const deckWithBonuses = applySynergyBonusesToDeck(playerDeck);
+				return deckWithBonuses.reduce((total, card) => total + (card.stats.atk + card.stats.def + Math.floor(card.stats.hp / 10)), 0);
+			}
 
-            playerBookmarks--;
-            if (playerBookmarks === MAX_BOOKMARKS - 1) {
-                 lastBookmarkUpdateTime = Date.now();
+            function displayCombatView() {
+                deckPowerDisplay.textContent = calculateDeckPower();
+                dungeonListContainer.innerHTML = '';
+                dungeons.forEach((dungeon, index) => {
+                    const monster = monsters[dungeon.monsterName];
+                    const recommendedPower = monster.stats.atk*5 + monster.stats.def*5 + Math.floor(monster.stats.hp / 5);
+                    const dungeonEl = document.createElement('div');
+                    dungeonEl.className = 'bg-black/20 p-4 rounded-lg text-center';
+                    dungeonEl.innerHTML = `
+                        <h3 class="text-xl font-bold text-yellow-300">${dungeon.name}</h3>
+                        <p class="text-gray-300">권장 전투력: ${recommendedPower}</p>
+                        <p class="text-gray-300">예상 보상: 💎${dungeon.rewards.min} ~ ${dungeon.rewards.max}</p>
+                        <button data-action="challenge-dungeon" data-dungeon-index="${index}" class="gacha-button bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-full mt-4">도전</button>
+                    `;
+                    dungeonListContainer.appendChild(dungeonEl);
+                });
             }
-            updateUI();
-            startCombat(volumeIndex, stageIndex, type);
-        }
+            
+            function challengeDungeon(dungeonIndex, type = 'main') {
+                if (playerBookmarks < 1) {
+                    const msgArea = type === 'event' ? document.getElementById('message-area') : (document.getElementById('combat-message-area') || messageArea);
+                    showMessage('책갈피가 부족합니다!', 'text-yellow-400', msgArea);
+                    return;
+                }
+                if (playerDeck.length < DECK_CAPACITY) {
+                    const msgArea = type === 'event' ? document.getElementById('message-area') : (document.getElementById('combat-message-area') || messageArea);
+                    showMessage('덱을 5장으로 모두 채워야 합니다!', 'text-yellow-400', msgArea);
+                    return;
+                }
+                
+                playerBookmarks--;
+                if (playerBookmarks === MAX_BOOKMARKS - 1) {
+                     lastBookmarkUpdateTime = Date.now();
+                }
+                updateUI();
+                // saveGame(); // 전투 시작 전에 저장하지 않고, 전투 종료 후에 저장.
+
+                startCombat(dungeonIndex, type);
+            }
 
             function setCombatSpeed(speed) {
                 combatSpeedMultiplier = speed;
@@ -1660,10 +1623,10 @@
                 });
             });
 
-            backToVolumeSelectionButton.addEventListener('click', () => {
-    dungeonStageSelection.classList.add('hidden');
-    dungeonVolumeSelection.classList.remove('hidden');
-});
+            dungeonListContainer.addEventListener('click', (e) => { 
+                const button = e.target.closest('[data-action="challenge-dungeon"]');
+                if(button) challengeDungeon(parseInt(button.dataset.dungeonIndex), 'main'); 
+            });
             homeCharacterContainer.addEventListener('click', () => { if (representativeCharacter) displayHomeView(true); });
             eventBanner.addEventListener('click', () => {
                 showMessage(`[${EVENT_CHARACTER_NAME}] 확률 UP 이벤트 진행 중!`, 'text-blue-300', messageArea);
