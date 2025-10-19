@@ -291,7 +291,12 @@
                     <p class="text-gray-200">편찬한 책으로 독서에 도전하여 보상을 획득하세요!</p>
                     <p class="text-xl font-bold">현재 책 전투력: <span id="deck-power-display" class="text-yellow-300">0</span></p>
                 </div>
-                <div id="dungeon-list-container" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div id="chapter-list-container" class="md:w-1/3 space-y-2">
+                        </div>
+                    <div id="stage-list-container" class="md:w-2/3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 bg-black/20 p-2 rounded-xl">
+                        </div>
+                </div>
             </div>
 
             <!-- 전투 진행 화면 -->
@@ -462,7 +467,7 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
             let isCombatRunning = false;
             let combatSpeedMultiplier = 1;
             let lastCombatType = 'main'; // 마지막 전투 유형을 저장합니다.
-            let clearedDungeons = [];
+            let clearedStages = [];
             let clearedEventDungeons = [];
             let playerEventPoints = 0;
             let purchasedEventItems = {};
@@ -588,7 +593,7 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
                     deck: playerDeck.map(cardInstance => cardInstance.id), // ✨ 덱에는 이제 고유 ID만 저장합니다.
                     capacity: inventoryCapacity,
                     representative: representativeCharacter ? representativeCharacter.name : null,
-                    clearedDungeons: clearedDungeons,
+                    clearedStages: clearedStages,
                     eventPoints: playerEventPoints,
                     clearedEventDungeons: clearedEventDungeons,
                     purchasedEventItems: purchasedEventItems,
@@ -630,7 +635,7 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
                             if (savedData.representative) {
                                 representativeCharacter = findCharacter(savedData.representative) || null;
                             }
-                            clearedDungeons = savedData.clearedDungeons || [];
+                            clearedStages = savedData.clearedStages || [];
                             playerEventPoints = savedData.eventPoints ?? 0;
                             clearedEventDungeons = savedData.clearedEventDungeons || [];
                             purchasedEventItems = savedData.purchasedEventItems || {};
@@ -696,7 +701,7 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
                 const currentState = {
                     inventory: playerInventory,
                     stats: playerStats,
-                    clearedDungeons: clearedDungeons,
+                    clearedStages: clearedStages,
                     capacity: inventoryCapacity,
                 };
                 let newAchievementUnlocked = false;
@@ -1374,32 +1379,72 @@ function addCardToInventory(cardName) {
     }, 0);
 }
 
+            // ✅ 이 코드로 기존 displayCombatView 함수를 교체해주세요.
             function displayCombatView() {
                 deckPowerDisplay.textContent = calculateDeckPower();
-                dungeonListContainer.innerHTML = '';
-                dungeons.forEach((dungeon, index) => {
-                    const monster = monsters[dungeon.monsterName];
-                    const recommendedPower = monster.stats.atk*5 + monster.stats.def*5 + Math.floor(monster.stats.hp / 5);
-                    const dungeonEl = document.createElement('div');
-                    dungeonEl.className = 'bg-black/20 p-4 rounded-lg text-center';
-                    dungeonEl.innerHTML = `
-                        <h3 class="text-xl font-bold text-yellow-300">${dungeon.name}</h3>
-                        <p class="text-gray-300">권장 전투력: ${recommendedPower}</p>
-                        <p class="text-gray-300">예상 보상: 💎${dungeon.rewards.min} ~ ${dungeon.rewards.max}</p>
-                        <button data-action="challenge-dungeon" data-dungeon-index="${index}" class="gacha-button bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-full mt-4">도전</button>
-                    `;
-                    dungeonListContainer.appendChild(dungeonEl);
+                const chapterContainer = document.getElementById('chapter-list-container');
+                chapterContainer.innerHTML = ''; // 초기화
+
+                mainChapters.forEach((chapter, index) => {
+                    const chapterEl = document.createElement('button');
+                    chapterEl.className = 'w-full gacha-button bg-black/20 hover:bg-black/40 text-white font-bold py-3 px-4 rounded-lg text-left';
+                    chapterEl.dataset.action = 'select-chapter';
+                    chapterEl.dataset.chapterIndex = index;
+                    chapterEl.textContent = chapter.chapterName;
+                    chapterContainer.appendChild(chapterEl);
                 });
+
+                // 기본적으로 첫 번째 챕터의 스테이지를 표시
+                displayStages(0);
             }
             
+			// ✅ displayCombatView 함수 바로 다음에 이 새로운 함수를 추가해주세요.
+            function displayStages(chapterIndex) {
+                const stageContainer = document.getElementById('stage-list-container');
+                stageContainer.innerHTML = ''; // 초기화
+                
+                // 선택된 챕터 버튼 활성화 스타일 적용
+                document.querySelectorAll('#chapter-list-container button').forEach((btn, idx) => {
+                    btn.classList.toggle('bg-blue-500', idx === chapterIndex);
+                });
+
+                const chapter = mainChapters[chapterIndex];
+                if (!chapter) return;
+
+                chapter.stages.forEach((stage, stageIndex) => {
+                    const stageId = `${chapterIndex + 1}-${stageIndex + 1}`;
+                    const isCleared = clearedStages.includes(stageId);
+                    
+                    // 스테이지 잠금 해제 조건: 첫 스테이지이거나, 이전 스테이지를 클리어했거나
+                    const isUnlocked = stageIndex === 0 || clearedStages.includes(`${chapterIndex + 1}-${stageIndex}`);
+
+                    const stageEl = document.createElement('button');
+                    stageEl.className = `p-3 rounded-lg text-center transition-transform duration-200 ${isUnlocked ? 'bg-white/20 hover:scale-105 cursor-pointer' : 'bg-black/30 text-gray-500 cursor-not-allowed'}`;
+                    stageEl.disabled = !isUnlocked;
+                    
+                    stageEl.innerHTML = `
+                        <p class="font-bold">${stage.stageName}</p>
+                        <p class="text-xs">${isCleared ? '✔️' : '⚔️'}</p>
+                    `;
+
+                    if(isUnlocked) {
+                        stageEl.dataset.action = 'challenge-stage';
+                        stageEl.dataset.chapterIndex = chapterIndex;
+                        stageEl.dataset.stageIndex = stageIndex;
+                    }
+                    stageContainer.appendChild(stageEl);
+                });
+            }
+			
+            // ✅ 기존 challengeDungeon 함수를 아래 코드로 교체해주세요. (이벤트 던전 로직은 유지됩니다)
             function challengeDungeon(dungeonIndex, type = 'main') {
                 if (playerBookmarks < 1) {
-                    const msgArea = type === 'event' ? document.getElementById('message-area') : (document.getElementById('combat-message-area') || messageArea);
+                    const msgArea = type === 'event' ? messageArea : (document.getElementById('combat-message-area') || messageArea);
                     showMessage('책갈피가 부족합니다!', 'text-yellow-400', msgArea);
                     return;
                 }
                 if (playerDeck.length < DECK_CAPACITY) {
-                    const msgArea = type === 'event' ? document.getElementById('message-area') : (document.getElementById('combat-message-area') || messageArea);
+                    const msgArea = type === 'event' ? messageArea : (document.getElementById('combat-message-area') || messageArea);
                     showMessage('덱을 5장으로 모두 채워야 합니다!', 'text-yellow-400', msgArea);
                     return;
                 }
@@ -1409,9 +1454,31 @@ function addCardToInventory(cardName) {
                      lastBookmarkUpdateTime = Date.now();
                 }
                 updateUI();
-                // saveGame(); // 전투 시작 전에 저장하지 않고, 전투 종료 후에 저장.
-
-                startCombat(dungeonIndex, type);
+                
+                // 이벤트 던전은 기존 로직을 그대로 사용합니다.
+                if (type === 'event') {
+                    startCombat(dungeonIndex, type);
+                }
+                // 'main' 타입은 이제 사용되지 않습니다. challengeStage를 통해 호출됩니다.
+            }
+            
+            // ✅ challengeDungeon 함수 바로 다음에 이 새로운 함수를 추가해주세요.
+            function challengeStage(chapterIndex, stageIndex) {
+                 if (playerBookmarks < 1) {
+                    showMessage('책갈피가 부족합니다!', 'text-yellow-400', messageArea);
+                    return;
+                }
+                if (playerDeck.length < DECK_CAPACITY) {
+                    showMessage('덱을 5장으로 모두 채워야 합니다!', 'text-yellow-400', messageArea);
+                    return;
+                }
+                
+                playerBookmarks--;
+                if (playerBookmarks === MAX_BOOKMARKS - 1) {
+                     lastBookmarkUpdateTime = Date.now();
+                }
+                updateUI();
+                startCombat({ chapter: chapterIndex, stage: stageIndex }, 'main_stage');
             }
 
             function setCombatSpeed(speed) {
@@ -1426,60 +1493,68 @@ function addCardToInventory(cardName) {
                 document.getElementById(`speed-${speed}x`).classList.remove('bg-gray-600');
             }
 
-				// ✅ 위에서 지운 자리에 이 코드 하나만 붙여넣으세요. ✅
-async function startCombat(dungeonIndex, type) {
-    isCombatRunning = true;
-    setCombatSpeed(1); // 전투 시작 시 1배속으로 초기화
-    const dungeonList = type === 'event' ? eventDungeons : dungeons;
-    const dungeon = dungeonList[dungeonIndex];
-    const monsterData = JSON.parse(JSON.stringify(monsters[dungeon.monsterName]));
+				// ✅ 이 코드로 기존 startCombat 함수를 통째로 교체해주세요.
+            async function startCombat(indices, type) {
+                isCombatRunning = true;
+                setCombatSpeed(1); // 전투 시작 시 1배속으로 초기화
 
-    // 1. 퇴고 레벨에 따른 스탯을 먼저 적용한 덱을 만듭니다.
-    let combatDeck = playerDeck.map(cardInstance => {
-        const baseCard = findCharacter(cardInstance.name);
-        const enhancedStats = getEnhancedStats(cardInstance);
-        // 퇴고된 스탯과 함께 스킬, 대사 등 모든 원본 정보를 포함한 객체를 만듭니다.
-        return {
-            ...baseCard, // faction, rarity, skills, dialogues 등 모든 기본 정보 복사
-            stats: enhancedStats, // stats만 퇴고된 것으로 교체
-        };
-    });
+                let combatData;
+                let monsterData;
 
-    // 2. 그 위에 인연(Synergy) 보너스를 적용합니다.
-    combatDeck = applySynergyBonusesToDeck(combatDeck);
+                if (type === 'main_stage') {
+                    combatData = mainChapters[indices.chapter].stages[indices.stage];
+                    monsterData = JSON.parse(JSON.stringify(monsters[combatData.monsterName]));
+                } else if (type === 'event') {
+                    combatData = eventDungeons[indices];
+                    monsterData = JSON.parse(JSON.stringify(monsters[combatData.monsterName]));
+                }
 
-    // 3. 전투 시작 시점의 최대 HP를 저장하기 위해 덱을 깊은 복사합니다.
-    const originalBonusDeck = JSON.parse(JSON.stringify(combatDeck));
+                // 1. 퇴고/개정 레벨에 따른 스탯을 먼저 적용한 덱을 만듭니다.
+                let combatDeck = playerDeck.map(cardInstance => {
+                    const baseCard = findCharacter(cardInstance.name);
+                    const enhancedStats = getEnhancedStats(cardInstance);
+                    // 퇴고/개정된 스탯과 함께 스킬, 대사 등 모든 원본 정보를 포함한 객체를 만듭니다.
+                    return {
+                        ...baseCard, // faction, rarity, skills, dialogues 등 모든 기본 정보 복사
+                        stats: enhancedStats, // stats만 퇴고/개정된 것으로 교체
+                    };
+                });
 
-    // --- UI 렌더링 ---
-    allViews.forEach(view => view.classList.add('hidden'));
-    combatInProgressView.classList.remove('hidden');
-    combatLog.innerHTML = '';
-    combatPlayerDeck.innerHTML = '';
-    combatDeck.forEach((card, index) => {
-        const cardEl = document.createElement('div');
-        cardEl.className = 'bg-gray-700 p-2 rounded';
-        cardEl.innerHTML = `
-            <p class="font-bold text-sm truncate" title="${card.name}">${card.name}</p>
-            <div class="hp-bar-background rounded-full h-2.5 mt-1">
-                <div id="player-hp-bar-${index}" class="hp-bar-foreground h-2.5 rounded-full" style="width: 100%"></div>
-            </div>
-            <p id="player-hp-text-${index}" class="text-xs text-center mt-0.5">${card.stats.hp} / ${originalBonusDeck[index].stats.hp}</p>
-        `;
-        combatPlayerDeck.appendChild(cardEl);
-    });
+                // 2. 그 위에 인연(Synergy) 보너스를 적용합니다.
+                combatDeck = applySynergyBonusesToDeck(combatDeck);
 
-    combatMonsterArea.innerHTML = `
-        <h3 class="text-2xl font-bold">${monsterData.name}</h3>
-        <img id="combat-monster-image" src="${monsterData.imageUrl}" alt="${monsterData.name}" class="my-4 h-48 w-48 object-contain">
-        <div class="w-full hp-bar-background rounded-full h-4">
-            <div id="monster-hp-bar" class="hp-bar-foreground h-4 rounded-full" style="width: 100%"></div>
-        </div>
-        <p id="monster-hp-text" class="text-sm mt-1">${monsterData.stats.hp} / ${monsterData.stats.hp}</p>
-    `;
+                // 3. 전투 시작 시점의 최대 HP를 저장하기 위해 덱을 깊은 복사합니다.
+                const originalBonusDeck = JSON.parse(JSON.stringify(combatDeck));
 
-    await runCombatLoop(combatDeck, originalBonusDeck, monsterData, dungeon, type);
-}
+                // --- UI 렌더링 ---
+                allViews.forEach(view => view.classList.add('hidden'));
+                combatInProgressView.classList.remove('hidden');
+                combatLog.innerHTML = '';
+                combatPlayerDeck.innerHTML = '';
+                combatDeck.forEach((card, index) => {
+                    const cardEl = document.createElement('div');
+                    cardEl.className = 'bg-gray-700 p-2 rounded';
+                    cardEl.innerHTML = `
+                        <p class="font-bold text-sm truncate" title="${card.name}">${card.name}</p>
+                        <div class="hp-bar-background rounded-full h-2.5 mt-1">
+                            <div id="player-hp-bar-${index}" class="hp-bar-foreground h-2.5 rounded-full" style="width: 100%"></div>
+                        </div>
+                        <p id="player-hp-text-${index}" class="text-xs text-center mt-0.5">${card.stats.hp} / ${originalBonusDeck[index].stats.hp}</p>
+                    `;
+                    combatPlayerDeck.appendChild(cardEl);
+                });
+
+                combatMonsterArea.innerHTML = `
+                    <h3 class="text-2xl font-bold">${monsterData.name}</h3>
+                    <img id="combat-monster-image" src="${monsterData.imageUrl}" alt="${monsterData.name}" class="my-4 h-48 w-48 object-contain">
+                    <div class="w-full hp-bar-background rounded-full h-4">
+                        <div id="monster-hp-bar" class="hp-bar-foreground h-4 rounded-full" style="width: 100%"></div>
+                    </div>
+                    <p id="monster-hp-text" class="text-sm mt-1">${monsterData.stats.hp} / ${monsterData.stats.hp}</p>
+                `;
+
+                await runCombatLoop(combatDeck, originalBonusDeck, monsterData, {indices, type}); // ✅ 수정된 코드
+            }
 
             
             
@@ -1586,24 +1661,38 @@ async function startCombat(dungeonIndex, type) {
 				document.getElementById('monster-hp-text').textContent = `${monster.stats.hp} / ${monsterMaxHp}`;
 			}
 			
-            function endCombat(isVictory, dungeon, type) {
-                lastCombatType = type; // 현재 종료된 전투 유형을 저장합니다.
+            // ✅ 이 코드로 기존 endCombat 함수를 통째로 교체해주세요.
+            function endCombat(isVictory, combatInfo) { // dungeon, type 대신 combatInfo 객체 받기
+                lastCombatType = combatInfo.type;
                 if (isVictory) {
                     let rewardMsg = '';
-                    if(type === 'event') {
+                    if (combatInfo.type === 'event') {
+                        const dungeon = eventDungeons[combatInfo.indices];
                         const reward = dungeon.eventPointReward;
                         playerEventPoints += reward;
                         if (!clearedEventDungeons.includes(dungeon.name)) {
                             clearedEventDungeons.push(dungeon.name);
                         }
                         rewardMsg = `이벤트 스테이지 클리어! ${reward} P를 획득했습니다.`;
-                    } else {
-                        if (!clearedDungeons.includes(dungeon.name)) {
-                            clearedDungeons.push(dungeon.name);
+                    } else if (combatInfo.type === 'main_stage') {
+                        const stage = mainChapters[combatInfo.indices.chapter].stages[combatInfo.indices.stage];
+                        const stageId = `${combatInfo.indices.chapter + 1}-${combatInfo.indices.stage + 1}`;
+                        
+                        if (!clearedStages.includes(stageId)) {
+                            clearedStages.push(stageId);
                         }
-                        const earnedReward = dungeon.rewards.min + Math.floor(Math.random() * (dungeon.rewards.max - dungeon.rewards.min + 1));
-                        playerCurrency += earnedReward;
-                        rewardMsg = `던전 클리어! 💎${earnedReward}를 획득했습니다.`;
+                        
+                        let rewardsEarned = [];
+                        if (stage.rewards.fountainPens) {
+                            playerFountainPens += stage.rewards.fountainPens;
+                            rewardsEarned.push(`🖋️${stage.rewards.fountainPens}`);
+                        }
+                        if (stage.rewards.currency) {
+                            playerCurrency += stage.rewards.currency;
+                            rewardsEarned.push(`💎${stage.rewards.currency}`);
+                        }
+                        
+                        rewardMsg = `스테이지 클리어! ${rewardsEarned.join(', ')} 획득!`;
                     }
                     combatResultTitle.textContent = "승리!";
                     combatResultTitle.className = "text-4xl font-bold mb-4 text-green-400";
@@ -1839,7 +1928,7 @@ async function startCombat(dungeonIndex, type) {
             function displayStoryView() {
                 mainStoryContainer.innerHTML = '';
                 mainStories.forEach((story, index) => {
-                    const isUnlocked = story.dungeonToUnlock === null || clearedDungeons.includes(story.dungeonToUnlock);
+                    const isUnlocked = story.dungeonToUnlock === null || clearedStages.includes(story.dungeonToUnlock);
                     const storyEl = document.createElement('div');
                     storyEl.className = `p-4 rounded-lg transition-colors duration-300 ${isUnlocked ? 'bg-white/20 hover:bg-white/30 cursor-pointer' : 'bg-black/30 text-gray-500'}`;
                     if (isUnlocked) {
@@ -2058,9 +2147,18 @@ async function startCombat(dungeonIndex, type) {
                 });
             });
 
-            dungeonListContainer.addEventListener('click', (e) => { 
-                const button = e.target.closest('[data-action="challenge-dungeon"]');
-                if(button) challengeDungeon(parseInt(button.dataset.dungeonIndex), 'main'); 
+            // ⛔️ 기존 dungeonListContainer.addEventListener... 부분을 삭제하고,
+            // ✅ 아래의 새로운 이벤트 리스너를 추가합니다.
+            document.getElementById('combat-view').addEventListener('click', (e) => {
+                const button = e.target.closest('button[data-action]');
+                if (!button) return;
+
+                const action = button.dataset.action;
+                if (action === 'select-chapter') {
+                    displayStages(parseInt(button.dataset.chapterIndex));
+                } else if (action === 'challenge-stage') {
+                    challengeStage(parseInt(button.dataset.chapterIndex), parseInt(button.dataset.stageIndex));
+                }
             });
             homeCharacterContainer.addEventListener('click', () => { if (representativeCharacter) displayHomeView(true); });
             eventBanner.addEventListener('click', () => {
@@ -2139,7 +2237,6 @@ async function startCombat(dungeonIndex, type) {
     </script>
 </body>
 </html>
-
 
 
 
