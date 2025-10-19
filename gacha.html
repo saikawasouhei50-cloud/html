@@ -254,7 +254,7 @@
         </div>
         <div id="inventory-sort-buttons" class="mt-4 flex justify-center gap-2">
             <button data-sort="rarity" class="gacha-button sort-button bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-4 rounded-full text-sm">등급순</button>
-            <button data-sort="level" class="gacha-button sort-button bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-4 rounded-full text-sm">강화순</button>
+            <button data-sort="level" class="gacha-button sort-button bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-4 rounded-full text-sm">퇴고순</button>
             <button data-sort="revision" class="gacha-button sort-button bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-4 rounded-full text-sm">개정순</button>
             <button data-sort="name" class="gacha-button sort-button bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-4 rounded-full text-sm">이름순</button>
         </div>
@@ -363,14 +363,14 @@
                 </div>
                 
                 <div id="enhancement-container" class="mt-4 bg-black/20 p-4 rounded-lg">
-                    <h3 class="font-bold text-lg mb-2 text-yellow-300">등장인물 강화</h3>
+                    <h3 class="font-bold text-lg mb-2 text-yellow-300">등장인물 퇴고</h3>
                     <div class="flex items-center justify-between">
                         <div>
                             <p>현재 레벨: <span id="detail-card-level" class="font-bold text-xl"></span></p>
                             <p id="enhancement-preview" class="text-sm text-green-400"></p>
                         </div>
                         <button id="enhance-card-button" class="gacha-button bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-full shadow-lg">
-                            강화하기
+                            퇴고하기
                             <span id="enhancement-cost" class="block text-xs"></span>
                         </button>
                     </div>
@@ -594,11 +594,12 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
                 localStorage.setItem(SAVE_DATA_KEY, JSON.stringify(saveData));
             }
 
+            // ✅ 이 코드로 기존 loadGame 함수를 통째로 교체해주세요.
             function loadGame() {
                 if (!isStorageAvailable()) {
                     storageWarning.classList.remove('hidden');
                     resetButton.disabled = true;
-                    initializeNewGameData(); // 저장 기능 없어도 초기 카드는 지급
+                    initializeNewGameData();
                 } else {
                     const savedDataString = localStorage.getItem(SAVE_DATA_KEY);
                     if (savedDataString) {
@@ -606,9 +607,16 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
                             const savedData = JSON.parse(savedDataString);
                             playerCurrency = savedData.currency ?? 100;
                             playerFountainPens = savedData.fountainPens ?? 500;
-                            playerInventory = savedData.inventory || [];
                             
-                            // ✨ 저장된 ID를 사용해 playerInventory에서 실제 카드 인스턴스를 찾아 덱을 복원합니다.
+                            // ✨ 여기가 핵심적인 수정 부분입니다! ✨
+                            // 저장된 인벤토리를 불러오면서 각 카드에 'revision' 속성이 있는지 확인하고,
+                            // 만약 없다면 기본값인 0을 추가해줍니다.
+                            const loadedInventory = savedData.inventory || [];
+                            playerInventory = loadedInventory.map(card => ({
+                                ...card, // 기존 카드 정보 (id, name, level)는 그대로 유지
+                                revision: card.revision ?? 0 // revision 속성이 없으면(??) 0을 할당
+                            }));
+
                             const savedDeckIds = savedData.deck || [];
                             playerDeck = savedDeckIds.map(id => playerInventory.find(card => card.id === id)).filter(Boolean);
 
@@ -1113,7 +1121,7 @@ function addCardToInventory(cardName) {
         def: Math.floor(baseCard.stats.def * revisionBonus),
     };
 
-    // 그 다음 '강화'에 따른 보너스를 적용
+    // 그 다음 '퇴고'에 따른 보너스를 적용
     const enhancementBonus = 1 + (cardInstance.level * STAT_INCREASE_PER_LEVEL);
     return {
         hp: Math.floor(revisedStats.hp * enhancementBonus),
@@ -1333,7 +1341,7 @@ function addCardToInventory(cardName) {
 			function calculateDeckPower() {
     if (playerDeck.length === 0) return 0;
     
-    // 덱에 있는 각 카드의 강화된 스탯을 기준으로 전투력을 합산합니다.
+    // 덱에 있는 각 카드의 퇴고된 스탯을 기준으로 전투력을 합산합니다.
     // (표시되는 전투력에는 인연 보너스가 포함되지 않지만, 실제 전투에서는 정상 적용됩니다.)
     return playerDeck.reduce((total, cardInstance) => {
         const enhancedStats = getEnhancedStats(cardInstance);
@@ -1404,14 +1412,14 @@ async function startCombat(dungeonIndex, type) {
     const dungeon = dungeonList[dungeonIndex];
     const monsterData = JSON.parse(JSON.stringify(monsters[dungeon.monsterName]));
 
-    // 1. 강화 레벨에 따른 스탯을 먼저 적용한 덱을 만듭니다.
+    // 1. 퇴고 레벨에 따른 스탯을 먼저 적용한 덱을 만듭니다.
     let combatDeck = playerDeck.map(cardInstance => {
         const baseCard = findCharacter(cardInstance.name);
         const enhancedStats = getEnhancedStats(cardInstance);
-        // 강화된 스탯과 함께 스킬, 대사 등 모든 원본 정보를 포함한 객체를 만듭니다.
+        // 퇴고된 스탯과 함께 스킬, 대사 등 모든 원본 정보를 포함한 객체를 만듭니다.
         return {
             ...baseCard, // faction, rarity, skills, dialogues 등 모든 기본 정보 복사
-            stats: enhancedStats, // stats만 강화된 것으로 교체
+            stats: enhancedStats, // stats만 퇴고된 것으로 교체
         };
     });
 
@@ -1709,7 +1717,7 @@ async function startCombat(dungeonIndex, type) {
                 const factionColors = { '탐정': 'bg-blue-500 text-white', '조수': 'bg-green-500 text-white', '범인': 'bg-red-500 text-white' };
                 factionEl.className = `font-bold text-lg px-3 py-1 rounded-full ${factionColors[character.faction]}`;
 
-                // --- 2. 강화된 능력치 표시 ---
+                // --- 2. 퇴고된 능력치 표시 ---
                 document.getElementById('detail-stat-hp').textContent = currentStats.hp;
                 document.getElementById('detail-stat-atk').textContent = currentStats.atk;
                 document.getElementById('detail-stat-def').textContent = currentStats.def;
@@ -1728,7 +1736,7 @@ async function startCombat(dungeonIndex, type) {
                 currentStoryPageIndex = 0;
                 displayCardStoryPage();
 
-                // --- 4. 강화 UI 업데이트 로직 ---
+                // --- 4. 퇴고 UI 업데이트 로직 ---
                 const levelDisplay = document.getElementById('detail-card-level');
                 const previewDisplay = document.getElementById('enhancement-preview');
                 const costDisplay = document.getElementById('enhancement-cost');
@@ -1737,7 +1745,7 @@ async function startCombat(dungeonIndex, type) {
                 if (cardInstance.level >= MAX_ENHANCEMENT_LEVEL) {
                     previewDisplay.textContent = '최대 레벨에 도달했습니다.';
                     enhanceButton.disabled = true;
-                    costDisplay.textContent = '강화 불가';
+                    costDisplay.textContent = '퇴고 불가';
                 } else {
                     const nextLevelStats = getEnhancedStats({ ...cardInstance, level: cardInstance.level + 1 });
                     previewDisplay.innerHTML = `HP ${currentStats.hp} <span class="text-gray-400">&rarr;</span> ${nextLevelStats.hp} (+${nextLevelStats.hp - currentStats.hp})<br>ATK ${currentStats.atk} <span class="text-gray-400">&rarr;</span> ${nextLevelStats.atk} (+${nextLevelStats.atk - currentStats.atk})`;
@@ -2094,6 +2102,7 @@ document.getElementById('inventory-sort-buttons').addEventListener('click', (e) 
     </script>
 </body>
 </html>
+
 
 
 
