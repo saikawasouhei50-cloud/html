@@ -1879,9 +1879,9 @@ function endCombat(isVictory, combatInfo) { // dungeon, type 대신 combatInfo �
                 } else {
                     const nextLevelStats = getEnhancedStats({ ...cardInstance, level: cardInstance.level + 1 });
                     previewDisplay.innerHTML = `HP ${currentStats.hp} <span class="text-gray-400">&rarr;</span> ${nextLevelStats.hp} (+${nextLevelStats.hp - currentStats.hp})<br>ATK ${currentStats.atk} <span class="text-gray-400">&rarr;</span> ${nextLevelStats.atk} (+${nextLevelStats.atk - currentStats.atk})`;
-                    const cost = ENHANCEMENT_COSTS[cardInstance.level];
-                    costDisplay.textContent = `🖋️ ${cost}`;
-                    enhanceButton.disabled = playerFountainPens < cost;
+                    const cost = getEnhancementCost(cardInstance); // ✨ 새로운 함수 호출로 변경
+costDisplay.textContent = `🖋️ ${cost}`;
+enhanceButton.disabled = playerFountainPens < cost;
                 }
 
                 // --- 5. ✨ '개정' UI 업데이트 로직 (새로 추가된 부분) ✨ ---
@@ -1972,6 +1972,17 @@ function endCombat(isVictory, combatInfo) { // dungeon, type 대신 combatInfo �
                     mainStoryContainer.appendChild(storyEl);
                 });
             }
+
+			function getEnhancementCost(cardInstance) {
+    const character = findCharacter(cardInstance.name);
+    if (!character || cardInstance.level >= MAX_ENHANCEMENT_LEVEL) return null;
+
+    const baseCost = ENHANCEMENT_BASE_COSTS[cardInstance.level];
+    const multiplier = RARITY_COST_MULTIPLIER[character.rarity] || 1.0;
+    
+    // 최종 비용은 소수점 올림 또는 반올림 처리하여 정수로 반환합니다.
+    return Math.ceil(baseCost * multiplier);
+}
 			
 			// --- 대화형 스토리 관련 함수 (새 버전) ---
             function startInteractiveStory(storyIndex, type) {
@@ -2034,7 +2045,10 @@ function endCombat(isVictory, combatInfo) { // dungeon, type 대신 combatInfo �
     const cardInstance = playerInventory.find(c => c.id === currentDetailCardId);
     if (!cardInstance || cardInstance.level >= MAX_ENHANCEMENT_LEVEL) return;
 
-    const cost = ENHANCEMENT_COSTS[cardInstance.level];
+    // 수정: ENHANCEMENT_COSTS 배열 대신 새로운 함수 사용
+    const cost = getEnhancementCost(cardInstance);
+    if (cost === null) return; // 비용을 가져올 수 없으면 종료
+
     if (playerFountainPens >= cost) {
         playerFountainPens -= cost;
         cardInstance.level++;
@@ -2266,6 +2280,7 @@ function endCombat(isVictory, combatInfo) { // dungeon, type 대신 combatInfo �
     </script>
 </body>
 </html>
+
 
 
 
