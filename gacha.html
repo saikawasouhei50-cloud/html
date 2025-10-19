@@ -1383,17 +1383,8 @@ async function startCombat(dungeonIndex, type) {
     await runCombatLoop(combatDeck, originalBonusDeck, monsterData, dungeon, type);
 }
 
-                combatMonsterArea.innerHTML = `
-                    <h3 class="text-2xl font-bold">${monsterData.name}</h3>
-                    <img id="combat-monster-image" src="${monsterData.imageUrl}" alt="${monsterData.name}" class="my-4 h-48 w-48 object-contain">
-                    <div class="w-full hp-bar-background rounded-full h-4">
-                        <div id="monster-hp-bar" class="hp-bar-foreground h-4 rounded-full" style="width: 100%"></div>
-                    </div>
-                    <p id="monster-hp-text" class="text-sm mt-1">${monsterData.stats.hp} / ${monsterData.stats.hp}</p>
-                `;
-                
-                await runCombatLoop(combatDeck, originalBonusDeck, monsterData, dungeon, type);
-            }
+            
+            
 
             const delay = ms => new Promise(res => setTimeout(res, ms / combatSpeedMultiplier));
 
@@ -1955,5 +1946,6 @@ async function startCombat(dungeonIndex, type) {
     </script>
 </body>
 </html>
+
 
 
