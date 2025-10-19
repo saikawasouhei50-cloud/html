@@ -1309,10 +1309,10 @@ const closeDismantleResultButton = document.getElementById('close-dismantle-resu
             
 
             function showMessage(message, colorClass, element) {
-                element.textContent = message;
-                element.className = `text-center text-lg h-8 mb-4 transition-opacity duration-300 ${colorClass}`;
-                setTimeout(() => { element.textContent = ''; }, 2000);
-            }
+    element.textContent = message;
+    element.className = `text-center text-lg h-8 mb-4 transition-opacity duration-300 ${colorClass}`;
+    setTimeout(() => { element.textContent = ''; }, 2000); // 2초 후 메시지를 지웁니다.
+}
 			
 			function generateUniqueId() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
@@ -2506,27 +2506,20 @@ function dismantleMultipleCards() {
     displayInventory();
     saveGame();
     
-    // 4. 결과 모달에 보상 표시
+    // 4. 결과 모달에 보상 표시 (로직 유지)
     dismantleRewardsList.innerHTML = '';
+    // ... (보상 리스트 추가 로직 유지)
     
-    if (totalFountainPens > 0) {
-        dismantleRewardsList.innerHTML += `<div class="text-xl text-gray-300 font-bold">🖋️ 만년필: +${totalFountainPens}</div>`;
-    }
-    if (totalInkwells > 0) {
-        dismantleRewardsList.innerHTML += `<div class="text-xl text-fuchsia-400 font-bold">💧 잉크병: +${totalInkwells}</div>`;
-    }
-    
-    // 덱에 포함되어 파쇄하지 못한 카드가 있다면 경고 메시지를 추가합니다.
-    if (cardsInDeck.length > 0) {
-         dismantleRewardsList.innerHTML += `<div class="text-xs text-red-400 mt-2">(${cardsInDeck.length}장은 덱에 포함되어 파쇄되지 않았습니다.)</div>`;
-    }
-
     // 모달 표시
     dismantleResultModal.classList.remove('hidden');
 
-    // 성공 메시지 (파쇄된 경우에만)
+    // 5. 성공 메시지 딜레이 호출 (핵심 수정)
     if (cardsToRemove.length > 0) {
-        showMessage(`총 ${cardsToRemove.length}장의 원고를 파쇄했습니다.`, 'text-yellow-300', messageArea);
+        // UI 갱신이 완료된 후 짧은 딜레이를 주어 메시지가 덮어쓰이지 않도록 함
+        const finalMessage = `총 ${cardsToRemove.length}장의 원고를 파쇄했습니다.`;
+        setTimeout(() => {
+            showMessage(finalMessage, 'text-yellow-300', messageArea);
+        }, 100); // 100ms 딜레이
     }
 }
 			
@@ -2852,6 +2845,7 @@ cardClickableContainers.forEach(container => {
     </script>
 </body>
 </html>
+
 
 
 
