@@ -470,7 +470,7 @@
             const characterPortraits = {
                 '서도진': {
                     neutral: 'https://i.imgur.com/9AoLI6I.png',
-					serious: 'https://i.imgur.com/ERUGX0P.png',
+                    serious: 'https://i.imgur.com/ERUGX0P.png',
                     surprised: 'https://i.imgur.com/IayOWqf.png',
                     angry: 'https://i.imgur.com/ERUGX0P.png',
                 },
@@ -478,7 +478,39 @@
                     neutral: 'https://i.imgur.com/svV5WKn.png',
                     serious: 'https://i.imgur.com/HlApnIL.png',
                 },
-                // 여기에 다른 캐릭터와 표정도 추가할 수 있습니다.
+                '윤필규': {
+                    neutral: 'https://i.imgur.com/x6rfl1m.png'
+                },
+                '강은율': {
+                    neutral: 'https://placehold.co/400x800/0bc5ea/ffffff?text=강은율',
+                    serious: 'https://placehold.co/400x800/0987a0/ffffff?text=강은율'
+                },
+                '박연우': {
+                    neutral: 'https://placehold.co/400x800/dd6b20/ffffff?text=박연우'
+                },
+                '백정문': {
+                    neutral: 'https://placehold.co/400x800/f687b3/ffffff?text=백정문',
+                    serious: 'https://placehold.co/400x800/d53f8c/ffffff?text=백정문'
+                },
+                '양석민': {
+                    neutral: 'https://placehold.co/400x800/2f855a/ffffff?text=양석민',
+                    serious: 'https://placehold.co/400x800/22543d/ffffff?text=양석민'
+                },
+                '독고유진': {
+                    neutral: 'https://placehold.co/400x800/805ad5/ffffff?text=독고유진',
+                    serious: 'https://placehold.co/400x800/553c9a/ffffff?text=독고유진'
+                },
+                '윤서천': {
+                    neutral: 'https://i.imgur.com/Ruo7GXd.png',
+                    serious: 'https://i.imgur.com/L6RdFz9.png'
+                },
+                '한 현': {
+                    neutral: 'https://i.imgur.com/0F4cRdF.png'
+                },
+                '윤유준': {
+                    neutral: 'https://placehold.co/400x800/c53030/ffffff?text=윤유준',
+                    surprised: 'https://placehold.co/400x800/e53e3e/ffffff?text=윤유준'
+                }
             };
 			
 			const rarityProbabilities = { 'SSR': 3, 'SR': 12, 'R': 35, 'N': 50 };
@@ -505,6 +537,7 @@ const RARITY_COST_MULTIPLIER = {
 // (만약 있다면 삭제하세요): const enhancementCosts = [10, 20, 35, 55, 80, 110, 150, 200, 250];
 
 // 나머지 게임 설정 데이터는 그대로 유지합니다.
+
 
 
 
