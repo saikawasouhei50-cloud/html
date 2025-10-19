@@ -1178,6 +1178,7 @@ function addCardToInventory(cardName) {
                 deckStatus.textContent = `현재 편찬: ${playerDeck.length} / ${DECK_CAPACITY}`;
                 deckStatus.classList.toggle('text-green-400', playerDeck.length === DECK_CAPACITY);
                 
+                // 덱 슬롯 표시
                 deckSlotsContainer.innerHTML = '';
                 for (let i = 0; i < DECK_CAPACITY; i++) {
                     if (playerDeck[i]) {
@@ -1190,20 +1191,15 @@ function addCardToInventory(cardName) {
                     }
                 }
 
+                // 덱에 추가할 수 있는 인벤토리 카드 목록 표시
                 deckInventoryContainer.innerHTML = '';
                 if (playerInventory.length === 0) {
                     deckInventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">편찬할 등장인물이 없습니다.</p>`;
                 } else {
-                    // ✨ 덱에 있는 캐릭터들의 baseName 목록을 미리 만들어 둡니다.
-                    const deckBaseNames = new Set(playerDeck.map(deckCard => findCharacter(deckCard.name).baseName));
-                    
                     playerInventory.forEach((cardInstance, index) => {
                         const baseCharacter = findCharacter(cardInstance.name);
+                        // 이제 '이미 덱에 들어간 카드인지' 여부만 체크합니다.
                         const isCardInDeck = playerDeck.some(deckCard => deckCard.id === cardInstance.id);
-                        
-                        // ✨ isSameCharacterInDeck 로직을 baseName 기준으로 수정합니다.
-                        const isSameCharacterInDeck = deckBaseNames.has(baseCharacter.baseName);
-                        
                         const isDeckFull = playerDeck.length >= DECK_CAPACITY;
                         
                         deckInventoryContainer.appendChild(createCard(baseCharacter, {
@@ -1211,7 +1207,6 @@ function addCardToInventory(cardName) {
                             mode: 'deckBuilder',
                             instance: cardInstance,
                             isCardInDeck: isCardInDeck,
-                            isSameCharacterInDeck: isSameCharacterInDeck && !isCardInDeck, // 이미 덱에 있는 카드 자신은 중복으로 치지 않음
                             isDeckFull: isDeckFull
                         }));
                     });
@@ -1220,36 +1215,22 @@ function addCardToInventory(cardName) {
             }
 
             
-            // ✅ 기존 autoFillDeck 함수를 이 코드로 교체하세요. ✅
-function autoFillDeck() {
-    // 인벤토리의 모든 카드를 강화된 스탯 기준으로 전투력을 계산합니다.
-    const inventoryWithPower = playerInventory.map(cardInstance => {
-        const enhancedStats = getEnhancedStats(cardInstance);
-        const power = enhancedStats.atk + enhancedStats.def + Math.floor(enhancedStats.hp / 10);
-        return { instance: cardInstance, power: power };
-    });
+           function autoFillDeck() {
+                const inventoryWithPower = playerInventory.map(cardInstance => {
+                    const enhancedStats = getEnhancedStats(cardInstance);
+                    const power = enhancedStats.atk + enhancedStats.def + Math.floor(enhancedStats.hp / 10);
+                    return { instance: cardInstance, power: power };
+                });
 
-    // 전투력 순으로 정렬합니다.
-    inventoryWithPower.sort((a, b) => b.power - a.power);
-    
-    const newDeck = [];
-    const addedBaseNames = new Set(); // 중복 인물 추가를 막기 위한 Set
+                inventoryWithPower.sort((a, b) => b.power - a.power);
+                
+                // 이제 중복 체크 없이, 전투력이 가장 높은 5장을 바로 선택합니다.
+                playerDeck = inventoryWithPower.slice(0, DECK_CAPACITY).map(item => item.instance);
 
-    for (const item of inventoryWithPower) {
-        if (newDeck.length >= DECK_CAPACITY) break;
-        
-        const baseCharacter = findCharacter(item.instance.name);
-        if (!addedBaseNames.has(baseCharacter.baseName)) {
-            newDeck.push(item.instance);
-            addedBaseNames.add(baseCharacter.baseName);
-        }
-    }
-
-    playerDeck = newDeck;
-    displayDeckManagement();
-    showMessage('가장 강력한 등장인물로 덱을 자동 편성했습니다!', 'text-blue-300', messageArea);
-    saveGame();
-}
+                displayDeckManagement();
+                showMessage('가장 강력한 등장인물로 덱을 자동 편성했습니다!', 'text-blue-300', messageArea);
+                saveGame();
+            }
 
             function addToDeck(cardId) {
                 if (playerDeck.length >= DECK_CAPACITY) return;
@@ -1257,10 +1238,9 @@ function autoFillDeck() {
                 const cardInstanceToAdd = playerInventory.find(c => c.id === cardId);
                 if (!cardInstanceToAdd) return;
 
-                // ✨ baseName을 기준으로 동일 인물이 덱에 있는지 확인합니다.
-                const baseCharacterInfo = findCharacter(cardInstanceToAdd.name);
-                if (playerDeck.some(deckCard => findCharacter(deckCard.name).baseName === baseCharacterInfo.baseName)) {
-                     showMessage('이미 동일한 등장인물이 편찬되어 있습니다.', 'text-yellow-400', messageArea);
+                // 이제 동일 인물이 아닌, '이미 덱에 들어간 카드인지'만 확인합니다.
+                if (playerDeck.some(deckCard => deckCard.id === cardInstanceToAdd.id)) {
+                     showMessage('이미 편찬된 카드입니다.', 'text-yellow-400', messageArea);
                     return;
                 }
 
