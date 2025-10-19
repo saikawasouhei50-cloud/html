@@ -591,6 +591,7 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
 			const storySkipButton = document.getElementById('story-skip-button');
 			const detailStoryPrevButton = document.getElementById('detail-story-prev');
             const detailStoryNextButton = document.getElementById('detail-story-next');
+			const storyView = document.getElementById('story-view');
             
             // --- 데이터 저장/불러오기 함수 ---
             function isStorageAvailable() {
@@ -2406,18 +2407,23 @@ storySubTabStage.addEventListener('click', () => {
                 if (e.target === cardDetailModal) hideCardDetails();
             });
 
-            mainStoryContainer.addEventListener('click', (e) => {
+            storyView.addEventListener('click', (e) => {
+    // 클릭된 요소 또는 가장 가까운 [data-story-index]나 [data-stage-id] 요소를 찾습니다.
     const storyEl = e.target.closest('[data-story-index], [data-stage-id]');
     if (!storyEl) return;
 
     if (storyEl.dataset.storyType === 'main') {
+        // 메인 스토리 클릭 처리 (mainStories 배열의 index 사용)
         startInteractiveStory(parseInt(storyEl.dataset.storyIndex), 'main');
     } else if (storyEl.dataset.storyType === 'stage') {
+        // 스테이지 스토리 클릭 처리 (stageId 사용)
         const stageId = storyEl.dataset.stageId;
+        // stageId를 chapIdx, stgIdx로 변환 (1-1 -> 0, 0)
         const [chapIdx, stgIdx] = stageId.split('-').map(s => parseInt(s) - 1);
         const stage = mainChapters[chapIdx]?.stages[stgIdx];
 
         if (stage && stage.stageStory) {
+            // 스테이지 스토리 객체를 직접 전달
             startInteractiveStory({ content: stage.stageStory });
         } else {
             alert('스토리 데이터를 찾을 수 없습니다.');
@@ -2472,6 +2478,7 @@ storySubTabStage.addEventListener('click', () => {
     </script>
 </body>
 </html>
+
 
 
 
