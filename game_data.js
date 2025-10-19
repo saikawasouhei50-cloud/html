@@ -48,57 +48,71 @@
             ];
             
             const monsters = {
-                '슬라임 킹': { name: '슬라임 킹', stats: { hp: 300, atk: 15, def: 10 }, imageUrl: 'https://placehold.co/300x300/a0aec0/ffffff?text=Slime+King' },
-                '오크 대장': { name: '오크 대장', stats: { hp: 800, atk: 30, def: 20 }, imageUrl: 'https://placehold.co/300x300/63b3ed/ffffff?text=Orc+Chief' },
-                '레드 드래곤': { name: '레드 드래곤', stats: { hp: 2000, atk: 50, def: 35 }, imageUrl: 'https://placehold.co/300x300/f56565/000000?text=Red+Dragon' },
-                '그림자 암살자': { name: '그림자 암살자', stats: { hp: 1200, atk: 40, def: 15 }, imageUrl: 'https://placehold.co/300x300/4a5568/ffffff?text=Shadow' }
+                // 1장 초반부 일반 몬스터
+                '의혹의 안개': { name: '의혹의 안개', stats: { hp: 300, atk: 15, def: 10 }, imageUrl: 'https://placehold.co/300x300/a0aec0/4a5568?text=Fog+of+Doubt' },
+                // 1장 후반부 일반 몬스터
+                '모방범의 그림자': { name: '모방범의 그림자', stats: { hp: 800, atk: 30, def: 20 }, imageUrl: 'https://placehold.co/300x300/63b3ed/4a5568?text=Copycat+Shadow' },
+                // 2장 방어형 몬스터
+                '날조된 증거': { name: '날조된 증거', stats: { hp: 1200, atk: 40, def: 35 }, imageUrl: 'https://placehold.co/300x300/f56565/000000?text=Fabricated+Evidence' },
+                // 2장 보스 및 강력한 몬스터
+                '편집된 진실': { name: '편집된 진실', stats: { hp: 2000, atk: 50, def: 15 }, imageUrl: 'https://placehold.co/300x300/4a5568/ffffff?text=The+Edited+Truth' }
             };
 
             const mainChapters = [
     {
         chapterName: '제1장: 서재의 흔적',
         stages: [
-            { stageName: '1-1. 오래된 문장', monsterName: '슬라임 킹', rewards: { fountainPens: 20, currency: 5 } },
-            { stageName: '1-2. 흐릿한 단서', monsterName: '슬라임 킹', rewards: { fountainPens: 25, currency: 5 } },
-            { stageName: '1-3. 모방의 그림자', monsterName: '슬라임 킹', rewards: { fountainPens: 30, currency: 10 } },
-            { stageName: '1-4. 현장의 재구성', monsterName: '슬라임 킹', rewards: { fountainPens: 35, currency: 10 } },
-            { stageName: '1-5. 용의자의 진술', monsterName: '오크 대장', rewards: { fountainPens: 40, currency: 15 } },
-            { stageName: '1-6. 알리바이의 허점', monsterName: '오크 대장', rewards: { fountainPens: 45, currency: 15 } },
-            { stageName: '1-7. 미제 사건 파일', monsterName: '오크 대장', rewards: { fountainPens: 50, currency: 20 } },
-            { stageName: '1-8. 침묵의 증인', monsterName: '오크 대장', rewards: { fountainPens: 55, currency: 20 } },
-            { stageName: '1-9. 숨겨진 의도', monsterName: '오크 대장', rewards: { fountainPens: 60, currency: 25 } },
-            { stageName: '1-10. 장의 결말 (챕터 보스)', monsterName: '그림자 암살자', rewards: { fountainPens: 100, currency: 30 } },
-        ], // 👈 스테이지 배열 닫고, 쉼표로 다음 챕터 객체와 구분
-    }, // 👈 첫 번째 챕터 객체 닫고, 쉼표로 다음 챕터 객체와 구분
+            // 슬라임 킹 -> 의혹의 안개
+            { stageName: '1-1. 오래된 문장', monsterName: '의혹의 안개', rewards: { fountainPens: 20, currency: 5 } },
+            { stageName: '1-2. 흐릿한 단서', monsterName: '의혹의 안개', rewards: { fountainPens: 25, currency: 5 } },
+            { stageName: '1-3. 모방의 그림자', monsterName: '의혹의 안개', rewards: { fountainPens: 30, currency: 10 } },
+            { stageName: '1-4. 현장의 재구성', monsterName: '의혹의 안개', rewards: { fountainPens: 35, currency: 10 } },
+            
+            // 오크 대장 -> 모방범의 그림자
+            { stageName: '1-5. 용의자의 진술', monsterName: '모방범의 그림자', rewards: { fountainPens: 40, currency: 15 } },
+            { stageName: '1-6. 알리바이의 허점', monsterName: '모방범의 그림자', rewards: { fountainPens: 45, currency: 15 } },
+            { stageName: '1-7. 미제 사건 파일', monsterName: '모방범의 그림자', rewards: { fountainPens: 50, currency: 20 } },
+            { stageName: '1-8. 침묵의 증인', monsterName: '모방범의 그림자', rewards: { fountainPens: 55, currency: 20 } },
+            { stageName: '1-9. 숨겨진 의도', monsterName: '모방범의 그림자', rewards: { fountainPens: 60, currency: 25 } },
+            
+            // 그림자 암살자 -> 날조된 증거 (1장 보스)
+            { stageName: '1-10. 장의 결말 (챕터 보스)', monsterName: '날조된 증거', rewards: { fountainPens: 100, currency: 30 } },
+        ],
+    },
     {
         chapterName: '제2장: 미궁 속의 실험',
         stages: [
-            { stageName: '2-1. 새로운 가설', monsterName: '오크 대장', rewards: { fountainPens: 70, currency: 10 } },
-            { stageName: '2-2. 통제된 변수', monsterName: '오크 대장', rewards: { fountainPens: 75, currency: 10 } },
-            { stageName: '2-3. 예상치 못한 반응', monsterName: '오크 대장', rewards: { fountainPens: 80, currency: 15 } },
-            { stageName: '2-4. 오염된 샘플', monsterName: '오크 대장', rewards: { fountainPens: 85, currency: 15 } },
-            { stageName: '2-5. 연구자의 윤리', monsterName: '그림자 암살자', rewards: { fountainPens: 90, currency: 20 } },
-            { stageName: '2-6. 잊혀진 약물', monsterName: '그림자 암살자', rewards: { fountainPens: 95, currency: 20 } },
-            { stageName: '2-7. 배후의 조력자', monsterName: '그림자 암살자', rewards: { fountainPens: 100, currency: 25 } },
-            { stageName: '2-8. 역추적', monsterName: '그림자 암살자', rewards: { fountainPens: 105, currency: 25 } },
-            { stageName: '2-9. 긴급 상황', monsterName: '그림자 암살자', rewards: { fountainPens: 110, currency: 30 } },
-            { stageName: '2-10. 비극적인 실험 (챕터 보스)', monsterName: '레드 드래곤', rewards: { fountainPens: 180, currency: 40 } },
-        ],
-    } // 👈 두 번째 챕터 객체 뒤에는 쉼표가 없어야 합니다.
-]; // 👈 배열을 닫고, 세미콜론으로 문장 전체를 명확하게 종료합니다.
+            // 오크 대장 -> 모방범의 그림자
+            { stageName: '2-1. 새로운 가설', monsterName: '모방범의 그림자', rewards: { fountainPens: 70, currency: 10 } },
+            { stageName: '2-2. 통제된 변수', monsterName: '모방범의 그림자', rewards: { fountainPens: 75, currency: 10 } },
+            { stageName: '2-3. 예상치 못한 반응', monsterName: '모방범의 그림자', rewards: { fountainPens: 80, currency: 15 } },
+            { stageName: '2-4. 오염된 샘플', monsterName: '모방범의 그림자', rewards: { fountainPens: 85, currency: 15 } },
             
-            const eventDungeons = [
-                { name: '1장', monsterName: '슬라임 킹', eventPointReward: 100 },
-                { name: '2장', monsterName: '슬라임 킹', eventPointReward: 120 },
-                { name: '3장', monsterName: '오크 대장', eventPointReward: 150 },
-                { name: '4장', monsterName: '오크 대장', eventPointReward: 180 },
-                { name: '5장', monsterName: '그림자 암살자', eventPointReward: 220 },
-                { name: '6장', monsterName: '그림자 암살자', eventPointReward: 250 },
-                { name: '7장', monsterName: '그림자 암살자', eventPointReward: 300 },
-                { name: '8장', monsterName: '레드 드래곤', eventPointReward: 350 },
-                { name: '9장', monsterName: '레드 드래곤', eventPointReward: 400 },
-                { name: '10장', monsterName: '레드 드래곤', eventPointReward: 500 }
-            ];
+            // 그림자 암살자 -> 날조된 증거
+            { stageName: '2-5. 연구자의 윤리', monsterName: '날조된 증거', rewards: { fountainPens: 90, currency: 20 } },
+            { stageName: '2-6. 잊혀진 약물', monsterName: '날조된 증거', rewards: { fountainPens: 95, currency: 20 } },
+            { stageName: '2-7. 배후의 조력자', monsterName: '날조된 증거', rewards: { fountainPens: 100, currency: 25 } },
+            { stageName: '2-8. 역추적', monsterName: '날조된 증거', rewards: { fountainPens: 105, currency: 25 } },
+            { stageName: '2-9. 긴급 상황', monsterName: '날조된 증거', rewards: { fountainPens: 110, currency: 30 } },
+            
+            // 레드 드래곤 -> 편집된 진실 (2장 보스)
+            { stageName: '2-10. 비극적인 실험 (챕터 보스)', monsterName: '편집된 진실', rewards: { fountainPens: 180, currency: 40 } },
+        ],
+    }, // 👈 마지막 챕터 객체 뒤에는 쉼표가 없습니다.
+]; // 👈 배열을 닫고 세미콜론으로 문장을 종료합니다.
+            
+           const eventDungeons = [
+    { name: '1장', monsterName: '의혹의 안개', eventPointReward: 100 },
+    { name: '2장', monsterName: '의혹의 안개', eventPointReward: 120 },
+    { name: '3장', monsterName: '모방범의 그림자', eventPointReward: 150 },
+    { name: '4장', monsterName: '모방범의 그림자', eventPointReward: 180 },
+    { name: '5장', monsterName: '날조된 증거', eventPointReward: 220 },
+    { name: '6장', monsterName: '날조된 증거', eventPointReward: 250 },
+    { name: '7장', monsterName: '날조된 증거', eventPointReward: 300 },
+    { name: '8장', monsterName: '편집된 진실', eventPointReward: 350 },
+    { name: '9장', monsterName: '편집된 진실', eventPointReward: 400 },
+    { name: '10장', monsterName: '편집된 진실', eventPointReward: 500 }
+];
 
             const eventStories = [
                 { title: '사건의 발단', content: `어느 날, 탐정 사무소에 한 통의 편지가 도착한다...` },
@@ -280,6 +294,7 @@
             const EVENT_START_DATE = new Date('2025-10-14T00:00:00');
             const EVENT_END_DATE = new Date('2025-10-24T23:59:59');
 			const enhancementCosts = [10, 20, 35, 55, 80, 110, 150, 200, 250]; // +1강 ~ +9강에 필요한 만년필 비용
+
 
 
 
