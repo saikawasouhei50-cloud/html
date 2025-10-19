@@ -521,15 +521,23 @@ function b64_to_utf8(str) {
     
     reader.onload = function(event) {
         try {
-            const encodedData = event.target.result;
+            let encodedData = event.target.result;
+            
+            // ✨ 핵심 수정: 양쪽 끝의 공백, 줄바꿈 등을 제거하여 데이터 클리닝 ✨
+            encodedData = encodedData.trim();
             
             // 1. Base64 안전 디코딩
-            const jsonString = b64_to_utf8(encodedData); // ✨ 수정된 함수 사용 ✨
+            const jsonString = b64_to_utf8(encodedData); 
             
             // 2. JSON 파싱 테스트 (데이터 유효성 검사)
-            JSON.parse(jsonString); 
+            const parsedData = JSON.parse(jsonString); 
             
-            // 3. 유효한 데이터이므로 localStorage에 저장하고 로드
+            // 3. 유효성 추가 확인 (예: 인벤토리 키가 있는지 확인)
+            if (!parsedData || !Array.isArray(parsedData.inventory)) {
+                throw new Error("파싱된 데이터 구조가 유효하지 않습니다.");
+            }
+            
+            // 4. 유효한 데이터이므로 localStorage에 저장하고 로드
             localStorage.setItem(SAVE_DATA_KEY, jsonString);
             
             alert("데이터 로드 성공! 게임이 새로고침됩니다.");
@@ -537,8 +545,9 @@ function b64_to_utf8(str) {
 
         } catch (e) {
             console.error("데이터 로드 오류:", e);
-            alert("⚠️ 유효하지 않은 저장 파일입니다. (데이터 손상)");
-            showMessage('유효하지 않은 저장 파일입니다.', 'text-red-400', messageArea);
+            alert(`⚠️ 유효하지 않은 저장 파일입니다. 오류: ${e.message}`);
+            // showMessage는 이 시점에서 DOM이 새로 로드되기 때문에 의미 없습니다.
+            // alert만 표시하고 끝냅니다.
         }
     };
     
@@ -546,9 +555,9 @@ function b64_to_utf8(str) {
         alert("파일을 읽는 도중 오류가 발생했습니다.");
     };
 
+    // FileReader는 이 시점에만 호출됩니다.
     reader.readAsText(file);
 }
-
 		const SAVE_DATA_KEY = 'gachaGameSaveData_v9';
         document.addEventListener('DOMContentLoaded', () => {
             
@@ -2577,6 +2586,7 @@ storySubTabStage.addEventListener('click', () => {
     </script>
 </body>
 </html>
+
 
 
 
