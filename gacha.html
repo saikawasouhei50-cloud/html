@@ -1163,7 +1163,6 @@ function addCardToInventory(cardName) {
                 deckStatus.textContent = `현재 편찬: ${playerDeck.length} / ${DECK_CAPACITY}`;
                 deckStatus.classList.toggle('text-green-400', playerDeck.length === DECK_CAPACITY);
                 
-                // 덱 슬롯 표시
                 deckSlotsContainer.innerHTML = '';
                 for (let i = 0; i < DECK_CAPACITY; i++) {
                     if (playerDeck[i]) {
@@ -1176,15 +1175,20 @@ function addCardToInventory(cardName) {
                     }
                 }
 
-                // 덱에 추가할 수 있는 인벤토리 카드 목록 표시
                 deckInventoryContainer.innerHTML = '';
                 if (playerInventory.length === 0) {
                     deckInventoryContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-10">편찬할 등장인물이 없습니다.</p>`;
                 } else {
+                    // ✨ 덱에 있는 캐릭터들의 baseName 목록을 미리 만들어 둡니다.
+                    const deckBaseNames = new Set(playerDeck.map(deckCard => findCharacter(deckCard.name).baseName));
+                    
                     playerInventory.forEach((cardInstance, index) => {
                         const baseCharacter = findCharacter(cardInstance.name);
                         const isCardInDeck = playerDeck.some(deckCard => deckCard.id === cardInstance.id);
-                        const isSameCharacterInDeck = playerDeck.some(deckCard => deckCard.name === cardInstance.name);
+                        
+                        // ✨ isSameCharacterInDeck 로직을 baseName 기준으로 수정합니다.
+                        const isSameCharacterInDeck = deckBaseNames.has(baseCharacter.baseName);
+                        
                         const isDeckFull = playerDeck.length >= DECK_CAPACITY;
                         
                         deckInventoryContainer.appendChild(createCard(baseCharacter, {
@@ -1192,7 +1196,7 @@ function addCardToInventory(cardName) {
                             mode: 'deckBuilder',
                             instance: cardInstance,
                             isCardInDeck: isCardInDeck,
-                            isSameCharacterInDeck: isSameCharacterInDeck, // 동일 인물 체크용
+                            isSameCharacterInDeck: isSameCharacterInDeck && !isCardInDeck, // 이미 덱에 있는 카드 자신은 중복으로 치지 않음
                             isDeckFull: isDeckFull
                         }));
                     });
@@ -1202,19 +1206,44 @@ function addCardToInventory(cardName) {
 
             
             function autoFillDeck() {
-                const uniqueCards = getUniqueInventory();
-                const sortedByPower = uniqueCards.sort((a, b) => (b.stats.atk + b.stats.def) - (a.stats.atk + a.stats.def));
-                playerDeck = sortedByPower.slice(0, DECK_CAPACITY);
+                // 인벤토리의 모든 카드를 강화된 스탯 기준으로 전투력을 계산합니다.
+                const inventoryWithPower = playerInventory.map(cardInstance => {
+                    const enhancedStats = getEnhancedStats(cardInstance);
+                    const power = enhancedStats.atk + enhancedStats.def + Math.floor(enhancedStats.hp / 10);
+                    return { instance: cardInstance, power: power };
+                });
+
+                // 전투력 순으로 정렬합니다.
+                inventoryWithPower.sort((a, b) => b.power - a.power);
+                
+                const newDeck = [];
+                const addedBaseNames = new Set(); // 중복 인물 추가를 막기 위한 Set
+
+                for (const item of inventoryWithPower) {
+                    if (newDeck.length >= DECK_CAPACITY) break;
+                    
+                    const baseCharacter = findCharacter(item.instance.name);
+                    if (!addedBaseNames.has(baseCharacter.baseName)) {
+                        newDeck.push(item.instance);
+                        addedBaseNames.add(baseCharacter.baseName);
+                    }
+                }
+
+                playerDeck = newDeck;
                 displayDeckManagement();
-                showMessage('가장 강력한 카드로 덱을 자동 편성했습니다!', 'text-blue-300', messageArea);
+                showMessage('가장 강력한 등장인물로 덱을 자동 편성했습니다!', 'text-blue-300', messageArea);
                 saveGame();
             }
 
             function addToDeck(cardId) {
                 if (playerDeck.length >= DECK_CAPACITY) return;
-                // 이미 덱에 있는 카드의 '이름'과 같은 카드는 추가하지 못하게 막습니다. (동일 인물 중복 방지)
+                
                 const cardInstanceToAdd = playerInventory.find(c => c.id === cardId);
-                if (!cardInstanceToAdd || playerDeck.some(deckCard => deckCard.name === cardInstanceToAdd.name)) {
+                if (!cardInstanceToAdd) return;
+
+                // ✨ baseName을 기준으로 동일 인물이 덱에 있는지 확인합니다.
+                const baseCharacterInfo = findCharacter(cardInstanceToAdd.name);
+                if (playerDeck.some(deckCard => findCharacter(deckCard.name).baseName === baseCharacterInfo.baseName)) {
                      showMessage('이미 동일한 등장인물이 편찬되어 있습니다.', 'text-yellow-400', messageArea);
                     return;
                 }
@@ -1321,7 +1350,7 @@ function addCardToInventory(cardName) {
                 // ✨ 3. 전투 시작 시점의 최대 HP를 저장하기 위해 덱을 깊은 복사해둡니다. (HP바 표시 및 힐링 계산용)
                 const originalBonusDeck = JSON.parse(JSON.stringify(combatDeck));
 
-                // --- UI 렌더링 (이하 로직은 기존과 거의 동일) ---
+                // --- UI 렌더링 ---
                 allViews.forEach(view => view.classList.add('hidden'));
                 combatInProgressView.classList.remove('hidden');
                 combatLog.innerHTML = '';
@@ -1334,7 +1363,7 @@ function addCardToInventory(cardName) {
                         <div class="hp-bar-background rounded-full h-2.5 mt-1">
                             <div id="player-hp-bar-${index}" class="hp-bar-foreground h-2.5 rounded-full" style="width: 100%"></div>
                         </div>
-                        <p id="player-hp-text-${index}" class="text-xs text-center mt-0.5">${card.stats.hp} / ${card.stats.hp}</p>
+                        <p id="player-hp-text-${index}" class="text-xs text-center mt-0.5">${card.stats.hp} / ${originalBonusDeck[index].stats.hp}</p>
                     `;
                     combatPlayerDeck.appendChild(cardEl);
                 });
