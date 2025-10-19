@@ -446,7 +446,9 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
             const currencyDisplay = document.getElementById('currency-display');
             const messageArea = document.getElementById('message-area');
             const allTabs = document.querySelectorAll('.tab-button');
-            const allViews = document.querySelectorAll('main > div:not(#combat-result-modal):not(#card-detail-modal):not(#main-story-modal)');
+            const allViews = document.querySelectorAll(
+  'main > div:not(#combat-result-modal):not(#card-detail-modal):not(#interactive-story-modal)'
+);
             const pullOneButton = document.getElementById('pull-one');
             const pullTenButton = document.getElementById('pull-ten');
             const pullOneEventButton = document.getElementById('pull-one-event');
