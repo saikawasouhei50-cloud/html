@@ -148,6 +148,20 @@
 
         <!-- 재화 및 탭 메뉴 영역 -->
         <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
+    <div class="flex justify-center md:justify-start items-center gap-4 flex-wrap">
+        <button onclick="downloadSaveData()" class="gacha-button bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full text-sm">💾 데이터 다운로드</button>
+        <label for="upload-file" class="gacha-button bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full text-sm cursor-pointer">
+            ⬆️ 데이터 업로드
+        </label>
+        <input type="file" id="upload-file" accept=".txt" class="hidden">
+    </div>
+    <div class="bg-black/20 rounded-full p-1 flex-shrink-0 flex flex-wrap justify-center">
+        </div>
+    
+    <div class="flex items-center gap-4">
+        </div>
+</div>
+			
             <div class="bg-black/20 rounded-full p-1 flex-shrink-0 flex flex-wrap justify-center">
                 <button id="tab-home" class="tab-button active font-bold py-2 px-6 rounded-full">홈</button>
                 <button id="tab-event" class="tab-button font-bold py-2 px-6 rounded-full hidden">이벤트</button>
@@ -682,6 +696,68 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
                 checkAchievements();
             }
 
+function downloadSaveData() {
+    const saveDataString = localStorage.getItem(SAVE_DATA_KEY);
+    if (!saveDataString) {
+        alert("저장된 게임 데이터가 없습니다!");
+        return;
+    }
+
+    // 1. 저장된 JSON 문자열을 Base64로 인코딩 (데이터 보호 및 텍스트 안전성 확보)
+    const encodedData = btoa(saveDataString);
+
+    // 2. 파일 생성 및 다운로드 링크 생성
+    const blob = new Blob([encodedData], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    
+    // 파일명: Kside_Save_20251019.txt (현재 날짜 사용)
+    const now = new Date();
+    const dateString = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+    a.download = `Kside_Save_${dateString}.txt`;
+    
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showMessage('게임 데이터가 다운로드되었습니다.', 'text-green-400', messageArea);
+}
+
+			function uploadSaveData(file) {
+    const reader = new FileReader();
+    
+    reader.onload = function(event) {
+        try {
+            const encodedData = event.target.result;
+            
+            // 1. Base64 디코딩
+            const jsonString = atob(encodedData);
+            
+            // 2. JSON 파싱 테스트 (데이터 유효성 검사)
+            JSON.parse(jsonString); 
+            
+            // 3. 유효한 데이터이므로 localStorage에 저장하고 로드
+            localStorage.setItem(SAVE_DATA_KEY, jsonString);
+            
+            alert("데이터 로드 성공! 게임이 새로고침됩니다.");
+            location.reload();
+
+        } catch (e) {
+            console.error("데이터 로드 오류:", e);
+            alert("⚠️ 유효하지 않은 저장 파일입니다. (데이터 손상)");
+            showMessage('유효하지 않은 저장 파일입니다.', 'text-red-400', messageArea);
+        }
+    };
+    
+    reader.onerror = function() {
+        alert("파일을 읽는 도중 오류가 발생했습니다.");
+    };
+
+    reader.readAsText(file);
+}
+			
             function initializeNewGameData() {
     // ✨ 게임 첫 시작 시 기본 지급 카드에 고유 ID와 레벨 부여
     addCardToInventory('[편집자] 윤필규');
@@ -2291,6 +2367,13 @@ function startInteractiveStory(storyOrIndex, type) {
 			
             // --- 이벤트 리스너 ---
 
+			document.getElementById('upload-file').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        uploadSaveData(file);
+    }
+});
+
 			storySubTabMain.addEventListener('click', () => {
     storySubTabMain.classList.add('active');
     storySubTabStage.classList.remove('active');
@@ -2479,6 +2562,7 @@ storySubTabStage.addEventListener('click', () => {
     </script>
 </body>
 </html>
+
 
 
 
