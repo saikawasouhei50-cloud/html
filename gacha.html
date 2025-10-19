@@ -112,6 +112,11 @@
         #event-banner {
             animation: pulse-glow 2.5s infinite ease-in-out;
         }
+
+		.sort-button.active {
+    background-color: #4299e1; /* 파란색 */
+    color: white;
+}
         /* 뽑기 탭 버튼 스타일 */
         .sub-tab-button { transition: all 0.2s ease-in-out; }
         .sub-tab-button.active { background-color: rgba(246, 224, 94, 0.8); color: #330867; }
@@ -366,7 +371,7 @@
                     <h3 class="font-bold text-lg mb-2 text-yellow-300">등장인물 퇴고</h3>
                     <div class="flex items-center justify-between">
                         <div>
-                            <p>현재 레벨: <span id="detail-card-level" class="font-bold text-xl"></span></p>
+                            <p>현재 퇴고: <span id="detail-card-level" class="font-bold text-xl"></span></p>
                             <p id="enhancement-preview" class="text-sm text-green-400"></p>
                         </div>
                         <button id="enhance-card-button" class="gacha-button bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-full shadow-lg">
@@ -1916,9 +1921,15 @@ async function startCombat(dungeonIndex, type) {
             
 			// ✅ 1. 'closeInteractiveStory' 함수 바로 다음에 이 함수를 추가하세요.
             function reviseCard() {
-                if (!currentDetailCardId) return;
+    if (!currentDetailCardId) return;
 
-                const baseCard = playerInventory.find(c => c.id === currentDetailCardId);
+    // ✨ 확인창 로직 추가 시작 ✨
+    if (!confirm('선택한 카드를 원본으로 사용해 개정판을 제작하시겠습니까? 원본 카드는 사라집니다.')) {
+        return; // '취소'를 누르면 함수 종료
+    }
+    // ✨ 확인창 로직 추가 끝 ✨
+
+    const baseCard = playerInventory.find(c => c.id === currentDetailCardId);
                 const materialSelect = document.getElementById('revision-material-select');
                 const materialId = materialSelect.value;
 
@@ -1966,11 +1977,11 @@ document.getElementById('inventory-sort-buttons').addEventListener('click', (e) 
     const button = e.target.closest('.sort-button');
     if (button && button.dataset.sort) {
         currentSortOrder = button.dataset.sort;
-        // 활성화된 버튼 스타일링
-        document.querySelectorAll('.sort-button').forEach(btn => btn.classList.add('bg-gray-600', 'hover:bg-gray-700'));
-        button.classList.remove('bg-gray-600', 'hover:bg-gray-700');
-        button.classList.add('bg-blue-500'); 
-        displayInventory(); // 정렬 후 인벤토리 다시 표시
+        // 모든 버튼에서 active 클래스 제거
+        document.querySelectorAll('.sort-button').forEach(btn => btn.classList.remove('active', 'bg-blue-500'));
+        // 클릭된 버튼에만 active 클래스 추가
+        button.classList.add('active', 'bg-blue-500');
+        displayInventory();
     }
 });
 			
@@ -2102,6 +2113,7 @@ document.getElementById('inventory-sort-buttons').addEventListener('click', (e) 
     </script>
 </body>
 </html>
+
 
 
 
