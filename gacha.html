@@ -1481,24 +1481,23 @@ function addCardToInventory(cardName) {
                 // 'main' 타입은 이제 사용되지 않습니다. challengeStage를 통해 호출됩니다.
             }
             
-            // ✅ challengeDungeon 함수 바로 다음에 이 새로운 함수를 추가해주세요.
             function challengeStage(chapterIndex, stageIndex) {
-                 if (playerBookmarks < 1) {
-                    showMessage('책갈피가 부족합니다!', 'text-yellow-400', messageArea);
-                    return;
-                }
-                if (playerDeck.length < DECK_CAPACITY) {
-                    showMessage('덱을 5장으로 모두 채워야 합니다!', 'text-yellow-400', messageArea);
-                    return;
-                }
-                
-                playerBookmarks--;
-                if (playerBookmarks === MAX_BOOKMARKS - 1) {
-                     lastBookmarkUpdateTime = Date.now();
-                }
-                updateUI();
-                startCombat({ chapter: chapterIndex, stage: stageIndex }, 'main_stage');
-            }
+     if (playerBookmarks < 1) {
+        showMessage('책갈피가 부족합니다!', 'text-yellow-400', messageArea);
+        return;
+    }
+    if (playerDeck.length < DECK_CAPACITY) {
+        showMessage('덱을 5장으로 모두 채워야 합니다!', 'text-yellow-400', messageArea);
+        return;
+    }
+    
+    playerBookmarks--;
+    if (playerBookmarks === MAX_BOOKMARKS - 1) {
+         lastBookmarkUpdateTime = Date.now();
+    }
+    updateUI(); // ✨ 책갈피 차감 후 UI 즉시 갱신 ✨
+    startCombat({ chapter: chapterIndex, stage: stageIndex }, 'main_stage');
+}
 
             function setCombatSpeed(speed) {
                 combatSpeedMultiplier = speed;
@@ -1680,54 +1679,55 @@ function addCardToInventory(cardName) {
 				document.getElementById('monster-hp-text').textContent = `${monster.stats.hp} / ${monsterMaxHp}`;
 			}
 			
-            // ✅ 이 코드로 기존 endCombat 함수를 통째로 교체해주세요.
-            function endCombat(isVictory, combatInfo) { // dungeon, type 대신 combatInfo 객체 받기
-                lastCombatType = combatInfo.type;
-                if (isVictory) {
-                    let rewardMsg = '';
-                    if (combatInfo.type === 'event') {
-                        const dungeon = eventDungeons[combatInfo.indices];
-                        const reward = dungeon.eventPointReward;
-                        playerEventPoints += reward;
-                        if (!clearedEventDungeons.includes(dungeon.name)) {
-                            clearedEventDungeons.push(dungeon.name);
-                        }
-                        rewardMsg = `이벤트 스테이지 클리어! ${reward} P를 획득했습니다.`;
-                    } else if (combatInfo.type === 'main_stage') {
-                        const stage = mainChapters[combatInfo.indices.chapter].stages[combatInfo.indices.stage];
-                        const stageId = `${combatInfo.indices.chapter + 1}-${combatInfo.indices.stage + 1}`;
-                        
-                        if (!clearedStages.includes(stageId)) {
-                            clearedStages.push(stageId);
-                        }
-                        
-                        let rewardsEarned = [];
-                        if (stage.rewards.fountainPens) {
-                            playerFountainPens += stage.rewards.fountainPens;
-                            rewardsEarned.push(`🖋️${stage.rewards.fountainPens}`);
-                        }
-                        if (stage.rewards.currency) {
-                            playerCurrency += stage.rewards.currency;
-                            rewardsEarned.push(`💎${stage.rewards.currency}`);
-                        }
-                        
-                        rewardMsg = `스테이지 클리어! ${rewardsEarned.join(', ')} 획득!`;
-                    }
-                    combatResultTitle.textContent = "승리!";
-                    combatResultTitle.className = "text-4xl font-bold mb-4 text-green-400";
-                    combatResultMessage.textContent = rewardMsg;
-                } else {
-                    combatResultTitle.textContent = "패배...";
-                    combatResultTitle.className = "text-4xl font-bold mb-4 text-red-400";
-                    combatResultMessage.textContent = `전투에서 패배했습니다...`;
-                }
-                
-                updateUI();
-                saveGame();
-                checkAchievements();
-                combatResultModal.classList.remove('hidden');
-                isCombatRunning = false;
+            // gacha3.html - endCombat 함수 (기존 코드 전체 교체)
+function endCombat(isVictory, combatInfo) { // dungeon, type 대신 combatInfo 객체 받기
+    lastCombatType = combatInfo.type;
+    if (isVictory) {
+        let rewardMsg = '';
+        if (combatInfo.type === 'event') {
+            const dungeon = eventDungeons[combatInfo.indices];
+            const reward = dungeon.eventPointReward;
+            playerEventPoints += reward;
+            if (!clearedEventDungeons.includes(dungeon.name)) {
+                clearedEventDungeons.push(dungeon.name);
             }
+            rewardMsg = `이벤트 스테이지 클리어! ${reward} P를 획득했습니다.`;
+        } else if (combatInfo.type === 'main_stage') {
+            const stage = mainChapters[combatInfo.indices.chapter].stages[combatInfo.indices.stage];
+            const stageId = `${combatInfo.indices.chapter + 1}-${combatInfo.indices.stage + 1}`;
+            
+            if (!clearedStages.includes(stageId)) {
+                clearedStages.push(stageId);
+            }
+            
+            let rewardsEarned = [];
+            if (stage.rewards.fountainPens) {
+                playerFountainPens += stage.rewards.fountainPens;
+                rewardsEarned.push(`🖋️${stage.rewards.fountainPens}`);
+            }
+            // ✨ 추가: 보석(currency) 보상 지급 로직 ✨
+            if (stage.rewards.currency) {
+                playerCurrency += stage.rewards.currency;
+                rewardsEarned.push(`💎${stage.rewards.currency}`);
+            }
+            
+            rewardMsg = `스테이지 클리어! ${rewardsEarned.join(', ')} 획득!`;
+        }
+        combatResultTitle.textContent = "승리!";
+        combatResultTitle.className = "text-4xl font-bold mb-4 text-green-400";
+        combatResultMessage.textContent = rewardMsg;
+    } else {
+        combatResultTitle.textContent = "패배...";
+        combatResultTitle.className = "text-4xl font-bold mb-4 text-red-400";
+        combatResultMessage.textContent = `전투에서 패배했습니다...`;
+    }
+    
+    updateUI();
+    saveGame();
+    checkAchievements();
+    combatResultModal.classList.remove('hidden');
+    isCombatRunning = false;
+}
 
             // ✅ 이 코드로 기존 createCard 함수를 통째로 교체해주세요.
             function createCard(character, options = {}) {
@@ -2266,6 +2266,7 @@ function addCardToInventory(cardName) {
     </script>
 </body>
 </html>
+
 
 
 
