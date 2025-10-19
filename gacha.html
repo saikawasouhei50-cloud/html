@@ -2477,22 +2477,26 @@ function startInteractiveStory(storyOrIndex, type) {
     if (typeof storyOrIndex === 'number' && type === 'main') {
         storyData = mainStories[storyOrIndex];
     } else if (typeof storyOrIndex === 'number' && type === 'event') {
+        // ✨ type이 'event'일 때 eventStories 배열을 사용합니다.
         storyData = eventStories[storyOrIndex];
     } else if (typeof storyOrIndex === 'object') {
-        // ✨ 스테이지 스토리 객체를 직접 받습니다. (stageStory: [..])
+        // 스테이지 스토리 객체를 직접 받습니다.
         storyData = storyOrIndex;
     } else {
         return;
     }
 
     currentInteractiveStory = storyData;
-    if (!currentInteractiveStory || !Array.isArray(currentInteractiveStory.content)) return;
+    // 스토리 데이터가 없거나, 내용(content)이 배열이 아니면 중단합니다.
+    if (!currentInteractiveStory || !Array.isArray(currentInteractiveStory.content)) {
+        alert("스토리 내용을 찾을 수 없습니다!"); // 데이터 문제 발생 시 알림 추가
+        return;
+    }
 
     currentSceneIndex = 0;
     interactiveStoryModal.classList.remove('hidden');
     renderCurrentScene();
 }
-
             function renderCurrentScene() {
                 const scene = currentInteractiveStory.content[currentSceneIndex];
                 if (!scene) {
@@ -2894,17 +2898,17 @@ cardClickableContainers.forEach(container => {
             });
 
             storyView.addEventListener('click', (e) => {
-    // 클릭된 요소 또는 가장 가까운 [data-story-index]나 [data-stage-id] 요소를 찾습니다.
+    // 1. 클릭된 요소 또는 가장 가까운 스토리 항목 요소를 찾습니다.
     const storyEl = e.target.closest('[data-story-index], [data-stage-id]');
     if (!storyEl) return;
 
     if (storyEl.dataset.storyType === 'main') {
-        // 메인 스토리 클릭 처리 (mainStories 배열의 index 사용)
+        // 메인 스토리 처리: 인덱스와 타입 'main' 전달
         startInteractiveStory(parseInt(storyEl.dataset.storyIndex), 'main');
+        
     } else if (storyEl.dataset.storyType === 'stage') {
-        // 스테이지 스토리 클릭 처리 (stageId 사용)
+        // 스테이지 스토리 처리: stageId를 파싱하여 객체로 전달
         const stageId = storyEl.dataset.stageId;
-        // stageId를 chapIdx, stgIdx로 변환 (1-1 -> 0, 0)
         const [chapIdx, stgIdx] = stageId.split('-').map(s => parseInt(s) - 1);
         const stage = mainChapters[chapIdx]?.stages[stgIdx];
 
@@ -2912,10 +2916,12 @@ cardClickableContainers.forEach(container => {
             // 스테이지 스토리 객체를 직접 전달
             startInteractiveStory({ content: stage.stageStory });
         } else {
-            alert('스토리 데이터를 찾을 수 없습니다.');
+            alert('스테이지 스토리 데이터를 찾을 수 없습니다.');
         }
+        
     } else if (storyEl.dataset.storyType === 'event') {
-        // 이벤트 스토리 클릭 처리 (eventStories 배열의 index 사용)
+        // 이벤트 스토리 처리: 인덱스와 타입 'event' 전달
+        // data-story-index를 반드시 정수(숫자)로 변환하여 전달합니다.
         startInteractiveStory(parseInt(storyEl.dataset.storyIndex), 'event');
     }
 });
@@ -2961,6 +2967,7 @@ cardClickableContainers.forEach(container => {
     </script>
 </body>
 </html>
+
 
 
 
