@@ -337,21 +337,20 @@
             <!-- 스토리 화면 -->
             <div id="story-view" class="hidden">
                 <div class="text-center mb-4">
-                    <p class="text-gray-200">독서를 통해 메인 스토리를 해금하세요.</p>
+                    <p class="text-gray-200">독서를 통해 해금한 스토리를 열람합니다.</p>
                 </div>
-			
+                
+                 <div class="bg-black/20 rounded-full p-1 flex justify-center items-center mb-4 max-w-sm mx-auto">
+                    <button id="story-sub-tab-main" class="sub-tab-button active w-1/2 font-bold py-2 px-6 rounded-full">메인 스토리</button>
+                    <button id="story-sub-tab-stage" class="sub-tab-button w-1/2 font-bold py-2 px-6 rounded-full">스테이지 스토리</button>
+                </div>
+
                 <div id="main-story-container" class="space-y-3 max-h-[60vh] overflow-y-auto bg-black/20 p-4 rounded-xl">
-                </div>
-            </div>
-
-             <div id="achievements-view" class="hidden">
-                <div class="text-center mb-4">
-                    <p class="text-gray-200">다양한 목표를 달성하고 특별한 보상을 획득하세요.</p>
-                </div>
-                <div id="achievements-container" class="space-y-3 max-h-[60vh] overflow-y-auto bg-black/20 p-4 rounded-xl">
                     </div>
+                
+                 <div id="stage-story-container" class="hidden space-y-3 max-h-[60vh] overflow-y-auto bg-black/20 p-4 rounded-xl">
+                     </div>
             </div>
-
             <div id="toast-notification" class="hidden fixed bottom-10 left-1/2 -translate-x-1/2 bg-yellow-400 text-black font-bold py-3 px-6 rounded-full shadow-lg transition-all duration-300 z-50">
                 🎉 업적 달성!
             </div>
@@ -579,6 +578,9 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
 			const storySkipButton = document.getElementById('story-skip-button');
 			const detailStoryPrevButton = document.getElementById('detail-story-prev');
             const detailStoryNextButton = document.getElementById('detail-story-next');
+			const stageStoryContainer = document.getElementById('stage-story-container');
+            const storySubTabMain = document.getElementById('story-sub-tab-main');
+            const storySubTabStage = document.getElementById('story-sub-tab-stage');
             
             // --- 데이터 저장/불러오기 함수 ---
             function isStorageAvailable() {
@@ -2011,9 +2013,22 @@ enhanceButton.disabled = playerFountainPens < cost;
             }
 
             function displayStoryView() {
+    // 탭 상태 확인 및 초기화 (메인 탭이 기본)
+    const activeTab = document.querySelector('#story-view .sub-tab-button.active');
+    
+    if (activeTab && activeTab.id === 'story-sub-tab-stage') {
+        displayStageStories();
+    } else {
+        displayMainStories();
+    }
+}
+
+// 새로운 함수: 메인 스토리 목록을 표시
+function displayMainStories() {
+    mainStoryContainer.classList.remove('hidden');
+    stageStoryContainer.classList.add('hidden');
     mainStoryContainer.innerHTML = '';
     
-    // --- 1. 메인 챕터 스토리 표시 ---
     mainStories.forEach((story, index) => {
         const isUnlocked = story.dungeonToUnlock === null || clearedStages.includes(story.dungeonToUnlock);
         const storyEl = document.createElement('div');
@@ -2036,8 +2051,14 @@ enhanceButton.disabled = playerFountainPens < cost;
         `;
         mainStoryContainer.appendChild(storyEl);
     });
+}
 
-    // --- 2. 열람한 스테이지 스토리 표시 ---
+// 새로운 함수: 스테이지 스토리 목록을 표시
+function displayStageStories() {
+    mainStoryContainer.classList.add('hidden');
+    stageStoryContainer.classList.remove('hidden');
+    stageStoryContainer.innerHTML = '';
+
     // 스테이지 스토리를 스테이지 ID(1-1, 1-2 등) 순서대로 정렬합니다.
     const sortedStageStories = [...clearedStageStories].sort((a, b) => {
         const [chapA, stgA] = a.split('-').map(Number);
@@ -2045,13 +2066,18 @@ enhanceButton.disabled = playerFountainPens < cost;
         return (chapA - chapB) || (stgA - stgB);
     });
 
+    if (sortedStageStories.length === 0) {
+        stageStoryContainer.innerHTML = `<p class="text-center text-gray-400 mt-10">열람한 스테이지 스토리가 없습니다. 독서를 진행해주세요.</p>`;
+        return;
+    }
+
     sortedStageStories.forEach(stageId => {
         const [chapIdx, stgIdx] = stageId.split('-').map(s => parseInt(s) - 1);
         const stage = mainChapters[chapIdx]?.stages[stgIdx];
 
         if (stage && stage.stageStory) {
             const storyEl = document.createElement('div');
-            storyEl.className = 'p-4 rounded-lg bg-white/10 hover:bg-white/20 cursor-pointer transition-colors duration-300 mt-2';
+            storyEl.className = 'p-4 rounded-lg bg-white/10 hover:bg-white/20 cursor-pointer transition-colors duration-300';
             storyEl.dataset.stageId = stageId;
             storyEl.dataset.storyType = 'stage';
 
@@ -2059,7 +2085,7 @@ enhanceButton.disabled = playerFountainPens < cost;
                 <h3 class="text-lg font-bold text-cyan-300">[스테이지] ${stage.stageName}</h3>
                 <p class="text-sm">클릭하여 다시 읽기</p>
             `;
-            mainStoryContainer.appendChild(storyEl);
+            stageStoryContainer.appendChild(storyEl);
         }
     });
 }
@@ -2235,6 +2261,18 @@ function startInteractiveStory(storyOrIndex, type) {
             }
 			
             // --- 이벤트 리스너 ---
+
+			storySubTabMain.addEventListener('click', () => {
+    storySubTabMain.classList.add('active');
+    storySubTabStage.classList.remove('active');
+    displayStoryView();
+});
+
+storySubTabStage.addEventListener('click', () => {
+    storySubTabStage.classList.add('active');
+    storySubTabMain.classList.remove('active');
+    displayStoryView();
+});
 			
 			// document.getElementById('enhance-card-button')... 바로 위에 추가
 			// ✅ 이 코드로 기존 정렬 버튼 이벤트 리스너를 통째로 교체해주세요.
@@ -2407,6 +2445,7 @@ function startInteractiveStory(storyOrIndex, type) {
     </script>
 </body>
 </html>
+
 
 
 
