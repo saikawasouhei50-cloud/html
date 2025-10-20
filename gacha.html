@@ -216,7 +216,7 @@ body.pointer-events-none {
                         <p id="home-character-dialogue" class="text-white"></p>
                     </div>
                      <div id="home-default-message" class="text-2xl text-gray-300">
-                        보관함에서 대표 등장인물을 설정해주세요!
+                        당신의 서고에서 대표 등장인물을 설정해주세요!
                     </div>
                 </div>
             </div>
@@ -304,7 +304,7 @@ body.pointer-events-none {
     </div>
 </div>
 <div class="flex justify-center mt-4 mb-4">
-    <button id="enter-multi-mode" class="gacha-button bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-lg">다중 파쇄 모드 진입</button>
+    <button id="enter-multi-mode" class="gacha-button bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-lg">일괄 파쇄</button>
 </div>
 
 <div id="inventory-sort-buttons" class="mt-4 flex justify-center gap-2">
@@ -1399,7 +1399,7 @@ function displayCollection() {
             
             function handlePull(count, cost, gachaType = 'normal') {
                 if (playerInventory.length + count > inventoryCapacity) {
-                    showMessage('보관함 공간이 부족합니다!', 'text-yellow-400', messageArea); return;
+                    showMessage('서고가 부족합니다!', 'text-yellow-400', messageArea); return;
                 }
                 if (playerCurrency >= cost) {
                     playerCurrency -= cost;
@@ -1413,7 +1413,7 @@ function displayCollection() {
             function expandInventory() {
                 if (playerCurrency >= EXPAND_COST) {
                     playerCurrency -= EXPAND_COST; inventoryCapacity += EXPAND_AMOUNT;
-                    showMessage(`보관함이 ${inventoryCapacity}칸으로 확장되었습니다!`, 'text-green-300', messageArea);
+                    showMessage(`서고가 ${inventoryCapacity}칸으로 확장되었습니다!`, 'text-green-300', messageArea);
                     updateUI(); displayInventory(); saveGame();
                     checkAchievements();
                 } else {
@@ -3340,6 +3340,7 @@ startBookmarkRegenTimer();
    </script>
 </body>
 </html>
+
 
 
 
