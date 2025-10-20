@@ -233,15 +233,20 @@ body.pointer-events-none {
                     <div id="event-dungeon-list-container" class="grid grid-cols-2 md:grid-cols-5 gap-4"></div>
                 </div>
                 <div id="event-story-view" class="hidden">
-    <p class="text-center text-gray-200 mb-4">이벤트 스테이지를 클리어하고 스토리를 해금하세요.</p>
-    
-    <button id="start-event-part2-button" class="gacha-button w-full mb-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg">
-        [NEW] 전반부 스토리 시작하기
-    </button>
+                    <p class="text-center text-gray-200 mb-4">이벤트 스테이지를 클리어하고 스토리를 해금하세요.</p>
 
-    <div id="event-story-container" class="space-y-3 max-h-[60vh] overflow-y-auto bg-black/20 p-4 rounded-xl">
-        </div>
-</div>
+                    <div class="bg-black/20 rounded-full p-1 flex justify-center items-center mb-4 max-w-sm mx-auto">
+                        <button id="event-story-sub-tab-part1" class="sub-tab-button active w-1/2 font-bold py-2 px-6 rounded-full">전반부</button>
+                        <button id="event-story-sub-tab-part2" class="sub-tab-button w-1/2 font-bold py-2 px-6 rounded-full">후반부</button>
+                    </div>
+
+                    <div id="event-story-part1-container" class="space-y-3 max-h-[60vh] overflow-y-auto bg-black/20 p-4 rounded-xl">
+                        </div>
+                    
+                    <div id="event-story-part2-container" class="hidden space-y-3 max-h-[60vh] overflow-y-auto bg-black/20 p-4 rounded-xl">
+                        <p class="text-center text-gray-400 mt-10">후반부 스토리는 준비 중입니다.</p>
+                    </div>
+                </div>
                 <div id="event-shop-view" class="hidden">
                     <p class="text-center text-gray-200 mb-4">획득한 이벤트 포인트로 특별한 보상을 교환하세요!</p>
                     <div id="event-shop-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
@@ -958,12 +963,19 @@ function saveGame() {
             }
 
             function checkAchievements() {
+    // 업적 조건 함수가 rarity, level 등 모든 정보에 접근할 수 있도록
+    // 인벤토리 데이터를 '풍부하게(rich)' 만듭니다.
+    const richInventory = playerInventory.map(c => {
+        const base = findCharacter(c.name); // (name, rarity, stats...)
+        return { ...base, ...c }; // (name, rarity, stats, id, level, revision)
+    });
+    
     const currentState = {
-        inventory: playerInventory,
+        inventory: richInventory, // 👈 'playerInventory' 대신 'richInventory'를 전달
         stats: playerStats,
         clearedStages: clearedStages,
         capacity: inventoryCapacity,
-        fountainPens: playerFountainPens, // ✨ 만년필 수량 상태를 추가합니다. ✨
+        fountainPens: playerFountainPens,
     };
     let newAchievementUnlocked = false;
     achievements.forEach(ach => {
@@ -1214,7 +1226,7 @@ function displayCollection() {
 			
             function displayEventView() {
                 displayEventBattleView();
-                displayEventStoryView();
+                displayEventStories(); // 👈 'displayEventStoryView'를 'displayEventStories'로 변경!
                 displayEventShopView();
                 switchSubTab(document.getElementById('event-view'), eventSubTabBattle);
             }
@@ -2134,6 +2146,7 @@ function startStageCombat(chapterIndex, stageIndex) {
 
 
 			function displayEventStories() {
+    const eventStoryContainer = document.getElementById('event-story-part1-container'); // 👈 이 줄을 추가하세요.
     eventStoryContainer.innerHTML = '';
     
     // 이벤트 스토리가 준비되지 않았을 경우 (데이터가 비어있는 경우)
@@ -2167,6 +2180,45 @@ function startStageCombat(chapterIndex, stageIndex) {
             <p class="text-sm">${unlockText}</p>
         `;
         eventStoryContainer.appendChild(storyEl);
+    });
+}
+			
+			function displayEventStoryPart2() {
+    const container = document.getElementById('event-story-part2-container');
+    container.innerHTML = '';
+
+    // 후반부 스토리가 없으면 안내 메시지 표시
+    if (!eventStoryPart2.secondHalf || eventStoryPart2.secondHalf.length === 0) {
+        container.innerHTML = `<p class="text-center text-gray-400 mt-10">후반부 스토리는 아직 공개되지 않았습니다.</p>`;
+        return;
+    }
+
+    // 전반부 마지막 스토리를 클리어했는지 확인
+    const isPart1Finished = playerChoices['event_part2_final_choice'];
+
+    eventStoryPart2.secondHalf.forEach((story, index) => {
+        // 후반부의 각 스토리는 이전 스토리를 봐야만 해금됩니다.
+        // 첫 번째 후반부 스토리는 전반부를 클리어해야만 해금됩니다.
+        const isUnlocked = (index === 0) ? isPart1Finished : playerChoices[`event_part2_story_${index - 1}`];
+
+        const storyEl = document.createElement('div');
+        storyEl.className = `p-4 rounded-lg transition-colors duration-300 ${isUnlocked ? 'bg-white/20 hover:bg-white/30 cursor-pointer' : 'bg-black/30 text-gray-500'}`;
+        
+        if (isUnlocked) {
+            storyEl.dataset.storyIndex = index;
+            storyEl.dataset.storyType = 'event_part2'; // 새로운 타입을 지정
+        }
+
+        let unlockText = '클릭하여 스토리 읽기';
+        if (!isUnlocked) {
+            unlockText = (index === 0) ? `전반부 마지막 선택을 완료하면 해금` : `이전 스토리를 완료하면 해금`;
+        }
+        
+        storyEl.innerHTML = `
+            <h3 class="text-xl font-bold ${isUnlocked ? 'text-pink-300' : ''}">[이벤트] ${story.title}</h3>
+            <p class="text-sm">${unlockText}</p>
+        `;
+        container.appendChild(storyEl);
     });
 }
 			
@@ -2604,8 +2656,9 @@ function startInteractiveStory(storyOrIndex, type) {
     if (typeof storyOrIndex === 'number' && type === 'main') {
         storyData = mainStories[storyOrIndex];
     } else if (typeof storyOrIndex === 'number' && type === 'event') {
-        // ✨ type이 'event'일 때 eventStories 배열을 사용합니다.
         storyData = eventStories[storyOrIndex];
+    } else if (typeof storyOrIndex === 'number' && type === 'event_part2') { // 👈 이 블록을 추가
+        storyData = eventStoryPart2.secondHalf[storyOrIndex];
     } else if (typeof storyOrIndex === 'object') {
         // 스테이지 스토리 객체를 직접 받습니다.
         storyData = storyOrIndex;
@@ -2682,27 +2735,33 @@ function startInteractiveStory(storyOrIndex, type) {
 }
 
 function advanceStory() {
-    const currentScene = currentInteractiveStory.content[currentSceneIndex];
+    // 1. 현재 장면 데이터를 먼저 가져옵니다.
+    const currentScene = currentInteractiveStory.content[currentSceneIndex]; 
 
-    // ✨ 점프 로직 추가 ✨
-    // 현재 장면에 jumpTo 속성이 있는지 확인합니다.
+    // 2. 'jumpTo' 속성이 있는지 확인합니다.
     if (currentScene && currentScene.jumpTo !== undefined) {
-        // jumpTo에 지정된 번호로 바로 점프합니다.
+        // 'jumpTo'가 있으면: 인덱스를 지정된 번호로 점프
         currentSceneIndex = currentScene.jumpTo;
     } else {
-        // jumpTo가 없으면, 평소처럼 다음 장면으로 넘어갑니다.
+        // 'jumpTo'가 없으면: 평소처럼 인덱스를 1 증가
         currentSceneIndex++;
     }
 
+    // 3. 증가/점프된 인덱스가 스토리의 끝을 넘었는지 확인합니다.
     if (currentSceneIndex < currentInteractiveStory.content.length) {
+        // 4. 스토리가 끝나지 않았으면: 다음 장면을 렌더링
         renderCurrentScene();
     } else {
-        closeInteractiveStory();
-        // 스토리 완료 후 콜백 처리 (기존 로직 유지)
-        const callback = interactiveStoryModal.dataset.callback;
+        // 5. 스토리가 끝났으면:
+        // (가장 중요!) 스토리를 닫기 *전에* 콜백(전투 시작 명령)을 읽어옵니다.
+        const callback = interactiveStoryModal.dataset.callback; 
+        
+        closeInteractiveStory(); // 스토리를 닫습니다. (이때 currentInteractiveStory가 null이 됩니다)
+        
+        // 읽어둔 콜백이 있으면 실행합니다.
         if (callback) {
             eval(callback);
-            interactiveStoryModal.dataset.callback = '';
+            interactiveStoryModal.dataset.callback = ''; // 콜백 비우기
         }
     }
 }
@@ -2801,6 +2860,7 @@ function dismantleMultipleCards() {
         saveGame();
         // 변경된 정보로 모달을 다시 표시
         showCardDetails(currentDetailCardId);
+        checkAchievements(); // ✨ 업적 달성 여부 확인
     } else {
         alert('만년필이 부족합니다!');
     }
@@ -2812,7 +2872,7 @@ function dismantleMultipleCards() {
     storyCharRight.src = '';
     currentInteractiveStory = null;
     // 일반적인 스토리 뷰에서 닫는 경우 콜백은 실행하지 않습니다.
-    interactiveStoryModal.dataset.callback = ''; 
+   
 }
             function reviseCard() {
     if (!currentDetailCardId) return;
@@ -2908,27 +2968,44 @@ function dismantleMultipleCards() {
 
 		function handleStoryInteraction(e) {
     const choiceButton = e.target.closest('button');
-    if (!choiceButton) return;
 
-    // 분기 처리: 유저가 일반 선택지를 골랐을 때
-    if (choiceButton.dataset.nextScene) {
-        // 유저의 선택(버튼 텍스트)을 currentEventChoice 변수에 저장합니다.
+    // --- 1. 선택지 버튼을 클릭한 경우 (기존 로직) ---
+    if (choiceButton && choiceButton.dataset.nextScene) {
         currentEventChoice = choiceButton.textContent;
-        
         currentSceneIndex = parseInt(choiceButton.dataset.nextScene);
         renderCurrentScene();
     } 
-    // 통계 처리: '전반부 스토리 완료' 버튼을 눌렀을 때
-    else if (choiceButton.dataset.isFinalChoice === 'true') {
+    // --- 2. '전반부 완료' 같은 최종 버튼을 클릭한 경우 (기존 로직) ---
+    else if (choiceButton && choiceButton.dataset.isFinalChoice === 'true') {
         closeInteractiveStory();
-        
-        // 버튼 텍스트 대신, 이전에 저장해둔 currentEventChoice 값으로 투표를 기록합니다.
         if (currentEventChoice) {
+            // ✅ 1. 유저의 선택을 playerChoices 객체에 기록합니다.
+            playerChoices[choiceButton.dataset.statId] = currentEventChoice;
+            
+            // ✅ 2. 변경된 playerChoices를 저장합니다.
+            saveGame();
+
             recordAndShowStats(choiceButton.dataset.statId, currentEventChoice);
         } else {
-            // 혹시 모를 오류 방지
             console.error("오류: 유저의 선택이 기록되지 않았습니다.");
         }
+    }
+    // --- 3. "스킵" 버튼을 누른 경우 (무시) ---
+    else if (choiceButton && choiceButton.id === 'story-skip-button') {
+        // 스킵 버튼은 자체 리스너(closeInteractiveStory)가 있으므로,
+        // 여기서 advanceStory가 호출되는 것을 막습니다.
+        return;
+    }
+    // --- 4. ✨ 그 외의 영역 (대화창, "다음" 버튼 등)을 클릭한 경우 ---
+    else {
+        // 현재 선택지가 화면에 떠 있는지 확인
+        const choiceContainer = document.getElementById('choice-buttons-container');
+        
+        // 선택지가 없을 때만 (즉, '다음' 버튼이 보일 때만) advanceStory를 호출
+        if (choiceContainer.children.length === 0) {
+            advanceStory();
+        }
+        // (선택지가 1개 이상 떠있다면, 유저가 선택지를 누르길 기다리며 아무것도 하지 않음)
     }
 }
 			
@@ -2941,17 +3018,57 @@ document.getElementById('logout-button').addEventListener('click', logoutUser);
 
 
 
-// ✨ 새로운 이벤트 스토리 시작 버튼
-document.getElementById('start-event-part2-button').addEventListener('click', () => {
-    startInteractiveStory({ content: eventStoryPart2.firstHalf });
+// ✨ 이벤트 스토리 뷰의 새 서브 탭 리스너
+document.getElementById('event-story-sub-tab-part1').addEventListener('click', () => {
+    document.getElementById('event-story-part1-container').classList.remove('hidden');
+    document.getElementById('event-story-part2-container').classList.add('hidden');
+    document.getElementById('event-story-sub-tab-part1').classList.add('active');
+    document.getElementById('event-story-sub-tab-part2').classList.remove('active');
+	
+});
+document.getElementById('event-story-sub-tab-part2').addEventListener('click', () => {
+    document.getElementById('event-story-part1-container').classList.add('hidden');
+    document.getElementById('event-story-part2-container').classList.remove('hidden');
+    document.getElementById('event-story-sub-tab-part1').classList.remove('active');
+    document.getElementById('event-story-sub-tab-part2').classList.add('active');
+	displayEventStoryPart2(); // 👈 이 줄을 추가하세요.
 });
 
-// ✨ 기존 이벤트 스토리 목록 클릭
 document.getElementById('event-view').addEventListener('click', (e) => {
-    const storyButton = e.target.closest('[data-story-type="event"]');
-    if (storyButton && storyButton.dataset.storyIndex) {
-        const storyIndex = parseInt(storyButton.dataset.storyIndex, 10);
+    const storyEl = e.target.closest('[data-story-type]');
+    if (!storyEl || !storyEl.dataset.storyIndex) return; // 유효한 스토리 버튼이 아니면 종료
+
+    const storyType = storyEl.dataset.storyType;
+    const storyIndex = parseInt(storyEl.dataset.storyIndex, 10);
+
+    if (storyType === 'event') {
+        // --- 전반부 스토리 클릭 ---
         startInteractiveStory(storyIndex, 'event');
+
+    } else if (storyType === 'event_part2') {
+        // --- 후반부 스토리 클릭 ---
+        const storyData = eventStoryPart2.secondHalf[storyIndex];
+
+        // 분기 스토리 처리
+        if (storyData.isBranching) {
+            const userChoice = playerChoices['event_part2_final_choice'];
+            if (userChoice && storyData.branches[userChoice]) {
+                startInteractiveStory({ content: storyData.branches[userChoice] });
+            } else {
+                // 혹시 모를 오류 방지용 기본값
+                startInteractiveStory({ content: storyData.branches['결정적인 지문을 믿는다.'] });
+            }
+        } else {
+            // 일반 후반부 스토리
+            startInteractiveStory(storyIndex, 'event_part2');
+        }
+
+        // 후반부 스토리를 "클릭"했다는 사실을 기록 (이것이 다음 스토리의 해금 조건)
+        playerChoices[`event_part2_story_${storyIndex}`] = true;
+        saveGame();
+        
+        // 스토리가 끝난 후 UI를 새로고침하여 다음 스토리가 해금된 것을 바로 보여주기 위한 설정
+        document.getElementById('interactive-story-modal').dataset.callback = 'displayEventStoryPart2()';
     }
 });
 
@@ -3124,7 +3241,7 @@ storyView.addEventListener('click', (e) => {
         else alert('스테이지 스토리 데이터를 찾을 수 없습니다.');
     } else if (storyEl.dataset.storyType === 'event') {
         startInteractiveStory(parseInt(storyEl.dataset.storyIndex), 'event');
-    }
+    } 
 });
 
 // ✨ 이벤트 상점
@@ -3134,7 +3251,6 @@ eventShopContainer.addEventListener('click', (e) => {
 });
 
 // ✨ 대화형 스토리 모달 상호작용
-storyNextButton.addEventListener('click', advanceStory);
 interactiveStoryModal.addEventListener('click', handleStoryInteraction);
 document.getElementById('close-stats-modal').addEventListener('click', () => {
     document.getElementById('choice-stats-modal').classList.add('hidden');
@@ -3171,7 +3287,6 @@ startBookmarkRegenTimer();
    </script>
 </body>
 </html>
-
 
 
 
