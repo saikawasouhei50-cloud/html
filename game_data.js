@@ -745,14 +745,14 @@ const characterProfiles = {
         name: '서도진',
         age: 37,
         job: '추리소설가',
-        description: '베스트셀러 추리소설가. 자신의 이야기가 현실을 침범하기 시작하며 사건에 휘말린다. 날카로운 추리력을 지녔지만, 때로는 이야기에 과하게 몰입하여 우울에 잠기기도 한다.',
+        description: '베스트셀러 추리소설가. 남에게 떠밀려 투고된 글이 공전의 히트를 쳤다. 이런 관심 받고 싶지 않지만, 담당 편집자의 격려로 어찌어찌 글쟁이 생활을 이어나가는 중.',
         imageUrl: 'https://placehold.co/300x500/a0aec0/ffffff?text=서도진+프로필' // 대표 프로필 이미지
     },
     '윤필규': {
         name: '윤필규',
         age: 32,
         job: '편집자',
-        description: '서도진의 담당 편집자. 꼼꼼하고 성실한 성격으로, 사건에 휘말린 서도진을 돕는다. 때로는 잔소리가 심한 동거인 같기도 하다. 올곧은 정의감을 숨기고 있다.',
+        description: '서도진의 담당 편집자. 꼼꼼하고 성실한 성격으로, 틈만 나면 슬럼프에 빠지는 서도진과 동거하며 그의 생활을 돕는다. 어디서 나온지 모를 올곧은 정의감을 숨기고 있다.',
         imageUrl: 'https://placehold.co/300x500/63b3ed/ffffff?text=윤필규+프로필'
     },
     '윤서천': {
@@ -819,6 +819,7 @@ const characterProfiles = {
         imageUrl: 'https://placehold.co/300x500/742a2a/ffffff?text=윤유준+프로필'
     }
 };
+
 
 
 
