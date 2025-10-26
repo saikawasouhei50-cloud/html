@@ -1363,6 +1363,12 @@ const currentEventInfo = {
     gachaCharacterName: EVENT_CHARACTER_NAME // 기존 이벤트 뽑기 캐릭터 이름 변수 사용
 };
 
+const GACHA_EXCLUDE_LIST = [
+                '[소중한 배낭] 선생',
+                '[백청자] 한 현',
+                '[목줄 매인 고양이] 백도화'
+            ];
+
 
 
 
