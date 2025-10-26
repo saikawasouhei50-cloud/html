@@ -1295,7 +1295,7 @@ function saveGame() {
                 const isEventActive = true; // For testing: now >= EVENT_START_DATE && now <= EVENT_END_DATE;
                 if (isEventActive) {
                     eventBanner.classList.remove('hidden');
-                    eventBannerText.textContent = `[결혼 반지는 아니지만] 서도진 & [좋은 하루 되세요] 윤필규 등장!`;
+                    eventBannerText.innerHTML = `[결혼 반지는 아니지만] 서도진<br>[좋은 하루 되세요] 윤필규 등장!`;
                     eventGachaInfo.querySelector('p').textContent = `[${EVENT_CHARACTER_NAME}] 등장 확률 UP!`;
                     gachaTabEvent.classList.remove('hidden');
                     eventTab.classList.remove('hidden');
