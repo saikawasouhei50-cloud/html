@@ -151,6 +151,8 @@ body.pointer-events-none {
             white-space: pre-wrap;
             word-break: keep-all;
         }
+		/* [추가] 구버전 UI를 강제로 숨깁니다. */
+        #event-point-display { display: none !important; }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
@@ -229,6 +231,53 @@ body.pointer-events-none {
                 </div>
             </div>
             
+			<div id="event-home-view" class="hidden">
+    <div class="flex flex-col md:flex-row gap-6">
+
+        <div class="md:w-5/12 flex flex-col items-center">
+            <img id="event-home-banner-image" src="https://placehold.co/600x200/ff6347/ffffff?text=Event+Banner" alt="Event Banner" class="w-full rounded-lg shadow-lg mb-3">
+            <p id="event-home-duration" class="text-sm text-gray-400 mb-4"></p>
+            
+            <div class="grid grid-cols-2 gap-4 w-full">
+                <button id="goto-event-story" class="gacha-button bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg text-base">
+                    이벤트 스토리
+                </button>
+                <button id="goto-event-gacha" class="gacha-button bg-gradient-to-r from-red-500 to-yellow-500 hover:from-red-600 hover:to-yellow-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg text-base">
+                    이벤트 서가
+                </button>
+            </div>
+        </div>
+
+        <div class="md:w-7/12 flex flex-col gap-4">
+
+            <div class="bg-black/20 p-4 rounded-lg shadow-lg">
+                <h3 class="text-xl font-bold text-yellow-300 mb-3">이벤트 Pt</h3>
+                <div class="flex justify-between items-center bg-black/30 p-4 rounded-lg">
+                    <span class="text-lg text-gray-300">총 획득 포인트</span>
+                    <div id="event-home-point-display" class="text-3xl font-bold text-pink-300">
+                        <span id="event-home-points">0</span> P
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-black/20 p-4 rounded-lg shadow-lg flex-grow flex flex-col">
+                <p id="event-home-description" class="text-gray-200 mb-4 text-center flex-shrink-0"></p>
+                
+                <div class="flex-grow"></div> <button id="goto-event-shop" class="gacha-button bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg text-lg w-full mb-3">
+                    이벤트 상점
+                </button>
+                
+                <button id="goto-event-battle" class="gacha-button bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-black font-bold py-5 px-6 rounded-lg shadow-lg text-xl w-full animate-pulse">
+                    이벤트 전투
+                </button>
+            </div>
+       
+
+    </div>
+</div>
+
+    </div>
+			
             <div id="event-view" class="hidden">
 				
                  <div class="bg-black/20 rounded-full p-1 flex justify-center items-center mb-4 max-w-md mx-auto">
@@ -912,6 +961,7 @@ const closeDismantleResultButton = document.getElementById('close-dismantle-resu
         capacity: inventoryCapacity,
         representative: representativeCharacter ? representativeCharacter.name : null,
         clearedStages: clearedStages,
+		currentEventId: CURRENT_EVENT_ID, // ✨ 1. 현재 이벤트 ID 저장
         eventPoints: playerEventPoints,
         clearedEventDungeons: clearedEventDungeons,
         purchasedEventItems: purchasedEventItems,
@@ -930,7 +980,8 @@ const closeDismantleResultButton = document.getElementById('close-dismantle-resu
 }
 
             // ✅ 이 코드로 기존 loadGame 함수를 통째로 교체해주세요.
-            async function loadGameFromFirebase(uid) {
+            // [gacha.html의 loadGameFromFirebase 함수를 이걸로 교체하세요]
+async function loadGameFromFirebase(uid) {
     const docRef = db.collection('users').doc(uid);
     const doc = await docRef.get();
 
@@ -939,35 +990,46 @@ const closeDismantleResultButton = document.getElementById('close-dismantle-resu
         console.log("Firebase에서 게임 데이터를 불러옵니다.");
         const savedData = doc.data();
         
-        // 기존 loadGame 함수의 데이터 복원 로직을 그대로 사용합니다.
+        // 1. 비(非)-이벤트 데이터 로드 (재화, 인벤토리 등)
         playerCurrency = savedData.currency ?? 100;
         playerFountainPens = savedData.fountainPens ?? 500;
         playerInkwells = savedData.inkwells ?? 0;
-        
-        // revision 속성이 없는 구버전 데이터를 불러올 경우를 대비한 호환성 코드
         const loadedInventory = savedData.inventory || [];
         playerInventory = loadedInventory.map(card => ({
             ...card,
             revision: card.revision ?? 0
         }));
-collectedCardNames = new Set(savedData.collectedCardNames || []);
+        collectedCardNames = new Set(savedData.collectedCardNames || []);
         const savedDeckIds = savedData.deck || [];
         playerDeck = savedDeckIds.map(id => playerInventory.find(card => card.id === id)).filter(Boolean);
-
         inventoryCapacity = savedData.capacity ?? 100;
         if (savedData.representative) {
             representativeCharacter = findCharacter(savedData.representative) || null;
         }
         clearedStages = savedData.clearedStages || [];
-        playerEventPoints = savedData.eventPoints ?? 0;
-        clearedEventDungeons = savedData.clearedEventDungeons || [];
-        purchasedEventItems = savedData.purchasedEventItems || {};
         playerBookmarks = savedData.bookmarks ?? MAX_BOOKMARKS;
         lastBookmarkUpdateTime = savedData.lastBookmarkUpdate ?? Date.now();
         playerAchievements = savedData.achievements || {};
         playerStats = savedData.stats || { totalPulls: 0 };
         clearedStageStories = savedData.clearedStageStories || [];
-        playerChoices = savedData.playerChoices || {};
+        
+        // 2. ✨ 이벤트 데이터 로드 (핵심 수정) ✨
+        // 저장된 이벤트 ID와 현재 게임의 이벤트 ID를 비교합니다.
+        if (savedData.currentEventId === CURRENT_EVENT_ID) {
+            // ID가 같으면 = 진행 중이던 이벤트를 계속
+            console.log("이전 이벤트를 이어서 진행합니다:", CURRENT_EVENT_ID);
+            playerEventPoints = savedData.eventPoints ?? 0; //
+            clearedEventDungeons = savedData.clearedEventDungeons || []; //
+            purchasedEventItems = savedData.purchasedEventItems || {}; //
+            playerChoices = savedData.playerChoices || {}; //
+        } else {
+            // ID가 다르면 = 새 이벤트 시작 (또는 첫 이벤트)
+            console.log("새 이벤트가 시작되어 이전 이벤트 기록을 초기화합니다.");
+            playerEventPoints = 0;
+            clearedEventDungeons = [];
+            purchasedEventItems = {};
+            playerChoices = {}; // 이벤트 선택지 기록도 초기화
+        }
 
     } else {
         // --- 처음 가입한 새로운 유저 ---
@@ -982,8 +1044,8 @@ collectedCardNames = new Set(savedData.collectedCardNames || []);
     checkEventStatus();
     switchTab('home');
     checkAchievements();
-	document.getElementById('loading-overlay').classList.add('hidden');
-        document.body.classList.remove('loading');
+    document.getElementById('loading-overlay').classList.add('hidden');
+    document.body.classList.remove('loading');
 }
 
 function saveGame() {
@@ -1164,13 +1226,22 @@ function saveGame() {
     
     // 1. 모든 뷰 숨기기 및 탭 비활성화
     allViews.forEach(view => {
-        // 뷰 요소가 유효한지 확인 후 hidden 클래스 추가
         if (view) view.classList.add('hidden'); 
     });
     allTabs.forEach(tab => tab.classList.remove('active'));
     
     // 2. 선택된 뷰 활성화
-    const targetView = document.getElementById(`${tabName}-view`);
+    // ================== [시작] 수정된 부분 ==================
+    let targetView;
+    // '이벤트' 탭을 누르면 'event-home-view'(앙스타 레이아웃)를 보여줍니다.
+    if (tabName === 'event') {
+        targetView = document.getElementById('event-home-view'); 
+    } else {
+    // 나머지 탭은 기존 규칙(예: 'home' -> 'home-view')을 따릅니다.
+        targetView = document.getElementById(`${tabName}-view`);
+    }
+    // ================== [끝] 수정된 부분 ==================
+    
     const targetTab = document.getElementById(`tab-${tabName}`);
 
     // ✨ 방어 코드: 뷰가 존재하지 않으면 함수를 종료합니다. ✨
@@ -1182,14 +1253,14 @@ function saveGame() {
     targetView.classList.remove('hidden');
     targetTab.classList.add('active');
     
-    // 3. 뷰별 렌더링 함수 호출
+    // 3. 뷰별 렌더링 함수 호출 (이 부분은 기존 코드 유지)
     if (tabName === 'home') displayHomeView();
     else if (tabName === 'inventory') displayInventory(); 
     else if (tabName === 'deck') displayDeckManagement();
     else if (tabName === 'combat') displayCombatView();
-    else if (tabName === 'collection') displayCollectionView(); // 👈 함수 이름 변경
+    else if (tabName === 'collection') displayCollectionView();
     else if (tabName === 'story') displayStoryView();
-    else if (tabName === 'event') displayEventView();
+    else if (tabName === 'event') displayEventHomeView(); // event-home-view의 데이터를 채웁니다.
     else if (tabName === 'achievements') displayAchievements();
 }
             function switchSubTab(viewContainer, button) {
@@ -1228,7 +1299,7 @@ function saveGame() {
                     eventGachaInfo.querySelector('p').textContent = `[${EVENT_CHARACTER_NAME}] 등장 확률 UP!`;
                     gachaTabEvent.classList.remove('hidden');
                     eventTab.classList.remove('hidden');
-                    eventPointDisplay.classList.remove('hidden');
+                    // eventPointDisplay.classList.remove('hidden');
                 } else {
                     eventBanner.classList.add('hidden');
                     gachaTabEvent.classList.add('hidden');
@@ -1401,12 +1472,27 @@ const isCardCollected = collectedCardNames.has(character.name);
         dialogueList.innerHTML += `<hr class="border-gray-600 my-2">`;
     });
 }
+
+// ✅ displayEventView 함수 바로 위에 이 함수를 추가하세요.
+
+function displayEventHomeView() {
+    // game_data.js에서 이벤트 정보 가져오기
+    // document.getElementById('event-home-title').textContent = currentEventInfo.title;
+    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    const startDateStr = currentEventInfo.startDate.toLocaleDateString('ko-KR', options);
+    const endDateStr = currentEventInfo.endDate.toLocaleDateString('ko-KR', options);
+    document.getElementById('event-home-duration').textContent = `${startDateStr} ~ ${endDateStr}`;
+    document.getElementById('event-home-banner-image').src = currentEventInfo.bannerImageUrl;
+    document.getElementById('event-home-description').textContent = currentEventInfo.description;
+    document.getElementById('event-home-points').textContent = playerEventPoints; // 이벤트 포인트 표시
+    document.getElementById('event-home-point-display').classList.remove('hidden'); // 포인트 표시 보이게
+}
 			
             function displayEventView() {
                 displayEventBattleView();
                 displayEventStories(); // 👈 'displayEventStoryView'를 'displayEventStories'로 변경!
                 displayEventShopView();
-                switchSubTab(document.getElementById('event-view'), eventSubTabBattle);
+               
             }
 
             function displayEventBattleView() {
@@ -2368,22 +2454,24 @@ function startStageCombat(chapterIndex, stageIndex) {
     });
 }
 			
-			function displayEventStoryPart2() {
+			// [이 코드로 gacha.html의 function displayEventStoryPart2() 함수 전체를 교체하세요]
+function displayEventStoryPart2() {
     const container = document.getElementById('event-story-part2-container');
     container.innerHTML = '';
 
     // 후반부 스토리가 없으면 안내 메시지 표시
     if (!eventStoryPart2.secondHalf || eventStoryPart2.secondHalf.length === 0) {
-        container.innerHTML = `<p class="text-center text-gray-400 mt-10">후반부 스토리는 아직 공개되지 않았습니다.</p>`;
+        // [수정된 부분] 
+        // "아직 공개되지 않았습니다" 대신 요청하신 메시지로 변경합니다.
+        container.innerHTML = `<p class="text-center text-gray-400 mt-10">미니 이벤트에는 후반부 스토리가 없습니다</p>`;
         return;
     }
 
+    // (기존 후반부 스토리 해금 로직은 그대로 둡니다)
     // 전반부 마지막 스토리를 클리어했는지 확인
     const isPart1Finished = playerChoices['event_part2_final_choice'];
 
     eventStoryPart2.secondHalf.forEach((story, index) => {
-        // 후반부의 각 스토리는 이전 스토리를 봐야만 해금됩니다.
-        // 첫 번째 후반부 스토리는 전반부를 클리어해야만 해금됩니다.
         const isUnlocked = (index === 0) ? isPart1Finished : playerChoices[`event_part2_story_${index - 1}`];
 
         const storyEl = document.createElement('div');
@@ -2391,7 +2479,7 @@ function startStageCombat(chapterIndex, stageIndex) {
         
         if (isUnlocked) {
             storyEl.dataset.storyIndex = index;
-            storyEl.dataset.storyType = 'event_part2'; // 새로운 타입을 지정
+            storyEl.dataset.storyType = 'event_part2'; 
         }
 
         let unlockText = '클릭하여 스토리 읽기';
@@ -3364,6 +3452,51 @@ dismantleCardButton.addEventListener('click', () => {
     dismantleCard(currentDetailCardId);
 });
 
+// ================ 👇 이벤트 홈 관련 리스너 (신규) 👇 ================
+
+// 1. '홈' 화면의 이벤트 배너 클릭 시 -> 이벤트 홈으로 이동
+console.log('Checking eventBanner:', eventBanner); // 디버깅용 로그 추가
+eventBanner.addEventListener('click', () => {
+    switchTab('event'); // event-home-view를 보여줌
+});
+
+// 2. '이벤트 홈'의 '이벤트 전투' 버튼 클릭 시
+document.getElementById('goto-event-battle').addEventListener('click', () => {
+    // 기존 event-view를 보여주고, '전투' 서브 탭을 활성화
+    document.getElementById('event-home-view').classList.add('hidden');
+    document.getElementById('event-view').classList.remove('hidden');
+    displayEventView(); // 전투/스토리/상점 목록을 그림
+    switchSubTab(document.getElementById('event-view'), eventSubTabBattle); // 전투 탭 활성화
+});
+
+// 3. '이벤트 홈'의 '이벤트 스토리' 버튼 클릭 시
+document.getElementById('goto-event-story').addEventListener('click', () => {
+    document.getElementById('event-home-view').classList.add('hidden');
+    document.getElementById('event-view').classList.remove('hidden');
+    displayEventView(); 
+    switchSubTab(document.getElementById('event-view'), eventSubTabStory); // 스토리 탭 활성화
+});
+
+// 4. '이벤트 홈'의 '이벤트 서가' 버튼 클릭 시
+document.getElementById('goto-event-gacha').addEventListener('click', () => {
+    switchTab('gacha'); // 뽑기 탭으로 이동
+    switchGachaTab('event'); // 이벤트 뽑기 서브 탭 활성화
+});
+
+// 5. '이벤트 홈'의 '이벤트 상점' 버튼 클릭 시 (신규 추가)
+            document.getElementById('goto-event-shop').addEventListener('click', () => {
+                // 기존 event-view를 보여주고, '상점' 서브 탭을 활성화
+                document.getElementById('event-home-view').classList.add('hidden');
+                document.getElementById('event-view').classList.remove('hidden');
+                displayEventView(); // 전투/스토리/상점 목록을 그림
+                
+                // '상점' 탭을 활성화하기 위해 eventSubTabShop 변수(DOM 요소)를 전달
+                switchSubTab(document.getElementById('event-view'), eventSubTabShop); 
+            });
+
+// ======================================================================
+
+
 // =================== 👇 '도감' 탭 전용 리스너 👇 ===================
 
 // '도감' 탭의 캐릭터 목록(사이드바) 클릭 이벤트
@@ -3614,18 +3747,23 @@ speed1xButton.addEventListener('click', () => setCombatSpeed(1));
 speed2xButton.addEventListener('click', () => setCombatSpeed(2));
 speed4xButton.addEventListener('click', () => setCombatSpeed(4));
 
-// ✨ 이벤트 뷰의 서브 탭
-eventSubTabBattle.addEventListener('click', () => switchSubTab(document.getElementById('event-view'), eventSubTabBattle));
-eventSubTabStory.addEventListener('click', () => switchSubTab(document.getElementById('event-view'), eventSubTabStory));
-eventSubTabShop.addEventListener('click', () => switchSubTab(document.getElementById('event-view'), eventSubTabShop));
-
-startBookmarkRegenTimer();
+// ✨ 이벤트 뷰의 서브 탭 (수정됨)
+eventSubTabBattle.addEventListener('click', () => {
+    displayEventView(); // 👈 내용 먼저 그리기
+    switchSubTab(document.getElementById('event-view'), eventSubTabBattle); 
 });
-
+eventSubTabStory.addEventListener('click', () => {
+    displayEventView(); // 👈 내용 먼저 그리기
+    switchSubTab(document.getElementById('event-view'), eventSubTabStory); 
+});
+eventSubTabShop.addEventListener('click', () => {
+    displayEventView(); // 👈 내용 먼저 그리기
+    switchSubTab(document.getElementById('event-view'), eventSubTabShop); 
+});
+});
    </script>
 </body>
 </html>
-
 
 
 
