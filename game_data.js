@@ -1356,7 +1356,7 @@ const CURRENT_EVENT_ID = "mini_event_202510_dohwa";
 
 
 const currentEventInfo = {
-    title: "[ON] 승급전 세번만", // 이벤트 제목
+    title: "[ON] 승급전 세판만", // 이벤트 제목
     startDate: EVENT_START_DATE, // 기존 이벤트 시작 날짜 변수 사용
     endDate: EVENT_END_DATE,     // 기존 이벤트 종료 날짜 변수 사용
     bannerImageUrl: "https://placehold.co/600x200/5a4fcf/ffffff?text=푸른+잉크와+그림자", // 이벤트 홈 배너 이미지
