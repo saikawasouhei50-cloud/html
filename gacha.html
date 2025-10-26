@@ -3688,13 +3688,27 @@ closeCombatResultButton.addEventListener('click', () => {
     combatResultModal.classList.add('hidden');
     combatInProgressView.classList.add('hidden');
     if (lastCombatType === 'event') {
-        switchTab('event');
-        displayEventView();
-        switchSubTab(document.getElementById('event-view'), eventSubTabBattle);
-    } else {
-        switchTab('combat');
-    }
-});
+                    // [수정된 부분]
+                    // 1. switchTab('event')를 호출하는 대신, 모든 메인 뷰를 수동으로 숨깁니다.
+                    allViews.forEach(view => {
+                        if (view) view.classList.add('hidden'); 
+                    });
+                    
+                    // 2. 상단 '이벤트' 탭을 활성화합니다.
+                    allTabs.forEach(tab => tab.classList.remove('active'));
+                    document.getElementById('tab-event').classList.add('active');
+
+                    // 3. 'event-home-view'(앙스타 홈) 대신 'event-view'(서브 탭 컨테이너)를 보여줍니다.
+                    document.getElementById('event-view').classList.remove('hidden');
+
+                    // 4. 이벤트 뷰를 그리고, '전투' 서브 탭을 활성화합니다. (이건 기존과 동일)
+                    displayEventView();
+                    switchSubTab(document.getElementById('event-view'), eventSubTabBattle);
+                    
+                } else {
+                    switchTab('combat');
+                }
+            });
 closeCardDetailButton.addEventListener('click', hideCardDetails);
 cardDetailModal.addEventListener('click', (e) => { if (e.target === cardDetailModal) hideCardDetails(); });
 
