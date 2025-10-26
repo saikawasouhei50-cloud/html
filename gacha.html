@@ -1576,7 +1576,7 @@ function displayEventHomeView() {
                 purchasedEventItems[item.id] = purchasedCount + 1;
 
                 if (item.type === 'card') {
-                    playerInventory.push(item.itemData);
+                    addCardToInventory(item.itemData.name);
                     showMessage(`[${item.name}] 획득!`, 'text-green-300', messageArea);
                 } else if (item.type === 'currency') {
                     playerCurrency += item.itemData;
