@@ -1188,15 +1188,14 @@ const eventStoryPart2 = {
                     serious: 'https://i.imgur.com/HlApnIL.png',
                 },
                 '윤필규': {
-                    neutral: 'https://i.imgur.com/7NFEHLX.png',
-					angry: 'https://i.imgur.com/3Hwyj1m.png'
+                    neutral: 'https://i.imgur.com/x6rfl1m.png'
                 },
                 '강은율': {
                     neutral: 'https://placehold.co/400x800/0bc5ea/ffffff?text=강은율',
                     serious: 'https://placehold.co/400x800/0987a0/ffffff?text=강은율'
                 },
                 '박연우': {
-                    neutral: 'https://i.imgur.com/P5VeI0c.png'
+                    neutral: 'https://placehold.co/400x800/dd6b20/ffffff?text=박연우'
                 },
                 '백정문': {
                     neutral: 'https://placehold.co/400x800/f687b3/ffffff?text=백정문',
@@ -1233,6 +1232,7 @@ const eventStoryPart2 = {
 			const rarityProbabilities = { 'SSR': 3, 'SR': 12, 'R': 35, 'N': 50 };
             const eventRarityProbabilities = { 'SSR': 6, 'SR': 14, 'R': 30, 'N': 50 };
             const EVENT_CHARACTER_NAME = '[결혼 반지는 아니지만] 서도진';
+			const EVENT_R_PICKUP_NAME = '[좋은 하루 되세요] 윤필규';
             const EVENT_START_DATE = new Date('2025-10-26T00:00:00');
             const EVENT_END_DATE = new Date('2025-11-09T23:59:59');
 			// --- 강화(퇴고) 비용 설정 ---
@@ -1369,8 +1369,6 @@ const GACHA_EXCLUDE_LIST = [
                 '[백청자] 한 현',
                 '[목줄 매인 고양이] 백도화'
             ];
-
-
 
 
 
