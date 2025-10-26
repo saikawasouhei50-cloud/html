@@ -910,7 +910,7 @@ const eventStories = [
             { character: null, dialogue: '손님의 시선이 도진의 얼굴에서 손으로 떨어진다. 도진의 시선 역시 덩달아 추락한다. 왼손 약지에서 반지가 반짝이고 있다.' },
             { character: '서도진', expression: 'neutral', position: 'left', dialogue: '네, 네.' },
             { character: null, dialogue: '도진은 긍정을 표했다. 결혼한 부부와 거진 동일한 생활을 하고 있음이 분명했다.' },
-            { character: '선생', expression: 'neutral', position: 'right', dialogue: '아이는요?‘' },
+            { character: '선생', expression: 'neutral', position: 'right', dialogue: '아이는요?' },
             { character: '서도진', expression: 'neutral', position: 'left', dialogue: '네?' },
             { character: null, dialogue: '헥? 에 가까운 발음이었지만 어찌저찌 의미는 통할 것이었다.' },
             { character: null, dialogue: '손님을 기다리던 현은 불길하다는 표정을 만면에 걸고는 슬금슬금 이쪽으로 돌아오고 있었다.' },
@@ -1362,6 +1362,7 @@ const currentEventInfo = {
     description: "'실패한 도시'를 떠난 백도화. 몇 달의 시간이 흐른 뒤, 긴 휴식기를 가졌던 그의 방송이 다시 시작된다. 그러나 방송을 보던 현은 무언가 이상한 낌새를 느끼고, 도진에게 의견을 구하는데….", // 이벤트 설명
     gachaCharacterName: EVENT_CHARACTER_NAME // 기존 이벤트 뽑기 캐릭터 이름 변수 사용
 };
+
 
 
 
