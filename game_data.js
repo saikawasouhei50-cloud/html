@@ -1027,8 +1027,8 @@ const eventStoryPart2 = {
 };
 
             const eventShopItems = [
-                { id: 'event_ssr_sensei', name: '[소중한 배낭] 선생', type: 'card', cost: 15000, limit: 1, itemData: characters.find(c => c.name === '[소중한 배낭] 선생') },
-{ id: 'event_sr_hyeon', name: '[백청자] 한 현', type: 'card', cost: 5000, limit: 1, itemData: characters.find(c => c.name === '[백청자] 한 현') },
+                { id: 'event_ssr_sensei', name: '[소중한 배낭] 선생', type: 'card', cost: 15000, limit: 5, itemData: characters.find(c => c.name === '[소중한 배낭] 선생') },
+{ id: 'event_sr_hyeon', name: '[백청자] 한 현', type: 'card', cost: 5000, limit: 5, itemData: characters.find(c => c.name === '[백청자] 한 현') },
 { id: 'event_r_dohwa', name: '[목줄 매인 고양이] 백도화', type: 'card', cost: 1000, limit: 5, itemData: characters.find(c => c.name === '[목줄 매인 고양이] 백도화') },
                 { id: 'gems_100', name: '보석 100개', type: 'currency', cost: 1000, limit: 5, itemData: 100 },
                 { id: 'gems_500', name: '보석 500개', type: 'currency', cost: 4500, limit: 2, itemData: 500 }
@@ -1362,6 +1362,7 @@ const currentEventInfo = {
     description: "'실패한 도시'를 떠난 백도화. 몇 달의 시간이 흐른 뒤, 긴 휴식기를 가졌던 그의 방송이 다시 시작된다. 그러나 방송을 보던 현은 무언가 이상한 낌새를 느끼고, 도진에게 의견을 구하는데….", // 이벤트 설명
     gachaCharacterName: EVENT_CHARACTER_NAME // 기존 이벤트 뽑기 캐릭터 이름 변수 사용
 };
+
 
 
 
