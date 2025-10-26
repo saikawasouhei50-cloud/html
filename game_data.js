@@ -1188,7 +1188,7 @@ const eventStoryPart2 = {
                     serious: 'https://i.imgur.com/HlApnIL.png',
                 },
                 '윤필규': {
-                    neutral: 'https://i.imgur.com/7NFEHLX.png'
+                    neutral: 'https://i.imgur.com/7NFEHLX.png',
 					angry: 'https://i.imgur.com/3Hwyj1m.png'
                 },
                 '강은율': {
@@ -1369,6 +1369,7 @@ const GACHA_EXCLUDE_LIST = [
                 '[백청자] 한 현',
                 '[목줄 매인 고양이] 백도화'
             ];
+
 
 
 
