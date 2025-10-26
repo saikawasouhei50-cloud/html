@@ -1768,16 +1768,14 @@ function addCardToInventory(cardName) {
                     }
                 }
 
-                // --- 🔽 [수정됨] 뽑기 제외 로직 적용 🔽 ---
+                // --- 🔽 SSR/SR 픽업 로직 (기존과 동일) 🔽 ---
                 if (useEventRates && (selectedRarity === 'SSR' || selectedRarity === 'SR')) {
-                    // 1. 픽업 캐릭터가 제외 목록에 있는지 확인 (방어 코드)
                     const isPickupExcluded = GACHA_EXCLUDE_LIST.includes(EVENT_CHARACTER_NAME);
 
-                    if (Math.random() < 0.5 && !isPickupExcluded) { // 50% 확률로 픽업 (단, 픽업이 제외 대상이 아닐 때)
+                    if (Math.random() < 0.5 && !isPickupExcluded) { // 50% 확률로 픽업
                         return characters.find(c => c.name === EVENT_CHARACTER_NAME);
                     } else {
-                        // 2. "다른 카드" (픽업이 아니거나, 50% 확률을 빗나간 경우)
-                        // 뽑기 제외 목록(GACHA_EXCLUDE_LIST)에 없는 카드만 필터링합니다.
+                        // "다른 카드" (픽업이 아니거나, 50% 확률을 빗나간 경우)
                         const otherChars = characters.filter(c => 
                             c.rarity === selectedRarity && 
                             c.name !== EVENT_CHARACTER_NAME && 
@@ -1788,14 +1786,10 @@ function addCardToInventory(cardName) {
                             return otherChars[Math.floor(Math.random() * otherChars.length)];
                         }
                         
-                        // 3. "다른 카드"가 없는 경우 (예: 픽업이 유일한 SSR이거나, 픽업 아닌 카드가 모두 제외 목록인 경우)
-                        // 픽업 캐릭터라도 (제외 대상이 아니라면) 반환합니다.
                         if (!isPickupExcluded) {
                             return characters.find(c => c.name === EVENT_CHARACTER_NAME);
                         }
-
-                        // 4. 픽업 캐릭터도 제외대상이고 다른 카드도 없는 최악의 경우,
-                        // 그냥 등급만 맞는 제외되지 않은 아무 카드나 반환합니다. (N등급으로 밀릴 수도 있음)
+                        
                         const fallbackChars = characters.filter(c => c.rarity === selectedRarity && !GACHA_EXCLUDE_LIST.includes(c.name));
                         if (fallbackChars.length > 0) {
                              return fallbackChars[Math.floor(Math.random() * fallbackChars.length)];
@@ -1803,25 +1797,50 @@ function addCardToInventory(cardName) {
                     }
                 }
 
-                // 5. 일반 뽑기 및 SR/SSR 외 등급을 뽑을 때 제외 목록 적용
+                // --- 🔽 [신규] R 등급 픽업 로직 🔽 ---
+                if (useEventRates && selectedRarity === 'R') {
+                    // R 픽업 카드가 제외 목록에 있는지 확인 (방어 코드)
+                    const isRPickupExcluded = GACHA_EXCLUDE_LIST.includes(EVENT_R_PICKUP_NAME);
+
+                    if (Math.random() < 0.5 && !isRPickupExcluded) { // 50% 확률로 R 픽업
+                        return characters.find(c => c.name === EVENT_R_PICKUP_NAME);
+                    } else {
+                        // R 픽업에 실패한 경우:
+                        // 뽑기 제외 목록 + R 픽업 카드를 *모두 제외*한 R 카드 중에서 선택
+                        const otherRChars = characters.filter(c => 
+                            c.rarity === 'R' && 
+                            c.name !== EVENT_R_PICKUP_NAME && 
+                            !GACHA_EXCLUDE_LIST.includes(c.name)
+                        );
+                        
+                        if (otherRChars.length > 0) {
+                            return otherRChars[Math.floor(Math.random() * otherRChars.length)];
+                        }
+
+                        // 만약 다른 R카드가 없다면 (픽업이 유일하거나, 나머지가 다 제외된 경우)
+                        // (제외 대상이 아니라면) R 픽업 카드라도 반환
+                        if (!isRPickupExcluded) {
+                             return characters.find(c => c.name === EVENT_R_PICKUP_NAME);
+                        }
+                        // (최악의 경우 R 픽업도 제외대상이고 다른 R카드도 없으면 아래의 N등급 로직으로 밀려남)
+                    }
+                }
+                
+                // --- 🔽 N 등급 / 일반 뽑기 / R 픽업 실패 시 로직 (기존과 동일) 🔽 ---
                 const possibleCharacters = characters.filter(char => 
                     char.rarity === selectedRarity && 
                     !GACHA_EXCLUDE_LIST.includes(char.name)
                 );
                 
-                // 만약 제외 목록을 적용했더니 뽑을 카드가 없다면 (예: R등급 카드가 모두 제외 목록일 경우)
                 if (possibleCharacters.length === 0) {
-                    // 그냥 N등급 카드 중에서 (제외 목록에 없는) 하나를 줍니다.
                     const fallbackChars = characters.filter(c => c.rarity === 'N' && !GACHA_EXCLUDE_LIST.includes(c.name));
                     if (fallbackChars.length > 0) {
                         return fallbackChars[Math.floor(Math.random() * fallbackChars.length)];
                     }
-                    // N등급마저 없으면 그냥 원본에서 N등급 아무거나 줍니다 (이럴 확률 0에 수렴)
                     return characters.find(c => c.rarity === 'N');
                 }
                 
                 return possibleCharacters[Math.floor(Math.random() * possibleCharacters.length)];
-                // --- 🔼 [수정됨] 뽑기 제외 로직 적용 끝 🔼 ---
             }
 
             function displayResults(pulledCharacters) {
