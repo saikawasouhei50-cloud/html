@@ -1040,6 +1040,7 @@ async function loadGameFromFirebase(uid) {
 
     // 데이터 로드 후 공통으로 실행할 UI 업데이트 및 게임 준비
     calculateOfflineRegen();
+	startBookmarkRegenTimer();
     updateUI();
     checkEventStatus();
     switchTab('home');
