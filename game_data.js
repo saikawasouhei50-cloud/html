@@ -1359,7 +1359,7 @@ const currentEventInfo = {
     title: "[ON] 승급전 세판만", // 이벤트 제목
     startDate: EVENT_START_DATE, // 기존 이벤트 시작 날짜 변수 사용
     endDate: EVENT_END_DATE,     // 기존 이벤트 종료 날짜 변수 사용
-    bannerImageUrl: "https://i.imgur.com/LaVyqiy.png", // 이벤트 홈 배너 이미지
+    bannerImageUrl: "https://placehold.co/600x200/5a4fcf/ffffff?text=푸른+잉크와+그림자", // 이벤트 홈 배너 이미지
     description: "'실패한 도시'를 떠난 백도화. 몇 달의 시간이 흐른 뒤, 긴 휴식기를 가졌던 그의 방송이 다시 시작된다. 그러나 방송을 보던 현은 무언가 이상한 낌새를 느끼고, 도진에게 의견을 구하는데….", // 이벤트 설명
     gachaCharacterName: EVENT_CHARACTER_NAME // 기존 이벤트 뽑기 캐릭터 이름 변수 사용
 };
@@ -1370,7 +1370,22 @@ const GACHA_EXCLUDE_LIST = [
                 '[목줄 매인 고양이] 백도화'
             ];
 
+			// [이 코드를 game_data.js에 추가하세요]
 
+// 레벨 0->1, 1->2, ..., 8->9로 갈 때의 확률 (총 9개)
+// (great: 대성공 확률, success: 성공 확률, fail: 실패 확률)
+// (각 항목의 합은 100이 되어야 함)
+const ENHANCEMENT_PROBABILITY = [
+    { great: 10, success: 90, fail: 0 },   // 0 -> 1 (실패 없음)
+    { great: 8,  success: 82, fail: 10 },  // 1 -> 2
+    { great: 8,  success: 72, fail: 20 },  // 2 -> 3
+    { great: 6,  success: 64, fail: 30 },  // 3 -> 4
+    { great: 5,  success: 55, fail: 40 },  // 4 -> 5
+    { great: 4,  success: 46, fail: 50 },  // 5 -> 6
+    { great: 3,  success: 37, fail: 60 },  // 6 -> 7
+    { great: 2,  success: 28, fail: 70 },  // 7 -> 8
+    { great: 1,  success: 19, fail: 80 }   // 8 -> 9
+];
 
 
 
