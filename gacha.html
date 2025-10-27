@@ -3247,26 +3247,66 @@ function dismantleMultipleCards() {
 			
 
 			
-			function enhanceCard() {
+			// [gacha.html의 enhanceCard 함수 전체를 이 코드로 교체하세요]
+
+function enhanceCard() {
     if (!currentDetailCardId) return;
     const cardInstance = playerInventory.find(c => c.id === currentDetailCardId);
     if (!cardInstance || cardInstance.level >= MAX_ENHANCEMENT_LEVEL) return;
 
-    // 수정: ENHANCEMENT_COSTS 배열 대신 새로운 함수 사용
     const cost = getEnhancementCost(cardInstance);
-    if (cost === null) return; // 비용을 가져올 수 없으면 종료
+    if (cost === null) return;
 
-    if (playerFountainPens >= cost) {
-        playerFountainPens -= cost;
-        cardInstance.level++;
-        updateUI();
-        saveGame();
-        // 변경된 정보로 모달을 다시 표시
-        showCardDetails(currentDetailCardId);
-        checkAchievements(); // ✨ 업적 달성 여부 확인
-    } else {
+    if (playerFountainPens < cost) {
         alert('만년필이 부족합니다!');
+        return;
     }
+
+    // --- ▼ 확률 로직 시작 ▼ ---
+
+    // 1. 재화 선차감
+    playerFountainPens -= cost;
+
+    // 2. 확률 데이터 가져오기
+    const probs = ENHANCEMENT_PROBABILITY[cardInstance.level];
+    const roll = Math.random() * 100; // 0.00 ~ 99.99 사이의 숫자 뽑기
+
+    let resultMessage = '';
+
+    if (roll < probs.great) {
+        // 3-1. 대성공 (Great Success)
+        const oldLevel = cardInstance.level;
+        cardInstance.level += 2; // 2레벨 상승
+        // 최대 레벨(9)을 초과하지 않도록 보정
+        cardInstance.level = Math.min(cardInstance.level, MAX_ENHANCEMENT_LEVEL);
+        
+        // (선택적) 대성공 시 특별한 대사
+        const charData = findCharacter(cardInstance.name);
+        const successDialogue = charData.enhancementSuccessDialogue || "이것이... 이야기의 새로운 경지로군.";
+        resultMessage = `🎉 영감이 떠올랐다! [대성공] (+${cardInstance.level - oldLevel})\n\n"${successDialogue}"`;
+        
+    } else if (roll < probs.great + probs.success) {
+        // 3-2. 성공 (Success)
+        cardInstance.level++; // 1레벨 상승
+        resultMessage = "👍 퇴고 완료! [성공]";
+
+    } else {
+        // 3-3. 실패 (Failure)
+        // 레벨은 변하지 않고 재화만 소모됩니다.
+        resultMessage = "...마감에 쫓기다... [실패]";
+    }
+
+    // 4. 결과 알림
+    alert(resultMessage); 
+    
+    // --- ▲ 확률 로직 종료 ▲ ---
+
+    // 5. UI 갱신 및 저장
+    updateUI();
+    saveGame();
+    // 변경된 정보로 모달을 다시 표시
+    showCardDetails(currentDetailCardId);
+    checkAchievements();
 }
 			
             function closeInteractiveStory() {
