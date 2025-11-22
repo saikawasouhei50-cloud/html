@@ -910,7 +910,7 @@ const eventStories = [
             { character: null, dialogue: '손님의 시선이 도진의 얼굴에서 손으로 떨어진다. 도진의 시선 역시 덩달아 추락한다. 왼손 약지에서 반지가 반짝이고 있다.' },
             { character: '서도진', expression: 'neutral', position: 'left', dialogue: '네, 네.' },
             { character: null, dialogue: '도진은 긍정을 표했다. 결혼한 부부와 거진 동일한 생활을 하고 있음이 분명했다.' },
-            { character: '선생', expression: 'neutral', position: 'right', dialogue: '아이는요?' },
+            { character: '선생', expression: 'neutral', position: 'right', dialogue: '아이는요?‘' },
             { character: '서도진', expression: 'neutral', position: 'left', dialogue: '네?' },
             { character: null, dialogue: '헥? 에 가까운 발음이었지만 어찌저찌 의미는 통할 것이었다.' },
             { character: null, dialogue: '손님을 기다리던 현은 불길하다는 표정을 만면에 걸고는 슬금슬금 이쪽으로 돌아오고 있었다.' },
@@ -1027,8 +1027,8 @@ const eventStoryPart2 = {
 };
 
             const eventShopItems = [
-                { id: 'event_ssr_sensei', name: '[소중한 배낭] 선생', type: 'card', cost: 15000, limit: 5, itemData: characters.find(c => c.name === '[소중한 배낭] 선생') },
-{ id: 'event_sr_hyeon', name: '[백청자] 한 현', type: 'card', cost: 5000, limit: 5, itemData: characters.find(c => c.name === '[백청자] 한 현') },
+                { id: 'event_ssr_sensei', name: '[소중한 배낭] 선생', type: 'card', cost: 15000, limit: 1, itemData: characters.find(c => c.name === '[소중한 배낭] 선생') },
+{ id: 'event_sr_hyeon', name: '[백청자] 한 현', type: 'card', cost: 5000, limit: 1, itemData: characters.find(c => c.name === '[백청자] 한 현') },
 { id: 'event_r_dohwa', name: '[목줄 매인 고양이] 백도화', type: 'card', cost: 1000, limit: 5, itemData: characters.find(c => c.name === '[목줄 매인 고양이] 백도화') },
                 { id: 'gems_100', name: '보석 100개', type: 'currency', cost: 1000, limit: 5, itemData: 100 },
                 { id: 'gems_500', name: '보석 500개', type: 'currency', cost: 4500, limit: 2, itemData: 500 }
@@ -1232,9 +1232,8 @@ const eventStoryPart2 = {
 			const rarityProbabilities = { 'SSR': 3, 'SR': 12, 'R': 35, 'N': 50 };
             const eventRarityProbabilities = { 'SSR': 6, 'SR': 14, 'R': 30, 'N': 50 };
             const EVENT_CHARACTER_NAME = '[결혼 반지는 아니지만] 서도진';
-			const EVENT_R_PICKUP_NAME = '[좋은 하루 되세요] 윤필규';
             const EVENT_START_DATE = new Date('2025-10-26T00:00:00');
-            const EVENT_END_DATE = new Date('2025-11-09T23:59:59');
+            const EVENT_END_DATE = new Date('2025-11-9T23:59:59');
 			// --- 강화(퇴고) 비용 설정 ---
 
 // 레벨 0->1, 1->2, ..., 8->9로 갈 때 필요한 만년필의 기본 비용
@@ -1356,42 +1355,29 @@ const CURRENT_EVENT_ID = "mini_event_202510_dohwa";
 
 
 const currentEventInfo = {
-    title: "[ON] 승급전 세판만", // 이벤트 제목
+    title: "[ON] 승급전 세번만", // 이벤트 제목
     startDate: EVENT_START_DATE, // 기존 이벤트 시작 날짜 변수 사용
     endDate: EVENT_END_DATE,     // 기존 이벤트 종료 날짜 변수 사용
-    bannerImageUrl: "https://i.imgur.com/LaVyqiy.png", // 이벤트 홈 배너 이미지
+    bannerImageUrl: "https://placehold.co/600x200/5a4fcf/ffffff?text=푸른+잉크와+그림자", // 이벤트 홈 배너 이미지
     description: "'실패한 도시'를 떠난 백도화. 몇 달의 시간이 흐른 뒤, 긴 휴식기를 가졌던 그의 방송이 다시 시작된다. 그러나 방송을 보던 현은 무언가 이상한 낌새를 느끼고, 도진에게 의견을 구하는데….", // 이벤트 설명
     gachaCharacterName: EVENT_CHARACTER_NAME // 기존 이벤트 뽑기 캐릭터 이름 변수 사용
 };
 
-const GACHA_EXCLUDE_LIST = [
-                '[소중한 배낭] 선생',
-                '[백청자] 한 현',
-                '[목줄 매인 고양이] 백도화'
-            ];
-
-			// [이 코드를 game_data.js에 추가하세요]
-
-// 레벨 0->1, 1->2, ..., 8->9로 갈 때의 확률 (총 9개)
-// (great: 대성공 확률, success: 성공 확률, fail: 실패 확률)
-// (각 항목의 합은 100이 되어야 함)
-const ENHANCEMENT_PROBABILITY = [
-    { great: 10, success: 90, fail: 0 },   // 0 -> 1 (실패 없음)
-    { great: 8,  success: 82, fail: 10 },  // 1 -> 2
-    { great: 8,  success: 72, fail: 20 },  // 2 -> 3
-    { great: 6,  success: 64, fail: 30 },  // 3 -> 4
-    { great: 5,  success: 55, fail: 40 },  // 4 -> 5
-    { great: 4,  success: 46, fail: 50 },  // 5 -> 6
-    { great: 3,  success: 37, fail: 60 },  // 6 -> 7
-    { great: 2,  success: 28, fail: 70 },  // 7 -> 8
-    { great: 1,  success: 19, fail: 80 }   // 8 -> 9
+const furnitureItems = [
+    { id: 'desk_wood', name: '낡은 원목 책상', type: 'floor', size: { w: 2, h: 1 }, cost: 100, imageUrl: 'https://i.imgur.com/0tfl9uY.png' },
+    { id: 'bookshelf_mystery', name: '미스터리 책장', type: 'wall', size: { w: 1, h: 2 }, cost: 150, imageUrl: 'https://i.imgur.com/ewfr87E.png' },
+    { id: 'rug_red', name: '붉은색 러그', type: 'rug', size: { w: 2, h: 2 }, cost: 80, imageUrl: 'https://i.imgur.com/SYin06r.png' },
+    { id: 'sofa_leather', name: '가죽 소파', type: 'floor', size: { w: 2, h: 1 }, cost: 200, imageUrl: 'https://i.imgur.com/MrhdmIQ.png' },
+    { id: 'plant_potted', name: '관상용 화분', type: 'floor', size: { w: 1, h: 1 }, cost: 50, imageUrl: 'https://i.imgur.com/UbLVLuZ.png' }
 ];
 
-
-
-
-
-
+// --- 캐릭터 SD 이미지 매핑 (없으면 기본 카드 이미지나 플레이스홀더 사용) ---
+// 실제 게임에서는 배경이 투명한 귀여운 SD 캐릭터 이미지가 필요합니다.
+const chibiImages = {
+    '서도진': 'https://placehold.co/60x60/a0aec0/ffffff?text=SD+서도진',
+    '윤필규': 'https://placehold.co/60x60/63b3ed/ffffff?text=SD+윤필규',
+    // ... 나머지 캐릭터들도 추가
+};
 
 
 
