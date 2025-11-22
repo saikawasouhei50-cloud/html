@@ -13,6 +13,8 @@
 body.pointer-events-none {
     pointer-events: none;
 }
+
+		
 		
         /* 사용자 정의 애니메이션 및 스타일 */
         @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
@@ -151,6 +153,45 @@ body.pointer-events-none {
             white-space: pre-wrap;
             word-break: keep-all;
         }
+
+/* 마이룸 캐릭터 애니메이션 */
+.chibi-character {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    transition: all 2s linear; /* 부드러운 이동 */
+    z-index: 10;
+    cursor: pointer;
+}
+.chibi-character:hover {
+    transform: scale(1.1);
+}
+/* 말풍선 스타일 */
+.chibi-bubble {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    color: black;
+    padding: 4px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 20;
+}
+.chibi-character:hover .chibi-bubble {
+    opacity: 1;
+}
+/* 배치된 가구 */
+.placed-furniture {
+    position: absolute;
+    transition: all 0.2s;
+}
+		
 		/* [추가] 구버전 UI를 강제로 숨깁니다. */
         #event-point-display { display: none !important; }
     </style>
@@ -198,6 +239,7 @@ body.pointer-events-none {
                 <button id="tab-deck" class="tab-button font-bold py-2 px-4 rounded-full text-sm">편찬</button>
                 <button id="tab-combat" class="tab-button font-bold py-2 px-4 rounded-full text-sm">독서</button>
                 <button id="tab-story" class="tab-button font-bold py-2 px-4 rounded-full text-sm">스토리</button>
+				<button id="tab-myroom" class="tab-button font-bold py-2 px-4 rounded-full text-sm">탐정 사무소</button>
                 <button id="tab-collection" class="tab-button font-bold py-2 px-4 rounded-full text-sm">도감</button>
                 <button id="tab-achievements" class="tab-button font-bold py-2 px-4 rounded-full text-sm">업적</button>
             </div>
@@ -237,7 +279,7 @@ body.pointer-events-none {
         <div class="md:w-5/12 flex flex-col items-center">
             <img id="event-home-banner-image" src="https://placehold.co/600x200/ff6347/ffffff?text=Event+Banner" alt="Event Banner" class="w-full rounded-lg shadow-lg mb-3">
             <p id="event-home-duration" class="text-sm text-gray-400 mb-4"></p>
-            <h2 id="event-home-title-display" class="text-2xl font-bold text-yellow-300 mb-4 text-center"></h2>
+            
             <div class="grid grid-cols-2 gap-4 w-full">
                 <button id="goto-event-story" class="gacha-button bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg text-base">
                     이벤트 스토리
@@ -488,6 +530,7 @@ body.pointer-events-none {
                 <div class="text-center mb-4">
                     <p class="text-gray-200">독서를 통해 해금한 스토리를 열람합니다.</p>
                 </div>
+			
                 
                  <div class="bg-black/20 rounded-full p-1 flex justify-center items-center mb-4 max-w-sm mx-auto">
                     <button id="story-sub-tab-main" class="sub-tab-button active w-1/2 font-bold py-2 px-6 rounded-full">메인 스토리</button>
@@ -500,6 +543,50 @@ body.pointer-events-none {
                  <div id="stage-story-container" class="hidden space-y-3 max-h-[60vh] overflow-y-auto bg-black/20 p-4 rounded-xl">
                      </div>
             </div>
+            
+            <div id="myroom-view" class="hidden">
+				<div id="furniture-shop-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+    <div class="bg-gray-800 p-6 rounded-lg max-w-2xl w-full relative">
+        <button id="close-furniture-shop" class="absolute top-3 right-4 text-white text-3xl font-bold hover:text-gray-400">&times;</button>
+        
+        <h3 class="text-2xl font-bold text-yellow-300 mb-4">가구 상점</h3>
+        <p class="text-gray-400 mb-4 text-sm">보석을 사용하여 탐정 사무소를 꾸밀 가구를 구매하세요.</p>
+        
+        <div id="furniture-list" class="grid grid-cols-3 sm:grid-cols-4 gap-4 max-h-96 overflow-y-auto mb-4 bg-black/20 p-4 rounded-lg min-h-[100px]">
+        </div>
+    </div>
+</div>
+                <div class="text-center mb-4">
+                    <p class="text-gray-200">탐정 사무소를 꾸미고 등장인물들의 휴식을 지켜보세요.</p>
+                </div>
+
+                <div id="room-container" class="relative w-full max-w-3xl mx-auto h-96 bg-gray-800 rounded-xl overflow-hidden shadow-2xl border-4 border-gray-700">
+                    <div class="absolute inset-0 opacity-30" style="background-image: radial-gradient(#4a5568 1px, transparent 1px); background-size: 20px 20px;"></div>
+                    
+                    <div id="room-layer" class="relative w-full h-full">
+                        </div>
+                </div>
+
+                <div class="flex justify-center gap-4 mt-6">
+    <button id="open-furniture-shop" onclick="openFurnitureShop()" class="gacha-button bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-6 rounded-full">🪑 가구 상점</button>
+    
+    <button id="open-furniture-storage" class="hidden gacha-button bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-6 rounded-full">📦 보관함</button>
+    <button id="myroom-edit-mode" class="gacha-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-full">🔨 배치 모드</button>
+</div>
+
+<div id="furniture-storage-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+    <div class="bg-gray-800 p-6 rounded-lg max-w-2xl w-full">
+        <h3 class="text-2xl font-bold text-purple-300 mb-4">가구 보관함</h3>
+        <p class="text-gray-400 mb-4 text-sm">배치하지 않은 가구들이 여기에 보관됩니다.</p>
+        
+        <div id="storage-list" class="grid grid-cols-3 gap-4 max-h-96 overflow-y-auto mb-4 bg-black/20 p-4 rounded-lg min-h-[100px]">
+            </div>
+        
+        <button id="close-furniture-storage" class="gacha-button bg-red-500 text-white py-2 px-4 rounded-full w-full">닫기</button>
+    </div>
+</div>
+            </div>
+
             <div id="toast-notification" class="hidden fixed bottom-10 left-1/2 -translate-x-1/2 bg-yellow-400 text-black font-bold py-3 px-6 rounded-full shadow-lg transition-all duration-300 z-50">
                 🎉 업적 달성!
             </div>
@@ -627,7 +714,7 @@ body.pointer-events-none {
    
 
 	
-	<script src="game_data.js?v=1.1"></script>
+	<script src="game_data.js"></script>
 	
     <script>
 	
@@ -805,6 +892,8 @@ const STAT_INCREASE_PER_LEVEL = 0.05; // 레벨당 기본 능력치의 5% 증가
             let selectedCardsToDismantle = new Set(); // ✨ 선택된 카드 ID Set 추가
             let playerInventory = [];
 			let collectedCardNames = new Set(); // 👈 이 줄을 추가하세요.
+		let playerRoom = { furniture: [], characters: [] }; // 마이룸 데이터 (가구 배치, 캐릭터)
+let ownedFurniture = []; // 보유한 가구 목록
 			let isSortAscending = false; // ✨ 정렬 방향 변수 추가 (false: 내림차순, true: 오름차순)
             let playerDeck = [];
             let inventoryCapacity = 100;
@@ -971,7 +1060,9 @@ const closeDismantleResultButton = document.getElementById('close-dismantle-resu
         stats: playerStats,
         clearedStageStories: clearedStageStories,
         playerChoices: playerChoices,
-		collectedCardNames: Array.from(collectedCardNames)
+		collectedCardNames: Array.from(collectedCardNames),
+		myRoom: playerRoom,        // 마이룸 배치 정보 저장
+        ownedFurniture: ownedFurniture // 보유 가구 목록 저장
     };
     
     // 'users' 컬렉션에 현재 유저의 UID를 문서 ID로 사용하여 데이터 저장
@@ -1002,6 +1093,8 @@ async function loadGameFromFirebase(uid) {
         collectedCardNames = new Set(savedData.collectedCardNames || []);
         const savedDeckIds = savedData.deck || [];
         playerDeck = savedDeckIds.map(id => playerInventory.find(card => card.id === id)).filter(Boolean);
+		playerRoom = savedData.myRoom || { furniture: [], characters: [] };
+        ownedFurniture = savedData.ownedFurniture || [];
         inventoryCapacity = savedData.capacity ?? 100;
         if (savedData.representative) {
             representativeCharacter = findCharacter(savedData.representative) || null;
@@ -1040,7 +1133,6 @@ async function loadGameFromFirebase(uid) {
 
     // 데이터 로드 후 공통으로 실행할 UI 업데이트 및 게임 준비
     calculateOfflineRegen();
-	startBookmarkRegenTimer();
     updateUI();
     checkEventStatus();
     switchTab('home');
@@ -1070,6 +1162,8 @@ function saveGame() {
     lastBookmarkUpdateTime = Date.now();
 }
 
+
+		
 
             function resetGame() {
                 if (!isStorageAvailable()) return;
@@ -1221,7 +1315,6 @@ function saveGame() {
                 return bonusDeck;
             }
 
-            // --- 핵심 게임 로직 함수 ---
             function switchTab(tabName) {
     if (isCombatRunning) return;
     
@@ -1231,38 +1324,46 @@ function saveGame() {
     });
     allTabs.forEach(tab => tab.classList.remove('active'));
     
-    // 2. 선택된 뷰 활성화
-    // ================== [시작] 수정된 부분 ==================
+    // 2. 선택된 뷰 활성화 로직
     let targetView;
-    // '이벤트' 탭을 누르면 'event-home-view'(앙스타 레이아웃)를 보여줍니다.
+
     if (tabName === 'event') {
+        // '이벤트' 탭은 event-home-view를 보여줍니다.
         targetView = document.getElementById('event-home-view'); 
-    } else {
-    // 나머지 탭은 기존 규칙(예: 'home' -> 'home-view')을 따릅니다.
+    } 
+    // ✅ [수정 1] 마이룸 탭을 누르면 myroom-view를 찾도록 명시합니다.
+    else if (tabName === 'myroom') {
+        targetView = document.getElementById('myroom-view');
+    }
+    // 그 외 탭들은 이름 규칙에 따라 뷰를 찾습니다. (예: home -> home-view)
+    else {
         targetView = document.getElementById(`${tabName}-view`);
     }
-    // ================== [끝] 수정된 부분 ==================
     
     const targetTab = document.getElementById(`tab-${tabName}`);
 
-    // ✨ 방어 코드: 뷰가 존재하지 않으면 함수를 종료합니다. ✨
+    // 방어 코드: 뷰나 탭 버튼이 없으면 에러를 띄우고 중단합니다.
     if (!targetView || !targetTab) {
         console.error(`Error: Cannot find view or tab for name: ${tabName}`);
         return; 
     }
     
+    // 선택된 뷰를 보여주고 탭을 활성화합니다.
     targetView.classList.remove('hidden');
     targetTab.classList.add('active');
     
-    // 3. 뷰별 렌더링 함수 호출 (이 부분은 기존 코드 유지)
+    // 3. 탭에 맞는 화면 그리기 함수 호출
     if (tabName === 'home') displayHomeView();
     else if (tabName === 'inventory') displayInventory(); 
     else if (tabName === 'deck') displayDeckManagement();
     else if (tabName === 'combat') displayCombatView();
     else if (tabName === 'collection') displayCollectionView();
     else if (tabName === 'story') displayStoryView();
-    else if (tabName === 'event') displayEventHomeView(); // event-home-view의 데이터를 채웁니다.
+    else if (tabName === 'event') displayEventHomeView();
     else if (tabName === 'achievements') displayAchievements();
+    
+    // ✅ [수정 2] 마이룸 탭일 때, 마이룸 화면을 그리는 함수를 실행합니다.
+    else if (tabName === 'myroom') displayMyRoom();
 }
             function switchSubTab(viewContainer, button) {
                 Array.from(viewContainer.children).forEach(view => {
@@ -1296,8 +1397,8 @@ function saveGame() {
                 const isEventActive = true; // For testing: now >= EVENT_START_DATE && now <= EVENT_END_DATE;
                 if (isEventActive) {
                     eventBanner.classList.remove('hidden');
-                    eventBannerText.innerHTML = `[결혼 반지는 아니지만] 서도진<br>[좋은 하루 되세요] 윤필규 등장!`;
-                    eventGachaInfo.querySelector('p').innerHTML = `[${EVENT_CHARACTER_NAME}] 등장 확률 UP!<br>[${EVENT_R_PICKUP_NAME}] 등장 확률 UP!`;
+                    eventBannerText.textContent = `${EVENT_CHARACTER_NAME} 확률 UP!`;
+                    eventGachaInfo.querySelector('p').textContent = `[${EVENT_CHARACTER_NAME}] 등장 확률 UP!`;
                     gachaTabEvent.classList.remove('hidden');
                     eventTab.classList.remove('hidden');
                     // eventPointDisplay.classList.remove('hidden');
@@ -1479,8 +1580,7 @@ const isCardCollected = collectedCardNames.has(character.name);
 function displayEventHomeView() {
     // game_data.js에서 이벤트 정보 가져오기
     // document.getElementById('event-home-title').textContent = currentEventInfo.title;
-    document.getElementById('event-home-title-display').textContent = currentEventInfo.title;
-	const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
     const startDateStr = currentEventInfo.startDate.toLocaleDateString('ko-KR', options);
     const endDateStr = currentEventInfo.endDate.toLocaleDateString('ko-KR', options);
     document.getElementById('event-home-duration').textContent = `${startDateStr} ~ ${endDateStr}`;
@@ -1578,7 +1678,7 @@ function displayEventHomeView() {
                 purchasedEventItems[item.id] = purchasedCount + 1;
 
                 if (item.type === 'card') {
-                    addCardToInventory(item.itemData.name);
+                    playerInventory.push(item.itemData);
                     showMessage(`[${item.name}] 획득!`, 'text-green-300', messageArea);
                 } else if (item.type === 'currency') {
                     playerCurrency += item.itemData;
@@ -1748,7 +1848,6 @@ function addCardToInventory(cardName) {
     };
 }
 
-            // [이 코드로 function pullCharacter() 함수 전체를 교체하세요]
             function pullCharacter(allowedRarities = null, gachaType = 'normal') {
                 const now = new Date();
                 const isEventActive = true; // For testing
@@ -1768,78 +1867,17 @@ function addCardToInventory(cardName) {
                     }
                 }
 
-                // --- 🔽 SSR/SR 픽업 로직 (기존과 동일) 🔽 ---
                 if (useEventRates && (selectedRarity === 'SSR' || selectedRarity === 'SR')) {
-                    const isPickupExcluded = GACHA_EXCLUDE_LIST.includes(EVENT_CHARACTER_NAME);
-
-                    if (Math.random() < 0.5 && !isPickupExcluded) { // 50% 확률로 픽업
+                    if (Math.random() < 0.5) { // 50% chance for event character
                         return characters.find(c => c.name === EVENT_CHARACTER_NAME);
                     } else {
-                        // "다른 카드" (픽업이 아니거나, 50% 확률을 빗나간 경우)
-                        const otherChars = characters.filter(c => 
-                            c.rarity === selectedRarity && 
-                            c.name !== EVENT_CHARACTER_NAME && 
-                            !GACHA_EXCLUDE_LIST.includes(c.name)
-                        );
-                        
-                        if (otherChars.length > 0) {
-                            return otherChars[Math.floor(Math.random() * otherChars.length)];
-                        }
-                        
-                        if (!isPickupExcluded) {
-                            return characters.find(c => c.name === EVENT_CHARACTER_NAME);
-                        }
-                        
-                        const fallbackChars = characters.filter(c => c.rarity === selectedRarity && !GACHA_EXCLUDE_LIST.includes(c.name));
-                        if (fallbackChars.length > 0) {
-                             return fallbackChars[Math.floor(Math.random() * fallbackChars.length)];
-                        }
+                        const otherChars = characters.filter(c => c.rarity === selectedRarity && c.name !== EVENT_CHARACTER_NAME);
+                        if (otherChars.length > 0) return otherChars[Math.floor(Math.random() * otherChars.length)];
+                        return characters.find(c => c.name === EVENT_CHARACTER_NAME); // Fallback
                     }
                 }
 
-                // --- 🔽 [신규] R 등급 픽업 로직 🔽 ---
-                if (useEventRates && selectedRarity === 'R') {
-                    // R 픽업 카드가 제외 목록에 있는지 확인 (방어 코드)
-                    const isRPickupExcluded = GACHA_EXCLUDE_LIST.includes(EVENT_R_PICKUP_NAME);
-
-                    if (Math.random() < 0.5 && !isRPickupExcluded) { // 50% 확률로 R 픽업
-                        return characters.find(c => c.name === EVENT_R_PICKUP_NAME);
-                    } else {
-                        // R 픽업에 실패한 경우:
-                        // 뽑기 제외 목록 + R 픽업 카드를 *모두 제외*한 R 카드 중에서 선택
-                        const otherRChars = characters.filter(c => 
-                            c.rarity === 'R' && 
-                            c.name !== EVENT_R_PICKUP_NAME && 
-                            !GACHA_EXCLUDE_LIST.includes(c.name)
-                        );
-                        
-                        if (otherRChars.length > 0) {
-                            return otherRChars[Math.floor(Math.random() * otherRChars.length)];
-                        }
-
-                        // 만약 다른 R카드가 없다면 (픽업이 유일하거나, 나머지가 다 제외된 경우)
-                        // (제외 대상이 아니라면) R 픽업 카드라도 반환
-                        if (!isRPickupExcluded) {
-                             return characters.find(c => c.name === EVENT_R_PICKUP_NAME);
-                        }
-                        // (최악의 경우 R 픽업도 제외대상이고 다른 R카드도 없으면 아래의 N등급 로직으로 밀려남)
-                    }
-                }
-                
-                // --- 🔽 N 등급 / 일반 뽑기 / R 픽업 실패 시 로직 (기존과 동일) 🔽 ---
-                const possibleCharacters = characters.filter(char => 
-                    char.rarity === selectedRarity && 
-                    !GACHA_EXCLUDE_LIST.includes(char.name)
-                );
-                
-                if (possibleCharacters.length === 0) {
-                    const fallbackChars = characters.filter(c => c.rarity === 'N' && !GACHA_EXCLUDE_LIST.includes(c.name));
-                    if (fallbackChars.length > 0) {
-                        return fallbackChars[Math.floor(Math.random() * fallbackChars.length)];
-                    }
-                    return characters.find(c => c.rarity === 'N');
-                }
-                
+                const possibleCharacters = characters.filter(char => char.rarity === selectedRarity);
                 return possibleCharacters[Math.floor(Math.random() * possibleCharacters.length)];
             }
 
@@ -1963,6 +2001,410 @@ function addCardToInventory(cardName) {
         updateMultiSelectUI();
     }
 }
+
+		// ================== ✨ 마이룸 & 가구 상점 로직 시작 ✨ ==================
+
+// 1. 마이룸 화면 표시 (캐릭터 & 가구 렌더링)
+function displayMyRoom() {
+    const roomLayer = document.getElementById('room-layer');
+    if (!roomLayer) return; // 방이 없으면 중단
+    roomLayer.innerHTML = '';
+
+    // (1) 가구 렌더링 [수정된 부분 시작]
+    // forEach에 index 매개변수를 추가하여 몇 번째 가구인지 추적합니다.
+    playerRoom.furniture.forEach((item, index) => { 
+        const furnitureData = furnitureItems.find(f => f.id === item.id);
+        if (furnitureData) {
+            const el = document.createElement('img');
+            el.src = furnitureData.imageUrl;
+            el.className = 'placed-furniture absolute';
+            
+            // ✨ [핵심 수정] 드래그 시 식별을 위해 id와 key(인덱스)를 심어줍니다.
+            el.dataset.id = item.id;
+            el.dataset.key = index; 
+
+            // 백분율(%) 좌표로 위치 및 크기 지정
+            el.style.left = `${item.x}%`;
+            el.style.top = `${item.y}%`;
+            el.style.width = `${furnitureData.size.w * 10}%`; 
+            
+            // z-index를 Y축 좌표에 맞춰 설정 (아래에 있는 가구가 앞에 오도록)
+            el.style.zIndex = Math.floor(item.y);
+            roomLayer.appendChild(el);
+        }
+    });
+    // [수정된 부분 끝]
+
+    // (2) SD 캐릭터 렌더링 (덱에 있는 캐릭터 5명, 없으면 인벤토리 앞 5명)
+    const activeCharacters = playerDeck.length > 0 ? playerDeck : playerInventory.slice(0, 5);
+    
+    activeCharacters.forEach((card, index) => {
+        const charData = findCharacter(card.name);
+        if (!charData) return;
+
+        const el = document.createElement('div');
+        el.className = 'chibi-character absolute cursor-pointer transition-all duration-[2000ms] ease-linear';
+        el.id = `chibi-${index}`;
+        
+        // 초기 랜덤 위치 (10% ~ 80% 사이)
+        const startX = Math.random() * 70 + 10;
+        const startY = Math.random() * 50 + 20;
+        el.style.left = `${startX}%`;
+        el.style.top = `${startY}%`;
+        el.style.width = '60px'; 
+        el.style.height = '60px';
+        el.style.zIndex = Math.floor(startY) + 10; // 가구보다 살짝 위에
+
+        // 캐릭터 이미지
+        const img = document.createElement('img');
+        // chibiImages가 정의되지 않았을 경우를 대비해 cardImageUrl 사용
+        img.src = (typeof chibiImages !== 'undefined' && chibiImages[charData.baseName]) ? chibiImages[charData.baseName] : charData.cardImageUrl;
+        img.className = 'w-full h-full object-contain drop-shadow-lg';
+        el.appendChild(img);
+
+        // 대사 말풍선
+        const bubble = document.createElement('div');
+        bubble.className = 'chibi-bubble absolute -top-10 left-1/2 -translate-x-1/2 bg-white text-black px-2 py-1 rounded-lg text-xs whitespace-nowrap opacity-0 transition-opacity duration-300 pointer-events-none z-20 border border-gray-300 shadow-sm';
+        bubble.innerText = charData.dialogues[0];
+        el.appendChild(bubble);
+
+        // 클릭 시 대사 출력
+        el.addEventListener('click', (e) => {
+            e.stopPropagation(); // 뒤에 있는 가구 클릭 방지
+            const randomDialogue = charData.dialogues[Math.floor(Math.random() * charData.dialogues.length)];
+            bubble.innerText = randomDialogue;
+            bubble.style.opacity = 1;
+            setTimeout(() => bubble.style.opacity = 0, 3000);
+        });
+
+        roomLayer.appendChild(el);
+
+        // (3) 랜덤 이동 시작
+        startChibiMovement(el);
+    });
+}
+
+// 캐릭터 랜덤 이동 함수
+function startChibiMovement(element) {
+    // 이미 움직임 인터벌이 있다면 제거 (중복 방지)
+    if (element.dataset.moveInterval) clearInterval(element.dataset.moveInterval);
+
+    const move = () => {
+        if (!document.getElementById('myroom-view') || document.getElementById('myroom-view').classList.contains('hidden')) return;
+
+        const newX = Math.random() * 70 + 10;
+        const newY = Math.random() * 50 + 20;
+        
+        // 방향 전환 (이미지 좌우 반전)
+        const currentX = parseFloat(element.style.left);
+        const img = element.querySelector('img');
+        if (newX < currentX) {
+            img.style.transform = 'scaleX(1)'; // 왼쪽
+        } else {
+            img.style.transform = 'scaleX(-1)'; // 오른쪽
+        }
+
+        element.style.left = `${newX}%`;
+        element.style.top = `${newY}%`;
+        element.style.zIndex = Math.floor(newY) + 10;
+    };
+
+    // 3~6초마다 이동
+    const interval = setInterval(move, Math.random() * 3000 + 3000);
+    element.dataset.moveInterval = interval;
+}
+
+// ================== ✨ [신규] 가구 보관함 기능 시작 ✨ ==================
+
+// 1. 가구 보관함 열기 (보유 중이지만 방에 없는 가구만 표시)
+function openFurnitureStorage() {
+    const list = document.getElementById('storage-list');
+    const modal = document.getElementById('furniture-storage-modal');
+    if (!list || !modal) return;
+
+    list.innerHTML = '';
+
+    // 현재 방에 배치된 가구들의 ID 목록 추출
+    const placedFurnitureIds = playerRoom.furniture.map(f => f.id);
+
+    // 보유 중인 가구 중 배치되지 않은 것들 필터링
+    const unplacedFurnitureIds = ownedFurniture.filter(id => !placedFurnitureIds.includes(id));
+
+    if (unplacedFurnitureIds.length === 0) {
+        list.innerHTML = `<p class="col-span-3 text-center text-gray-500 py-4">보관 중인 가구가 없습니다.<br>상점에서 구매하거나 배치된 가구를 회수하세요.</p>`;
+    } else {
+        unplacedFurnitureIds.forEach(id => {
+            const item = furnitureItems.find(f => f.id === id);
+            if (!item) return;
+
+            const div = document.createElement('div');
+            div.className = 'bg-black/40 p-3 rounded flex flex-col items-center text-center border border-purple-500/30 hover:bg-purple-900/20 transition-colors cursor-pointer';
+            
+            // 클릭 시 배치 함수 호출
+            div.onclick = () => placeFurnitureFromStorage(id);
+
+            div.innerHTML = `
+                <div class="h-16 w-full flex items-center justify-center mb-2 bg-black/20 rounded pointer-events-none">
+                    <img src="${item.imageUrl}" class="max-h-full max-w-full">
+                </div>
+                <p class="font-bold text-white text-sm mb-1 pointer-events-none">${item.name}</p>
+                <p class="text-green-400 text-xs pointer-events-none">클릭하여 배치</p>
+            `;
+            list.appendChild(div);
+        });
+    }
+    modal.classList.remove('hidden');
+}
+
+// 2. 보관함에서 가구 꺼내기 (배치)
+function placeFurnitureFromStorage(furnitureId) {
+    const item = furnitureItems.find(f => f.id === furnitureId);
+    if (!item) return;
+
+    // 방 중앙에 배치
+    playerRoom.furniture.push({ id: item.id, x: 45, y: 45 });
+    
+    showMessage(`${item.name} 배치 완료!`, 'text-green-300', messageArea);
+    
+    // 화면 갱신
+    displayMyRoom();
+    saveGame();
+    
+    // 보관함 목록 갱신 (방금 꺼낸 건 사라져야 함)
+    openFurnitureStorage();
+}
+
+// ================== ✨ 가구 보관함 기능 끝 ✨ ==================
+		
+// 2. 가구 상점 열기
+function openFurnitureShop() {
+    const list = document.getElementById('furniture-list');
+    const modal = document.getElementById('furniture-shop-modal');
+    if (!list || !modal) return;
+
+    list.innerHTML = '';
+
+    furnitureItems.forEach(item => {
+        const isOwned = ownedFurniture.includes(item.id);
+        const div = document.createElement('div');
+        div.className = 'bg-black/40 p-3 rounded flex flex-col items-center text-center border border-white/10';
+        
+        // 버튼 스타일 결정
+        const btnClass = isOwned 
+            ? 'bg-gray-500 cursor-not-allowed' 
+            : (playerCurrency >= item.cost ? 'bg-green-500 hover:bg-green-600 cursor-pointer' : 'bg-red-500 opacity-50 cursor-not-allowed');
+        const btnText = isOwned ? '보유중' : '구매';
+        const btnDisabled = isOwned ? 'disabled' : '';
+
+        div.innerHTML = `
+            <div class="h-16 w-full flex items-center justify-center mb-2 bg-black/20 rounded">
+                <img src="${item.imageUrl}" class="max-h-full max-w-full">
+            </div>
+            <p class="font-bold text-white text-sm mb-1">${item.name}</p>
+            <p class="text-yellow-300 text-xs mb-2">💎 ${item.cost}</p>
+            <button class="gacha-button text-xs py-1 px-3 rounded-full text-white font-bold w-full transition-colors ${btnClass}" 
+                ${btnDisabled} 
+                onclick="buyFurniture('${item.id}')">
+                ${btnText}
+            </button>
+        `;
+        list.appendChild(div);
+    });
+    modal.classList.remove('hidden');
+}
+
+		window.openFurnitureShop = openFurnitureShop;
+
+// 3. 가구 구매 (HTML onclick에서 호출됨)
+window.buyFurniture = function(furnitureId) {
+    const item = furnitureItems.find(f => f.id === furnitureId);
+    if (!item) return;
+
+    if (ownedFurniture.includes(item.id)) {
+        alert('이미 보유하고 있는 가구입니다.');
+        return;
+    }
+
+    if (playerCurrency >= item.cost) {
+        if (!confirm(`${item.name}을(를) 💎${item.cost}에 구매하시겠습니까?`)) return;
+
+        playerCurrency -= item.cost;
+        ownedFurniture.push(item.id);
+        
+        // 구매 즉시 방 중앙에 자동 배치
+        playerRoom.furniture.push({ id: item.id, x: 45, y: 45 });
+        
+        showMessage(`${item.name} 구매 완료!`, 'text-green-300', messageArea);
+        
+        updateUI();
+        saveGame();
+        openFurnitureShop(); // 상점 UI 갱신 (버튼 상태 변경)
+        displayMyRoom(); // 방 화면 갱신
+    } else {
+        alert('보석이 부족합니다.');
+    }
+};
+
+		// ================== 🔨 배치 모드(Edit Mode) 로직 시작 ==================
+
+let isEditMode = false; // 현재 배치 모드인지 여부
+let draggedFurniture = null; // 드래그 중인 가구 요소
+let dragOffsetX = 0;
+let dragOffsetY = 0;
+
+// 1. 배치 모드 토글 함수
+function toggleEditMode() {
+    isEditMode = !isEditMode;
+    const btn = document.getElementById('myroom-edit-mode');
+    const container = document.getElementById('room-container');
+    
+    // ✨ [추가] 보관함 버튼 요소 가져오기
+    const storageBtn = document.getElementById('open-furniture-storage');
+
+    if (isEditMode) {
+        // [ON] 배치 모드 켜짐
+        btn.textContent = '✅ 저장 완료';
+        btn.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+        btn.classList.add('bg-green-600', 'hover:bg-green-700');
+        
+        container.classList.add('border-yellow-400'); 
+        
+        // ✨ [추가] 보관함 버튼 보이기
+        if(storageBtn) storageBtn.classList.remove('hidden');
+
+        // 캐릭터 숨기기
+        document.querySelectorAll('.chibi-character').forEach(el => el.classList.add('hidden'));
+        
+        // 가구 드래그 활성화
+        document.querySelectorAll('.placed-furniture').forEach(el => {
+            el.style.cursor = 'grab';
+            el.style.pointerEvents = 'auto';
+        });
+        
+        // 안내 메시지 수정 (회수하면 보관함으로 간다는 내용 추가)
+        showMessage('가구를 드래그하여 이동하거나, 우클릭하여 보관함에 넣으세요.', 'text-yellow-300', messageArea);
+
+    } else {
+        // [OFF] 배치 모드 꺼짐
+        btn.textContent = '🔨 배치 모드';
+        btn.classList.remove('bg-green-600', 'hover:bg-green-700');
+        btn.classList.add('bg-blue-500', 'hover:bg-blue-600');
+        
+        container.classList.remove('border-yellow-400');
+        
+        // ✨ [추가] 보관함 버튼 숨기기
+        if(storageBtn) storageBtn.classList.add('hidden');
+
+        // 캐릭터 보이기
+        document.querySelectorAll('.chibi-character').forEach(el => el.classList.remove('hidden'));
+        
+        document.querySelectorAll('.placed-furniture').forEach(el => {
+            el.style.cursor = 'default';
+        });
+
+        saveGame();
+        showMessage('배치가 저장되었습니다.', 'text-green-300', messageArea);
+    }
+}
+
+		
+
+// 2. 마우스 이벤트 초기화 (드래그 앤 드롭)
+function initDragEvents() {
+    const container = document.getElementById('room-container');
+
+    // (1) 마우스 누름 (드래그 시작)
+    container.addEventListener('mousedown', (e) => {
+        if (!isEditMode) return;
+        
+        if (e.target.classList.contains('placed-furniture')) {
+            e.preventDefault(); // 이미지 끌기 방지
+            draggedFurniture = e.target;
+            draggedFurniture.style.cursor = 'grabbing';
+            draggedFurniture.style.zIndex = 1000; // 맨 앞으로 가져오기
+            
+            // 클릭한 지점과 요소의 왼쪽 상단 사이의 거리 계산 (픽셀 단위)
+            const rect = draggedFurniture.getBoundingClientRect();
+            dragOffsetX = e.clientX - rect.left;
+            dragOffsetY = e.clientY - rect.top;
+        }
+    });
+
+    // (2) 마우스 이동 (드래그 중)
+    window.addEventListener('mousemove', (e) => {
+        if (!isEditMode || !draggedFurniture) return;
+        e.preventDefault();
+
+        const containerRect = container.getBoundingClientRect();
+        
+        // 컨테이너 내부에서의 마우스 좌표 계산
+        let newX = e.clientX - containerRect.left - dragOffsetX;
+        let newY = e.clientY - containerRect.top - dragOffsetY;
+
+        // 픽셀 좌표를 백분율(%)로 변환
+        let percentX = (newX / containerRect.width) * 100;
+        let percentY = (newY / containerRect.height) * 100;
+
+        // 화면 밖으로 나가지 않게 제한 (0% ~ 90% 사이)
+        percentX = Math.max(0, Math.min(90, percentX));
+        percentY = Math.max(0, Math.min(85, percentY));
+
+        draggedFurniture.style.left = `${percentX}%`;
+        draggedFurniture.style.top = `${percentY}%`;
+    });
+
+    // (3) 마우스 뗌 (드래그 종료)
+    window.addEventListener('mouseup', () => {
+        if (!isEditMode || !draggedFurniture) return;
+
+        // 최종 위치를 데이터에 업데이트
+        const currentLeft = parseFloat(draggedFurniture.style.left);
+        const currentTop = parseFloat(draggedFurniture.style.top);
+        
+        // 현재 드래그 중인 가구의 원래 데이터 찾기 (좌표로 대조하거나 ID를 데이터셋에 넣는 게 좋음)
+        // 여기서는 간단히 DOM 요소의 순서나, 새로 구현할 ID 매칭을 사용해야 합니다.
+        // **개선**: displayMyRoom에서 가구 생성 시 data-id를 넣도록 수정하겠습니다.
+        
+        const furnitureId = draggedFurniture.dataset.id;
+        const uniqueKey = draggedFurniture.dataset.key; // 중복 가구 구분을 위한 키
+
+        // playerRoom.furniture 배열에서 해당 가구를 찾아 좌표 업데이트
+        // (같은 가구가 여러 개일 수 있으므로 인덱스로 찾습니다)
+        const itemIndex = playerRoom.furniture.findIndex((f, idx) => idx == uniqueKey);
+        
+        if (itemIndex > -1) {
+            playerRoom.furniture[itemIndex].x = currentLeft;
+            playerRoom.furniture[itemIndex].y = currentTop;
+        }
+
+        // 스타일 초기화
+        draggedFurniture.style.cursor = 'grab';
+        draggedFurniture.style.zIndex = Math.floor(currentTop); // Y좌표에 따른 깊이 재설정
+        draggedFurniture = null;
+    });
+    
+    // (4) 우클릭 시 가구 회수 (삭제)
+    container.addEventListener('contextmenu', (e) => {
+        if (!isEditMode) return;
+        if (e.target.classList.contains('placed-furniture')) {
+            e.preventDefault();
+            
+            if(confirm('이 가구를 회수하시겠습니까?')) {
+                const uniqueKey = e.target.dataset.key;
+                // 배열에서 삭제
+                playerRoom.furniture.splice(uniqueKey, 1);
+                // 화면 다시 그리기 (삭제 반영 및 인덱스 재정렬)
+                displayMyRoom();
+                // 배치 모드 스타일 다시 적용
+                toggleEditMode(); 
+                toggleEditMode(); // 껐다 켜서 스타일 재적용 (꼼수지만 확실함)
+            }
+        }
+    });
+}
+
+// ================== 🔨 배치 모드 로직 끝 ==================
+// ================== ✨ 마이룸 로직 끝 ✨ ==================
 
             function displayDeckManagement() {
                 deckStatus.textContent = `현재 편찬: ${playerDeck.length} / ${DECK_CAPACITY}`;
@@ -2757,19 +3199,8 @@ function endCombat(isVictory, combatInfo) { // dungeon, type 대신 combatInfo �
                     enhanceButton.disabled = true;
                     costDisplay.textContent = '퇴고 불가';
                 } else {
-				const nextLevelStats = getEnhancedStats({ ...cardInstance, level: cardInstance.level + 1 });
-    // (1) 스탯 미리보기 저장
-    const statsPreview = `HP ${currentStats.hp} <span class="text-gray-400">&rarr;</span> ${nextLevelStats.hp} (+${nextLevelStats.hp - currentStats.hp})<br>ATK ${currentStats.atk} <span class="text-gray-400">&rarr;</span> ${nextLevelStats.atk} (+${nextLevelStats.atk - currentStats.atk})`;
-
-    // (2) 확률 정보 가져오기
-    const probs = ENHANCEMENT_PROBABILITY[cardInstance.level];
-    
-    // (3) 스탯 미리보기 + 확률 정보를 함께 표시
-    previewDisplay.innerHTML = `
-        ${statsPreview}
-        <br><span class="text-cyan-300 font-bold">성공: ${probs.great + probs.success}% (대성공: ${probs.great}%)</span>
-        / <span class="text-red-400 font-bold">실패: ${probs.fail}%</span>
-    `;
+                    const nextLevelStats = getEnhancedStats({ ...cardInstance, level: cardInstance.level + 1 });
+                    previewDisplay.innerHTML = `HP ${currentStats.hp} <span class="text-gray-400">&rarr;</span> ${nextLevelStats.hp} (+${nextLevelStats.hp - currentStats.hp})<br>ATK ${currentStats.atk} <span class="text-gray-400">&rarr;</span> ${nextLevelStats.atk} (+${nextLevelStats.atk - currentStats.atk})`;
                     const cost = getEnhancementCost(cardInstance); // ✨ 새로운 함수 호출로 변경
 costDisplay.textContent = `🖋️ ${cost}`;
 enhanceButton.disabled = playerFountainPens < cost;
@@ -3247,66 +3678,26 @@ function dismantleMultipleCards() {
 			
 
 			
-			// [gacha.html의 enhanceCard 함수 전체를 이 코드로 교체하세요]
-
-function enhanceCard() {
+			function enhanceCard() {
     if (!currentDetailCardId) return;
     const cardInstance = playerInventory.find(c => c.id === currentDetailCardId);
     if (!cardInstance || cardInstance.level >= MAX_ENHANCEMENT_LEVEL) return;
 
+    // 수정: ENHANCEMENT_COSTS 배열 대신 새로운 함수 사용
     const cost = getEnhancementCost(cardInstance);
-    if (cost === null) return;
+    if (cost === null) return; // 비용을 가져올 수 없으면 종료
 
-    if (playerFountainPens < cost) {
-        alert('만년필이 부족합니다!');
-        return;
-    }
-
-    // --- ▼ 확률 로직 시작 ▼ ---
-
-    // 1. 재화 선차감
-    playerFountainPens -= cost;
-
-    // 2. 확률 데이터 가져오기
-    const probs = ENHANCEMENT_PROBABILITY[cardInstance.level];
-    const roll = Math.random() * 100; // 0.00 ~ 99.99 사이의 숫자 뽑기
-
-    let resultMessage = '';
-
-    if (roll < probs.great) {
-        // 3-1. 대성공 (Great Success)
-        const oldLevel = cardInstance.level;
-        cardInstance.level += 2; // 2레벨 상승
-        // 최대 레벨(9)을 초과하지 않도록 보정
-        cardInstance.level = Math.min(cardInstance.level, MAX_ENHANCEMENT_LEVEL);
-        
-        // (선택적) 대성공 시 특별한 대사
-        const charData = findCharacter(cardInstance.name);
-        const successDialogue = charData.enhancementSuccessDialogue || "이것이... 이야기의 새로운 경지로군.";
-        resultMessage = `🎉 영감이 떠올랐다! [대성공] (+${cardInstance.level - oldLevel})\n\n"${successDialogue}"`;
-        
-    } else if (roll < probs.great + probs.success) {
-        // 3-2. 성공 (Success)
-        cardInstance.level++; // 1레벨 상승
-        resultMessage = "👍 퇴고 완료! [성공]";
-
+    if (playerFountainPens >= cost) {
+        playerFountainPens -= cost;
+        cardInstance.level++;
+        updateUI();
+        saveGame();
+        // 변경된 정보로 모달을 다시 표시
+        showCardDetails(currentDetailCardId);
+        checkAchievements(); // ✨ 업적 달성 여부 확인
     } else {
-        // 3-3. 실패 (Failure)
-        // 레벨은 변하지 않고 재화만 소모됩니다.
-        resultMessage = "...마감에 쫓기다... [실패]";
+        alert('만년필이 부족합니다!');
     }
-
-    // 4. 결과 알림
-    alert(resultMessage); 
-    
-    // --- ▲ 확률 로직 종료 ▲ ---
-
-    // 5. UI 갱신 및 저장
-    updateUI();
-    saveGame();
-    // 변경된 정보로 모달을 다시 표시
-    showCardDetails(currentDetailCardId);
-    checkAchievements();
 }
 			
             function closeInteractiveStory() {
@@ -3717,6 +4108,30 @@ expandInventoryButton.addEventListener('click', expandInventory);
 autoFillDeckButton.addEventListener('click', autoFillDeck);
 resetButton.addEventListener('click', resetGame);
 
+		// 1. 탭 전환 기능에 마이룸 추가 (기존 switchTab 함수가 tabName을 받으므로 연결만 하면 됨)
+document.getElementById('tab-myroom').addEventListener('click', () => switchTab('myroom'));
+
+// 2. 마이룸 내부 버튼들
+const openShopBtn = document.getElementById('open-furniture-shop');
+if (openShopBtn) openShopBtn.addEventListener('click', openFurnitureShop);
+
+const closeShopBtn = document.getElementById('close-furniture-shop');
+const shopModal = document.getElementById('furniture-shop-modal');
+if (closeShopBtn) {
+    closeShopBtn.addEventListener('click', () => {
+        shopModal.classList.add('hidden');
+    });
+}
+
+// 상점 모달 배경 클릭 시 닫기
+if (shopModal) {
+    shopModal.addEventListener('click', (e) => {
+        if (e.target === shopModal) shopModal.classList.add('hidden');
+    });
+}
+
+		
+
 // ✨ 뽑기 뷰의 서브 탭
 gachaTabNormal.addEventListener('click', () => switchGachaTab('normal'));
 gachaTabEvent.addEventListener('click', () => switchGachaTab('event'));
@@ -3803,27 +4218,13 @@ closeCombatResultButton.addEventListener('click', () => {
     combatResultModal.classList.add('hidden');
     combatInProgressView.classList.add('hidden');
     if (lastCombatType === 'event') {
-                    // [수정된 부분]
-                    // 1. switchTab('event')를 호출하는 대신, 모든 메인 뷰를 수동으로 숨깁니다.
-                    allViews.forEach(view => {
-                        if (view) view.classList.add('hidden'); 
-                    });
-                    
-                    // 2. 상단 '이벤트' 탭을 활성화합니다.
-                    allTabs.forEach(tab => tab.classList.remove('active'));
-                    document.getElementById('tab-event').classList.add('active');
-
-                    // 3. 'event-home-view'(앙스타 홈) 대신 'event-view'(서브 탭 컨테이너)를 보여줍니다.
-                    document.getElementById('event-view').classList.remove('hidden');
-
-                    // 4. 이벤트 뷰를 그리고, '전투' 서브 탭을 활성화합니다. (이건 기존과 동일)
-                    displayEventView();
-                    switchSubTab(document.getElementById('event-view'), eventSubTabBattle);
-                    
-                } else {
-                    switchTab('combat');
-                }
-            });
+        switchTab('event');
+        displayEventView();
+        switchSubTab(document.getElementById('event-view'), eventSubTabBattle);
+    } else {
+        switchTab('combat');
+    }
+});
 closeCardDetailButton.addEventListener('click', hideCardDetails);
 cardDetailModal.addEventListener('click', (e) => { if (e.target === cardDetailModal) hideCardDetails(); });
 
@@ -3876,23 +4277,63 @@ speed1xButton.addEventListener('click', () => setCombatSpeed(1));
 speed2xButton.addEventListener('click', () => setCombatSpeed(2));
 speed4xButton.addEventListener('click', () => setCombatSpeed(4));
 
+		
+
 // ✨ 이벤트 뷰의 서브 탭 (수정됨)
-eventSubTabBattle.addEventListener('click', () => {
-    displayEventView(); // 👈 내용 먼저 그리기
-    switchSubTab(document.getElementById('event-view'), eventSubTabBattle); 
-});
-eventSubTabStory.addEventListener('click', () => {
-    displayEventView(); // 👈 내용 먼저 그리기
-    switchSubTab(document.getElementById('event-view'), eventSubTabStory); 
-});
-eventSubTabShop.addEventListener('click', () => {
-    displayEventView(); // 👈 내용 먼저 그리기
-    switchSubTab(document.getElementById('event-view'), eventSubTabShop); 
-});
-});
-   </script>
+        eventSubTabBattle.addEventListener('click', () => {
+            displayEventView(); 
+            switchSubTab(document.getElementById('event-view'), eventSubTabBattle); 
+        });
+        eventSubTabStory.addEventListener('click', () => {
+            displayEventView(); 
+            switchSubTab(document.getElementById('event-view'), eventSubTabStory); 
+        });
+        eventSubTabShop.addEventListener('click', () => {
+            displayEventView(); 
+            switchSubTab(document.getElementById('event-view'), eventSubTabShop); 
+        });
+
+        // 👇👇👇 [여기]에 이 코드를 붙여넣으세요! 👇👇👇
+        
+        // --- [수정] 마이룸 배치 모드 활성화 코드 ---
+        const myRoomEditBtn = document.getElementById('myroom-edit-mode');
+        if (myRoomEditBtn) {
+            myRoomEditBtn.addEventListener('click', toggleEditMode);
+        }
+
+		// ✨✨ [추가] 가구 보관함 버튼 연결 ✨✨
+        const openStorageBtn = document.getElementById('open-furniture-storage');
+        if (openStorageBtn) openStorageBtn.addEventListener('click', openFurnitureStorage);
+
+        const closeStorageBtn = document.getElementById('close-furniture-storage');
+        const storageModal = document.getElementById('furniture-storage-modal');
+        
+        if (closeStorageBtn) {
+            closeStorageBtn.addEventListener('click', () => {
+                storageModal.classList.add('hidden');
+            });
+        }
+        
+        if (storageModal) {
+            storageModal.addEventListener('click', (e) => {
+                if (e.target === storageModal) storageModal.classList.add('hidden');
+            });
+        }
+        // 드래그 기능 초기화
+        initDragEvents();
+        // ----------------------------------------
+
+    }); // <--- DOMContentLoaded 닫는 괄호
+    </script>
 </body>
 </html>
+
+
+
+
+
+
+
 
 
 
