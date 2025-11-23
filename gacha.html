@@ -12,6 +12,43 @@
 
 		/* gacha.html의 .iso-floor 스타일 수정 */
 
+.room-wrapper {
+    width: 100%;
+    max-width: 800px; /* PC 최대 너비 */
+    margin: 0 auto;   /* 중앙 정렬 */
+    position: relative;
+    
+    /* ✨ 핵심: 가로/세로 비율을 1.6 (16:10)으로 고정 */
+    /* 배경 이미지 비율에 따라 1.6, 1.5, 1.33 등으로 조절 가능 */
+    aspect-ratio: 1.6 / 1; 
+    
+    /* 구형 브라우저 호환용 (aspect-ratio가 안 먹힐 때 대비) */
+    @supports not (aspect-ratio: 1.6 / 1) {
+        padding-bottom: 62.5%; /* 100 / 1.6 = 62.5% */
+        height: 0;
+    }
+}
+
+#room-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #111827; /* bg-gray-900 색상 */
+    border-radius: 0.75rem;    /* rounded-xl */
+    overflow: hidden;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* shadow-xl */
+    border: 4px solid #374151; /* border-gray-700 */
+}
+
+/* 배경 이미지 스타일 강제 지정 */
+#room-container > div.absolute.inset-0 {
+    background-size: contain !important; /* 이미지가 잘리지 않고 꽉 차게 */
+    background-position: center bottom !important; /* 바닥 기준 정렬 */
+    background-repeat: no-repeat !important;
+}
+		
 .iso-floor {
     position: absolute;
     
@@ -586,16 +623,18 @@ body.pointer-events-none {
                     <p class="text-gray-200">탐정 사무소를 꾸미고 등장인물들의 휴식을 지켜보세요.</p>
                 </div>
 
-                <div id="room-container" class="relative w-full max-w-3xl mx-auto h-96 bg-gray-900 rounded-xl overflow-hidden shadow-2xl border-4 border-gray-700 perspective-1000">
-    
-    <div class="absolute inset-0 bg-contain bg-center bg-no-repeat" style="background-image: url('https://i.imgur.com/CklaT1l.png');"></div>
-    
-    <div class="iso-floor"></div>
-    
-    <div id="room-layer" class="relative w-full h-full z-10 pointer-events-none">
-        <style> #room-layer > * { pointer-events: auto; } </style>
-    </div>
+                <div class="room-wrapper">
+    <div id="room-container">
+        
+        <div class="absolute inset-0 bg-contain bg-center bg-no-repeat" style="background-image: url('https://i.imgur.com/CklaT1l.png');"></div>
+        
+        <div class="iso-floor"></div>
+        
+        <div id="room-layer" class="relative w-full h-full z-10 pointer-events-none">
+            <style> #room-layer > * { pointer-events: auto; } </style>
+        </div>
 
+    </div>
 </div>
 
                 <div class="flex justify-center gap-4 mt-6">
@@ -892,7 +931,9 @@ function b64_to_utf8(str) {
     reader.readAsText(file);
 }
 		const SAVE_DATA_KEY = 'gachaGameSaveData_v9';
-
+const GRID_SIZE = 100; 
+    const TILE_WIDTH_PERCENT = 9;  
+    const TILE_HEIGHT_PERCENT = 5;
             
 
             // --- 게임 상태 ---
@@ -2045,20 +2086,21 @@ function addCardToInventory(cardName) {
 // 1. 마이룸 화면 표시 (캐릭터 & 가구 렌더링)
 		// ================== ✨ 아이소메트릭(마름모) 변환 로직 ✨ ==================
 
-// 1. 그리드 좌표 변환 함수 (방 전체 크기로 다시 확장)
+// 1. 그리드 좌표 변환 함수 (벽 안쪽으로 범위 축소)
 function getIsoPos(gridX, gridY) {
     const centerX = 50; 
     
-    // ✨ [수정 1] 바닥 시작점 높이 (살짝 위로)
-    const centerY = 30; 
+    // ✨ [수정 1] 바닥 중심점 높이 (30 -> 35)
+    // 전체적으로 살짝 내려서 위쪽 벽에 닿지 않게 합니다.
+    const centerY = 45; 
     
-    // ✨ [수정 2] 너비 계수 확장 (0.32 -> 0.46)
-    // 화면 좌우 92%까지 사용하여 벽 끝까지 가구를 놓을 수 있게 함
-    const widthFactor = 0.46;  
+    // ✨ [수정 2] 너비 계수 축소 (0.46 -> 0.38)
+    // 좌우 벽 두께만큼 안쪽으로 들여옵니다.
+    const widthFactor = 0.38;  
     
-    // ✨ [수정 3] 높이 계수 확장 (0.20 -> 0.30)
-    // 바닥을 화면 하단까지 깊게 내림
-    const heightFactor = 0.30; 
+    // ✨ [수정 3] 높이 계수 축소 (0.30 -> 0.24)
+    // 아래쪽 벽에 닿지 않게 상하 폭을 줄입니다.
+    const heightFactor = 0.24; 
     
     const screenX = centerX + (gridX - gridY) * widthFactor;
     const screenY = centerY + (gridX + gridY) * heightFactor;
@@ -2068,13 +2110,13 @@ function getIsoPos(gridX, gridY) {
     return { left: screenX, top: screenY, zIndex: zIndex };
 }
 
-// (getGridPosFromScreen 함수도 위와 똑같은 값으로 수정)
+// 2. 역변환 함수 (위와 변수값 일치 필수)
 function getGridPosFromScreen(screenX, screenY) {
     const centerX = 50;
-    const centerY = 30; // ✨ 일치시킴
+    const centerY = 45; // ✨ 일치시킴
     
-    const widthFactor = 0.46; // ✨ 일치시킴
-    const heightFactor = 0.30; // ✨ 일치시킴
+    const widthFactor = 0.38; // ✨ 일치시킴
+    const heightFactor = 0.24; // ✨ 일치시킴
     
     const dx = (screenX - centerX) / widthFactor;
     const dy = (screenY - centerY) / heightFactor;
@@ -2158,9 +2200,16 @@ function displayMyRoom() {
         el.style.left = `${iso.left}%`;
         el.style.top = `${iso.top}%`;
         el.style.transform = 'translate(-50%, -90%)'; 
-        el.style.width = '45px';
-        el.style.height = '45px';
-        el.style.zIndex = iso.zIndex + 50; 
+        
+        // ❌ 기존: 45px 고정 크기 (너무 작음)
+        // el.style.width = '45px';
+        // el.style.height = '45px';
+
+        // ✅ 수정: 타일 크기(TILE_WIDTH_PERCENT)에 비례하게 설정 (1.5배 ~ 1.8배 추천)
+        el.style.width = `${TILE_WIDTH_PERCENT * 1.3}%`; 
+        el.style.height = 'auto'; // 높이는 비율에 맞춰 자동 조절
+
+        el.style.zIndex = iso.zIndex + 50;
 
         const img = document.createElement('img');
         img.src = (typeof chibiImages !== 'undefined' && chibiImages[charData.baseName]) ? chibiImages[charData.baseName] : charData.cardImageUrl;
@@ -2320,58 +2369,63 @@ function showBubble(charEl, text) {
 }
 
 
-// ================== ✨ 수정된 startChibiMovement ✨ ==================
-// 캐릭터 랜덤 이동 함수 (가구 회피 로직 개선)
-// 캐릭터 이동 함수 (넓어진 방에서 캐릭터만 안쪽으로 다니게 설정)
+// 캐릭터 이동 함수 (한 칸씩 이동 + 안전장치 추가)
 function startChibiMovement(element) {
     if (element.dataset.moveInterval) clearInterval(element.dataset.moveInterval);
 
     const move = () => {
         const myRoomView = document.getElementById('myroom-view');
         if (!myRoomView || myRoomView.classList.contains('hidden')) return;
-        
         if (element.dataset.isInteracting === 'true') return;
 
         let targetGridX, targetGridY;
         let attempts = 0;
-        let isValidPosition = false;
+        let finalTarget = null; // 최종 목적지
 
-        // ✨ [핵심] 방은 0~100이지만, 캐릭터는 15~85 사이만 다니게 함 (벽 뚫기 방지)
-        const safePadding = 15; 
-        const safeRange = 70;   
+        // ✨ [핵심 로직] 빈 자리를 찾기 위해 10번 시도합니다.
+        while (attempts < 10) {
+            // 0~9 사이 랜덤 좌표 생성
+            // 1. 가장자리(0과 100 근처)에 너무 붙지 않도록 10 ~ 90 사이의 좌표를 생성합니다.
+const margin = 10;
+const effectiveSize = GRID_SIZE - (margin * 2); // 100 - 20 = 80
+const testX = Math.floor(Math.random() * effectiveSize) + margin;
+const testY = Math.floor(Math.random() * effectiveSize) + margin;
 
-        while (attempts < 50) {
-            targetGridX = Math.random() * safeRange + safePadding;
-            targetGridY = Math.random() * safeRange + safePadding;
+// 2. 가구 충돌 체크 범위 수정 (좌표가 0~100이 되었으므로 범위도 넓혀야 함)
+const isBlocked = playerRoom.furniture.some(f => {
+    const itemData = furnitureItems.find(i => i.id === f.id);
+    if (!itemData || itemData.type === 'wall' || itemData.type === 'rug') return false;
+    
+    // 가구 중심점(f.x, f.y)과 목표 지점(testX, testY)의 거리를 계산
+    // 거리가 6 이내면 부딪힌 것으로 간주 (가구 크기에 따라 조절 가능)
+    const dist = Math.sqrt(Math.pow(f.x - testX, 2) + Math.pow(f.y - testY, 2));
+    return dist < 6; 
+});
+           
 
-            let collision = false;
-            for (const furniture of playerRoom.furniture) {
-                const itemData = furnitureItems.find(i => i.id === furniture.id);
-                if (!itemData || itemData.type === 'wall' || itemData.type === 'rug') continue;
-
-                const dist = Math.sqrt(Math.pow(targetGridX - furniture.x, 2) + Math.pow(targetGridY - furniture.y, 2));
-                if (dist < 8) { 
-                    collision = true;
-                    break;
-                }
-            }
-
-            if (!collision) {
-                isValidPosition = true;
+            // 빈 자리라면? -> 여기로 결정하고 반복 종료!
+            if (!isBlocked) {
+                finalTarget = { x: testX, y: testY };
                 break;
             }
+            
+            // 막힌 자리라면? -> 일단 후보지로 저장해두고 다시 시도 (정 갈 데 없으면 여기라도 가야 하니까)
+            if (!finalTarget) {
+                finalTarget = { x: testX, y: testY };
+            }
+
             attempts++;
         }
 
-        if (!isValidPosition) {
-             targetGridX = Math.random() * safeRange + safePadding;
-             targetGridY = Math.random() * safeRange + safePadding;
-        }
+        // (안전장치) 혹시라도 타겟이 없으면 현재 위치 유지
+        if (!finalTarget) return;
 
-        const iso = getIsoPos(targetGridX, targetGridY);
+        // --- 이동 실행 ---
+        const iso = getIsoPos(finalTarget.x, finalTarget.y);
         
-        const currentLeft = parseFloat(element.style.left);
+        const currentLeft = parseFloat(element.style.left) || iso.left;
         const img = element.querySelector('img');
+        
         if (iso.left < currentLeft) {
             img.style.transform = 'scaleX(1)'; 
             element.dataset.facing = 'left';
@@ -2382,13 +2436,16 @@ function startChibiMovement(element) {
 
         element.style.left = `${iso.left}%`;
         element.style.top = `${iso.top}%`;
-        element.style.zIndex = iso.zIndex + 50;
         
-        element.dataset.gridX = targetGridX;
-        element.dataset.gridY = targetGridY;
+        // 가구보다 살짝 앞에 서기
+        element.style.zIndex = iso.zIndex + 5;
+        
+        element.dataset.gridX = finalTarget.x;
+        element.dataset.gridY = finalTarget.y;
     };
 
-    const interval = setInterval(move, Math.random() * 2000 + 3000);
+    // 2.5초 ~ 4.5초 간격으로 이동 (너무 정신없지 않게)
+    const interval = setInterval(move, Math.random() * 2000 + 2500);
     element.dataset.moveInterval = interval;
 }
 // ================== ✨ 수정된 initDragEvents (배치 모드) ✨ ==================
@@ -4681,6 +4738,18 @@ speed4xButton.addEventListener('click', () => setCombatSpeed(4));
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
